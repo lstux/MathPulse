@@ -215,6 +215,18 @@ class ScreenManager {
     startSession() {
         this.session = new Session(this.engine, this.progression);
         this.session.start();
-        this.show('game');
+
+        // Show discovery phase first if not yet seen
+        const skillId = this.session.skill;
+        const hasSeenDiscovery = localStorage.getItem(`discovery-${skillId}`);
+
+        if (!hasSeenDiscovery) {
+            localStorage.setItem(`discovery-${skillId}`, 'true');
+            const discovery = new DiscoveryPhase(skillId, this);
+            discovery.show();
+        } else {
+            this.show('game');
+        }
     }
 }
+
