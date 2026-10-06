@@ -18,7 +18,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 
 ## Étape 1 — Alpha (v0.5)
 
-**But :** une application qu'on peut mettre entre les mains d'un enfant sans que la pédagogie soit « à trous ». Décisions à prendre d'abord : **Q1, Q2, Q4, Q5, Q6**.
+**But :** une application qu'on peut mettre entre les mains d'un enfant sans que la pédagogie soit « à trous ». Décisions du 6 octobre : Q2 (temps ajustés après les premiers tests), Q4 (espace parent non protégé), Q5 (un seul profil), Q6 (pavé numérique) ; **Q1 à confirmer**.
 
 | Chantier | Détail | Taille |
 |---|---|---|
@@ -26,17 +26,15 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Intégration continue | GitHub Actions : `node tests/run.js` + `tests/smoke.py` à chaque push | S |
 | Réapparition des erreurs | Mémoriser les opérations ratées (clé `7×5`) ; en réinjecter 1 à 2 par session suivante jusqu'à 2 réussites consécutives | M |
 | Mélange des notions | Sessions à 60 % compétence ciblée / 40 % rappel de notions déjà vues (Q8) | M |
-| Maîtrise plus juste | Fenêtre glissante de 20 réponses (Q3) ; aide qui ne compte pas pour ⭐⭐⭐ (Q1) ; seuils de vitesse par type d'exercice (Q2) | M |
-| Pavé numérique | Clavier intégré à grandes touches (Q6) | M |
-| Barrière parent | Appui long ou petite opération (Q4) | S |
-| Profils | Seulement si la fratrie partage l'appareil (Q5) | M |
+| Maîtrise plus juste | Fenêtre glissante de 20 réponses (Q3) ; quota de coups de pouce sans pénalité par session (Q1, règle à confirmer) | M |
+| Pavé numérique | ✅ **Fait** (le 6 oct.) : grandes touches, ⌫, ✓, clavier physique | — |
 | Journal d'usage local | Enregistrer abandons (✕), usage de l'aide, temps par question dans l'historique | S |
 
 **Critères de sortie :**
 - [ ] Tests unitaires et smoke verts en CI sur chaque push.
 - [ ] Une erreur réapparaît bien dans la session suivante (test automatique).
 - [ ] Application accessible en ligne et installable sur au moins un Android.
-- [ ] Questions Q1, Q2, Q4, Q5, Q6 tranchées et consignées dans `revue-mvp.md`.
+- [x] Q2, Q4, Q5, Q6 tranchées (6 oct.) ; [ ] Q1 confirmée et consignée dans `revue-mvp.md`.
 
 ---
 
@@ -113,7 +111,7 @@ Utilisation normale par les enfants testeurs, sans aucune nouvelle fonctionnalit
 
 ## Premières actions (dès validation du plan)
 
-1. Trancher Q1, Q2, Q4, Q5, Q6 (une conversation de 15 minutes suffit).
+1. Confirmer la règle des coups de pouce (Q1).
 2. Activer GitHub Pages et vérifier l'adresse sur un téléphone.
 3. Ajouter l'intégration continue.
 4. Implémenter la réapparition des erreurs (le plus gros manque pédagogique).

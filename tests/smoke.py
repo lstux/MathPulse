@@ -29,8 +29,11 @@ with sync_playwright() as p:
         for _ in range(5):
             ans = solve(pg.inner_text('#question'))
             if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')
-            else: pg.fill('#answer-input', str(ans)); pg.click('#btn-submit')
-            pg.wait_for_selector('#question, .result-card', timeout=4000) if False else pg.wait_for_timeout(1400)
+            else:
+                for d in str(ans): pg.click(f'.key[data-key="{d}"]')
+                assert pg.inner_text('#answer-display') == str(ans), 'le pavé numérique doit afficher la saisie'
+                pg.click('.key[data-key="ok"]')
+            pg.wait_for_timeout(1400)
         assert pg.locator('.result-card').count(), 'écran de résultat attendu'
         if session < 2: pg.click('#btn-again'); pg.wait_for_timeout(300)
 

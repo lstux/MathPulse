@@ -18,6 +18,10 @@ class ScreenManager {
     show(name, data = {}) {
         this.timers.forEach(clearTimeout);
         this.timers = [];
+        if (this.keyHandler) {
+            document.removeEventListener('keydown', this.keyHandler);
+            this.keyHandler = null;
+        }
 
         const builders = {
             home: () => this.createHomeScreen(),
@@ -32,9 +36,6 @@ class ScreenManager {
         this.appContainer.appendChild(screen);
         this.currentScreen = name;
         window.scrollTo(0, 0);
-
-        const focusTarget = screen.querySelector('[data-autofocus]');
-        if (focusTarget) focusTarget.focus();
     }
 
     screenEl(extraClass = '') {
@@ -108,10 +109,13 @@ class ScreenManager {
 
         const answerArea = ex.choices
             ? `<div class="choices">${ex.choices.map(c => `<button class="choice" data-value="${c}">${c}</button>`).join('')}</div>`
-            : `<form class="input-area" id="answer-form" autocomplete="off">
-                   <input type="text" inputmode="numeric" pattern="[0-9]*" id="answer-input" aria-label="Ta réponse" placeholder="?" data-autofocus>
-                   <button type="submit" class="btn-primary" id="btn-submit" aria-label="Valider">✓</button>
-               </form>`;
+            : `<output class="answer-display empty" id="answer-display" aria-live="polite" aria-label="Ta réponse">?</output>
+               <div class="keypad" id="keypad">
+                   ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button class="key" data-key="${n}">${n}</button>`).join('')}
+                   <button class="key key-del" data-key="del" aria-label="Effacer">⌫</button>
+                   <button class="key" data-key="0">0</button>
+                   <button class="key key-ok" data-key="ok" aria-label="Valider">✓</button>
+               </div>`;
 
         screen.innerHTML = `
             <div class="game-top">
@@ -126,7 +130,7 @@ class ScreenManager {
             <div id="feedback" class="feedback-container" aria-live="polite"></div>
         `;
 
-        const controls = () => screen.querySelectorAll('.choice, #answer-input, #btn-submit, #btn-hint');
+        const controls = () => screen.querySelectorAll('.choice, .key, #btn-hint');
         const advance = () => {
             s.next();
             if (s.isComplete()) this.show('result', { summary: s.complete() });
@@ -138,6 +142,15 @@ class ScreenManager {
             answered = true;
             const result = s.submitAnswer(value, hinted);
             controls().forEach(c => { c.disabled = true; });
+            screen.querySelector('#btn-hint').hidden = true;
+
+            // Pavé numérique : on affiche la réponse validée (✓ / ✗) et on libère la place pour le retour
+            const display = screen.querySelector('#answer-display');
+            if (display) {
+                display.textContent = `${value} ${result.correct ? '✓' : '✗'}`;
+                display.classList.add(result.correct ? 'correct' : 'wrong');
+                screen.querySelector('#keypad').hidden = true;
+            }
 
             // Le retour d'un choix ne repose pas que sur la couleur : ✓ / ✗
             screen.querySelectorAll('.choice').forEach(btn => {
@@ -163,8 +176,36 @@ class ScreenManager {
             }
         };
 
-        const form = screen.querySelector('#answer-form');
-        if (form) form.addEventListener('submit', e => { e.preventDefault(); submit(screen.querySelector('#answer-input').value); });
+        // Pavé numérique (3 chiffres maximum : les réponses attendues vont jusqu'à 50)
+        if (!ex.choices) {
+            let typed = '';
+            const display = screen.querySelector('#answer-display');
+            const press = key => {
+                if (answered) return;
+                if (key === 'ok') return submit(typed);
+                if (key === 'del') typed = typed.slice(0, -1);
+                else if (typed.length < 3) typed = (typed + key).replace(/^0+(?=\d)/, '');
+                display.textContent = typed || '?';
+                display.classList.toggle('empty', !typed);
+            };
+            // e.detail > 0 : clic souris/tactile → on retire le focus pour que Entrée au clavier valide la réponse
+            // (e.detail === 0 : activation au clavier, le focus doit rester pour la navigation Tab)
+            screen.querySelectorAll('.key').forEach(k => k.addEventListener('click', e => {
+                press(k.dataset.key);
+                if (e.detail > 0) k.blur();
+            }));
+
+            // Clavier physique (ordinateur) : chiffres, Retour arrière, Entrée
+            this.keyHandler = e => {
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+                if (/^\d$/.test(e.key)) press(e.key);
+                else if (e.key === 'Backspace') press('del');
+                else if (e.key === 'Enter' && !(document.activeElement && document.activeElement.tagName === 'BUTTON')) press('ok');
+                else return;
+                e.preventDefault();
+            };
+            document.addEventListener('keydown', this.keyHandler);
+        }
         screen.querySelectorAll('.choice').forEach(btn =>
             btn.addEventListener('click', () => submit(btn.dataset.value, btn)));
 
