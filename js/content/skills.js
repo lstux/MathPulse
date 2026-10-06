@@ -46,6 +46,11 @@ function starsForScore(correct) {
     return 0;
 }
 
+// Coups de pouce (💡) : gratuits dans la limite du quota par session.
+// Au-delà : la session rapporte au plus `maxStarsOverQuota` étoiles et les réponses aidées
+// ne comptent plus dans la maîtrise (elles restent visibles dans l'historique de session).
+const HINTS = { freePerSession: 2, maxStarsOverQuota: 2 };
+
 // Planètes déverrouillées avec le total d'étoiles collectées
 const PLANETS = [
     { name: 'Lune', emoji: '🌕', unlockAt: 10 },

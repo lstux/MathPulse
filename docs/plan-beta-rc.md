@@ -18,15 +18,15 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 
 ## Étape 1 — Alpha (v0.5)
 
-**But :** une application qu'on peut mettre entre les mains d'un enfant sans que la pédagogie soit « à trous ». Décisions du 6 octobre : Q2 (temps ajustés après les premiers tests), Q4 (espace parent non protégé), Q5 (un seul profil), Q6 (pavé numérique) ; **Q1 à confirmer**.
+**But :** une application qu'on peut mettre entre les mains d'un enfant sans que la pédagogie soit « à trous ». Décisions du 6 octobre : Q2 (temps ajustés après les premiers tests), Q4 (espace parent non protégé), Q5 (un seul profil), Q6 (pavé numérique) ; Q1 (2 coups de pouce gratuits par session, au-delà 2⭐ max et hors maîtrise).
 
 | Chantier | Détail | Taille |
 |---|---|---|
-| Mise en ligne | Activer GitHub Pages ; tester l'adresse réelle ; version affichée dans l'espace parent | S |
-| Intégration continue | GitHub Actions : `node tests/run.js` + `tests/smoke.py` à chaque push | S |
+| Mise en ligne | ✅ Workflow Pages écrit (déploie après les tests) ; reste à activer *Settings → Pages → Source : GitHub Actions*, tester l'adresse réelle sur téléphone, afficher la version dans l'espace parent | S |
+| Intégration continue | ✅ Écrit (`ci-pages.yml` : tests unitaires + smoke à chaque push et PR) ; à valider au premier passage | S |
 | Réapparition des erreurs | Mémoriser les opérations ratées (clé `7×5`) ; en réinjecter 1 à 2 par session suivante jusqu'à 2 réussites consécutives | M |
 | Mélange des notions | Sessions à 60 % compétence ciblée / 40 % rappel de notions déjà vues (Q8) | M |
-| Maîtrise plus juste | Fenêtre glissante de 20 réponses (Q3) ; quota de coups de pouce sans pénalité par session (Q1, règle à confirmer) | M |
+| Maîtrise plus juste | Fenêtre glissante de 20 réponses (Q3) ; coups de pouce : ✅ **fait** (Q1) | M (fenêtre glissante restante) |
 | Pavé numérique | ✅ **Fait** (le 6 oct.) : grandes touches, ⌫, ✓, clavier physique | — |
 | Journal d'usage local | Enregistrer abandons (✕), usage de l'aide, temps par question dans l'historique | S |
 
@@ -34,7 +34,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 - [ ] Tests unitaires et smoke verts en CI sur chaque push.
 - [ ] Une erreur réapparaît bien dans la session suivante (test automatique).
 - [ ] Application accessible en ligne et installable sur au moins un Android.
-- [x] Q2, Q4, Q5, Q6 tranchées (6 oct.) ; [ ] Q1 confirmée et consignée dans `revue-mvp.md`.
+- [x] Q1, Q2, Q4, Q5, Q6 tranchées (6 oct.) et consignées dans `revue-mvp.md`.
 
 ---
 
@@ -111,7 +111,6 @@ Utilisation normale par les enfants testeurs, sans aucune nouvelle fonctionnalit
 
 ## Premières actions (dès validation du plan)
 
-1. Confirmer la règle des coups de pouce (Q1).
-2. Activer GitHub Pages et vérifier l'adresse sur un téléphone.
-3. Ajouter l'intégration continue.
-4. Implémenter la réapparition des erreurs (le plus gros manque pédagogique).
+1. Activer GitHub Pages (*Source : GitHub Actions*) et vérifier l'adresse sur un téléphone.
+2. Implémenter la réapparition des erreurs (le plus gros manque pédagogique).
+3. Maîtrise sur les 20 dernières réponses, puis mélange des notions.

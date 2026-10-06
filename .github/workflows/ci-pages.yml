@@ -1,0 +1,58 @@
+name: Tests et déploiement
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Tests unitaires
+        run: node tests/run.js
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test de fumée (navigateur, hors ligne)
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+          python tests/smoke.py
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Assembler le site (sans tests ni docs) et versionner le cache hors ligne
+        run: |
+          mkdir _site
+          cp -r index.html manifest.json sw.js css js assets _site/
+          sed -i "s/mathpulse-v[0-9]*/mathpulse-${GITHUB_SHA::7}/" _site/sw.js
+          grep -n "CACHE_VERSION =" _site/sw.js
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

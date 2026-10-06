@@ -101,8 +101,14 @@ class ScreenManager {
         const s = this.session;
         const ex = s.getCurrentExercise();
         s.beginQuestion();
-        let hinted = false;
         let answered = false;
+
+        const hintLabel = () => {
+            const left = s.freeHintsLeft();
+            return left > 0
+                ? `💡 Un coup de pouce · ${left} gratuit${left > 1 ? 's' : ''}`
+                : `💡 Un coup de pouce · ${HINTS.maxStarsOverQuota}⭐ max cette session`;
+        };
 
         const dots = s.exercises.map((_, i) =>
             `<span class="dot ${i < s.currentIndex ? 'done' : i === s.currentIndex ? 'current' : ''}"></span>`).join('');
@@ -126,7 +132,7 @@ class ScreenManager {
             <div class="question" id="question">${ex.question}</div>
             <div id="visual-slot"></div>
             ${answerArea}
-            <button class="btn-hint" id="btn-hint">💡 Un coup de pouce</button>
+            <button class="btn-hint" id="btn-hint">${hintLabel()}</button>
             <div id="feedback" class="feedback-container" aria-live="polite"></div>
         `;
 
@@ -140,7 +146,7 @@ class ScreenManager {
         const submit = (value, chosenBtn) => {
             if (answered || String(value).trim() === '') return;
             answered = true;
-            const result = s.submitAnswer(value, hinted);
+            const result = s.submitAnswer(value);
             controls().forEach(c => { c.disabled = true; });
             screen.querySelector('#btn-hint').hidden = true;
 
@@ -210,7 +216,7 @@ class ScreenManager {
             btn.addEventListener('click', () => submit(btn.dataset.value, btn)));
 
         screen.querySelector('#btn-hint').addEventListener('click', e => {
-            hinted = true;
+            s.useHint();
             screen.querySelector('#visual-slot').innerHTML = Animations.forExercise(ex);
             e.currentTarget.hidden = true;
         });
@@ -221,7 +227,7 @@ class ScreenManager {
     // ---------- Résultat ----------
     createResultScreen(summary) {
         const screen = this.screenEl();
-        const { correct, total, starsEarned, newPlanets, skill } = summary;
+        const { correct, total, starsEarned, newPlanets, skill, capped } = summary;
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
         const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
         screen.innerHTML = `
@@ -232,6 +238,7 @@ class ScreenManager {
                     <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
+                    ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
                     ${planets}
                 </div>
             </div>

@@ -138,3 +138,61 @@ test('session: le chrono mesure la question, pas la session', () => {
     s.submitAnswer(s.getCurrentExercise().answer);
     assert.ok(s.results[0].time_ms >= 1900 && s.results[0].time_ms < 4000);
 });
+
+// ---------- Coups de pouce : 2 gratuits par session, au-delà 2⭐ max et hors maîtrise ----------
+
+function playSession(engine, progression, hintOnQuestions = [], wrongOn = []) {
+    const s = new Session(engine, progression);
+    s.start();
+    s.exercises.forEach((ex, i) => {
+        s.beginQuestion();
+        if (hintOnQuestions.includes(i)) s.useHint();
+        s.submitAnswer(wrongOn.includes(i) ? ex.answer + 1 : ex.answer);
+        s.next();
+    });
+    return s;
+}
+
+test('coups de pouce: 2 gratuits → aucune pénalité, tout compte pour la maîtrise', () => {
+    const { engine, progression } = setup();
+    const s = playSession(engine, progression, [0, 1]);
+    assert.strictEqual(s.hintsUsed, 2);
+    assert.strictEqual(s.freeHintsLeft(), 0);
+    const sum = s.complete();
+    assert.strictEqual(sum.starsEarned, 3, '5/5 avec 2 coups de pouce garde 3 étoiles');
+    assert.strictEqual(sum.capped, false);
+    assert.strictEqual(progression.getSkillStats(s.skill).seen, 5, 'les 5 réponses comptent');
+});
+
+test('coups de pouce: au-delà du quota → 2 étoiles max et réponses aidées hors maîtrise', () => {
+    const { engine, progression } = setup();
+    const s = playSession(engine, progression, [0, 1, 2, 3]);   // 4 coups de pouce : les 3e et 4e sont hors quota
+    assert.ok(s.isOverHintQuota());
+    assert.deepStrictEqual(s.results.map(r => r.countedForMastery), [true, true, false, false, true]);
+    const sum = s.complete();
+    assert.strictEqual(sum.correct, 5);
+    assert.strictEqual(sum.starsEarned, 2, '5/5 mais plafonné à 2 étoiles');
+    assert.strictEqual(sum.capped, true);
+    assert.strictEqual(progression.getSkillStats(s.skill).seen, 3, 'seules 3 réponses comptent dans la maîtrise');
+    assert.strictEqual(progression.getTotalStars(), 2);
+});
+
+test('coups de pouce: le plafond ne touche pas une session déjà ≤ 2 étoiles', () => {
+    const { engine, progression } = setup();
+    const s = playSession(engine, progression, [0, 1, 2], [3]);  // 4/5 → 2 étoiles
+    const sum = s.complete();
+    assert.strictEqual(sum.starsEarned, 2);
+    assert.strictEqual(sum.capped, false, "pas de message « plafonné » si le plafond n'a rien retiré");
+});
+
+test('coups de pouce: un seul par question, et le quota est par session', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start();
+    s.beginQuestion();
+    s.useHint(); s.useHint(); s.useHint();
+    assert.strictEqual(s.hintsUsed, 1, 'trois clics sur la même question = un seul coup de pouce');
+    const s2 = new Session(engine, progression);
+    s2.start();
+    assert.strictEqual(s2.freeHintsLeft(), HINTS.freePerSession, 'nouvelle session : quota remis à 2');
+});

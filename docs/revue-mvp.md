@@ -49,10 +49,10 @@ Classées par échéance. La recommandation est une proposition, pas une décisi
 
 ### Avant la bêta
 
-_Mise à jour du 6 octobre : Q2, Q4, Q5 et Q6 sont tranchées ; Q1 attend une confirmation._
+_Mise à jour du 6 octobre : Q1, Q2, Q4, Q5 et Q6 sont tranchées._
 
 **Q1 — Aide visuelle : quand l'enfant peut-il la voir, et que vaut une réponse aidée ?**
-_Réponse du 6 oct. : non à l'exclusion systématique des réponses aidées, mais un nombre limité de coups de pouce « sans pénalité » ; au-delà, « 2⭐ seulement ». **À confirmer** : nombre de coups de pouce gratuits, et ce que « 2⭐ » plafonne (étoiles de la session ou maîtrise)._
+_✅ Décidé le 6 oct. : **2 coups de pouce gratuits par session** (pas par jour). Au-delà : la session rapporte **2 étoiles au maximum** (étoiles de récompense, pas la maîtrise) et les réponses aidées hors quota **ne comptent plus dans la maîtrise**. **Fait** (voir `HINTS` dans `skills.js`, tests `coups de pouce`)._
 Aujourd'hui : masquée, accessible par « 💡 », automatique après une erreur. Une réponse correcte après aide compte comme une réussite normale, ce qui permet de gonfler la maîtrise en cliquant systématiquement sur l'aide.
 _Recommandation :_ garder l'aide opt-in ; une réponse aidée donne les étoiles de session mais ne compte pas pour passer au niveau ⭐⭐⭐. À implémenter avant la bêta (petit).
 
