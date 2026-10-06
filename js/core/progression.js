@@ -1,128 +1,94 @@
-// MathPulse - Progression Tracking System
+// MathPulse - Suivi de progression
+// Deux notions distinctes :
+//  - maîtrise d'une compétence (niveau 1-3, affichée ⭐⭐⭐ sur les cartes)
+//  - étoiles de récompense (totalStars), gagnées en fin de session, qui font avancer la fusée
 
 class Progression {
     constructor() {
-        this.data = null;
-        this.stars = 0;
-        this.skills = {};
+        this.data = { version: 1, skills: {}, totalStars: 0, discovered: {} };
     }
 
     load() {
-        this.data = storage.get(storage.KEYS.PROGRESSION) || { skills: {} };
-        this.calculateStats();
+        const saved = storage.get(storage.KEYS.PROGRESSION) || {};
+        this.data = {
+            version: 1,   // version du format des données (pour les futures migrations)
+            skills: saved.skills || {},
+            totalStars: Number.isFinite(saved.totalStars) ? saved.totalStars : 0,
+            discovered: saved.discovered || {}
+        };
     }
 
     save() {
         storage.set(storage.KEYS.PROGRESSION, this.data);
     }
 
-    calculateStats() {
-        this.stars = 0;
-        // Calculate total stars from all skills
-        for (const skill of Object.values(this.data.skills || {})) {
-            if (skill.mastery_level) {
-                this.stars += Math.max(0, skill.mastery_level - 1);
-            }
-        }
-    }
-
     recordAnswer(skillId, correct, timeMs) {
         if (!this.data.skills[skillId]) {
             this.data.skills[skillId] = {
-                seen: 0,
-                correct: 0,
-                wrong: 0,
-                avg_time_ms: 0,
-                mastery_level: 1,
-                last_practiced: null
+                seen: 0, correct: 0, wrong: 0,
+                avg_time_ms: 0, mastery_level: 1, last_practiced: null
             };
         }
-
         const skill = this.data.skills[skillId];
+        const t = Math.min(Math.max(0, timeMs), MASTERY.maxCountedMs);
+
         skill.seen++;
-        if (correct) {
-            skill.correct++;
-        } else {
-            skill.wrong++;
-        }
-        skill.avg_time_ms = (skill.avg_time_ms * (skill.seen - 1) + timeMs) / skill.seen;
+        if (correct) skill.correct++; else skill.wrong++;
+        skill.avg_time_ms = (skill.avg_time_ms * (skill.seen - 1) + t) / skill.seen;
         skill.last_practiced = new Date().toISOString();
+        skill.mastery_level = this.computeMastery(skill);
 
-        // Update mastery level
-        this.updateMastery(skillId);
         this.save();
-        this.calculateStats();
-
         return skill;
     }
 
-    updateMastery(skillId) {
-        const skill = this.data.skills[skillId];
-        if (!skill) return;
+    computeMastery(skill) {
+        const accuracy = skill.seen > 0 ? (skill.correct / skill.seen) * 100 : 0;
+        const l3 = MASTERY.level3, l2 = MASTERY.level2;
+        if (skill.seen >= l3.minSeen && accuracy >= l3.minAccuracy && skill.avg_time_ms <= l3.maxAvgMs) return 3;
+        if (skill.seen >= l2.minSeen && accuracy >= l2.minAccuracy) return 2;
+        return 1;
+    }
 
-        const correctPercent = (skill.correct / skill.seen) * 100;
-        const fastEnough = skill.avg_time_ms < 3000;
+    addStars(count) {
+        this.data.totalStars += Math.max(0, count);
+        this.save();
+        return this.data.totalStars;
+    }
 
-        // Level 1: Seen (default)
-        // Level 2: 70%+ correct + min 3 seen
-        // Level 3: 90%+ correct + min 5 seen + fast
-
-        if (skill.seen >= 5 && correctPercent >= 90 && fastEnough) {
-            skill.mastery_level = 3;
-        } else if (skill.seen >= 3 && correctPercent >= 70) {
-            skill.mastery_level = 2;
-        } else {
-            skill.mastery_level = 1;
-        }
+    getTotalStars() {
+        return this.data.totalStars;
     }
 
     getSkillStats(skillId) {
         return this.data.skills[skillId] || null;
     }
 
+    // Niveau de maîtrise : 0 = jamais pratiquée
+    getMasteryLevel(skillId) {
+        const s = this.data.skills[skillId];
+        return s ? s.mastery_level : 0;
+    }
+
     getStats() {
         const stats = {};
         for (const [skillId, skillData] of Object.entries(this.data.skills)) {
-            stats[skillId] = {
-                name: this.getSkillName(skillId),
-                ...skillData
-            };
+            stats[skillId] = { name: SKILLS[skillId] ? SKILLS[skillId].name : skillId, ...skillData };
         }
         return stats;
     }
 
-    getSkillName(skillId) {
-        // Map skill IDs to names
-        const names = {
-            'addition-simple': 'Additions',
-            'multiply-2': '×2 (doubler)',
-            'multiply-5': '×5 (groupes)'
-        };
-        return names[skillId] || skillId;
+    hasSeenDiscovery(skillId) {
+        return !!this.data.discovered[skillId];
     }
 
-    getTotalStars() {
-        return this.stars;
-    }
-
-    getNextSkill() {
-        // Simplified: return first skill with lowest mastery
-        let lowestSkill = null;
-        let lowestMastery = 4;
-
-        for (const [skillId, skill] of Object.entries(this.data.skills)) {
-            if ((skill.mastery_level || 1) < lowestMastery) {
-                lowestMastery = skill.mastery_level;
-                lowestSkill = skillId;
-            }
-        }
-
-        return lowestSkill;
+    markDiscovery(skillId) {
+        this.data.discovered[skillId] = true;
+        this.save();
     }
 
     reset() {
-        this.data = { skills: {} };
-        this.stars = 0;
-        this.save();
+        storage.resetAll();
+        this.load();
     }
 }

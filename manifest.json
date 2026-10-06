@@ -1,33 +1,18 @@
 {
-  "name": "MathPulse - Calcul Mental pour enfants",
+  "name": "MathPulse - Calcul mental",
   "short_name": "MathPulse",
-  "description": "Un jeu ludique pour apprendre le calcul mental en s'amusant - Pour enfants ~8 ans (CE2)",
+  "description": "Un jeu de calcul mental pour enfants, avec une fusée et un renard.",
+  "lang": "fr",
   "scope": "./",
   "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "portrait-primary",
   "theme_color": "#1a1a2e",
-  "background_color": "#f0f4f8",
+  "background_color": "#1a1a2e",
+  "categories": ["education", "kids"],
   "icons": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231a1a2e' width='192' height='192'/><text x='96' y='144' font-size='120' text-anchor='middle' fill='%23ffffff'>🚀</text></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%231a1a2e' width='512' height='512'/><text x='256' y='384' font-size='300' text-anchor='middle' fill='%23ffffff'>🚀</text></svg>",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["education"],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23f0f4f8' width='540' height='720'/><text x='270' y='360' font-size='80' text-anchor='middle'>🚀</text></svg>",
-      "sizes": "540x720",
-      "type": "image/svg+xml"
-    }
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

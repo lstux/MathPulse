@@ -1,217 +1,113 @@
-// MathPulse - Core Engine
-// Generates exercises and validates answers
+// MathPulse - Moteur : choix de la compétence, génération d'exercices, validation
+// Dépend de : skills.js (SKILLS, SKILL_ORDER)
 
 class Engine {
     constructor(progression) {
         this.progression = progression;
-        this.currentSkill = null;
     }
 
+    // ---------- Choix de la compétence ----------
+    // Priorité : maîtrise la plus basse, puis pratiquée il y a le plus longtemps, puis ordre du catalogue.
     selectSkillForSession() {
-        // Algorithm: prioritize skills to review, then new skills
-        const skills = ['addition-simple', 'multiply-2', 'multiply-5'];
-        const stats = this.progression.data.skills;
-
-        // Find skill with lowest mastery or not yet seen
-        let targetSkill = null;
-        let lowestMastery = 4;
-
-        for (const skill of skills) {
-            const skillStats = stats[skill];
-            const mastery = skillStats ? skillStats.mastery_level : 0;
-
-            if (mastery < lowestMastery) {
-                lowestMastery = mastery;
-                targetSkill = skill;
-            }
-        }
-
-        this.currentSkill = targetSkill || skills[0];
-        return this.currentSkill;
+        const ranked = SKILL_ORDER.map((id, order) => {
+            const stats = this.progression.getSkillStats(id);
+            return {
+                id, order,
+                level: this.progression.getMasteryLevel(id),
+                last: stats && stats.last_practiced ? Date.parse(stats.last_practiced) : 0
+            };
+        });
+        ranked.sort((a, b) => a.level - b.level || a.last - b.last || a.order - b.order);
+        return ranked[0].id;
     }
 
-    generateExercise(skillId, count = 5) {
+    // ---------- Génération ----------
+    generateSession(skillId) {
+        const skill = SKILLS[skillId];
+        if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
         const exercises = [];
-        const types = this.getExerciseTypes(skillId);
-
-        for (let i = 0; i < count; i++) {
-            // Mix types: mostly numeric (3), then missing (2)
-            const typeIdx = i < 3 ? 0 : 1;
-            const type = types[Math.min(typeIdx, types.length - 1)];
-
-            const exercise = this.generateSingleExercise(skillId, type);
-            exercises.push(exercise);
+        const seen = new Set();
+        for (const type of skill.plan) {
+            let ex = null;
+            for (let tries = 0; tries < 30; tries++) {
+                ex = this.generateExercise(skillId, type);
+                if (!seen.has(ex.key)) break;
+            }
+            seen.add(ex.key);
+            exercises.push(ex);
         }
-
         return exercises;
     }
 
-    getExerciseTypes(skillId) {
-        // Define game types for each skill
+    generateExercise(skillId, type = 'numeric') {
+        let a, b;
         switch (skillId) {
-            case 'addition-simple':
-                return ['numeric', 'missing'];
-            case 'multiply-2':
-                return ['numeric', 'missing'];
-            case 'multiply-5':
-                return ['numeric', 'multiple', 'missing'];
-            default:
-                return ['numeric'];
+            case 'addition-simple': a = this.randInt(1, 9); b = this.randInt(1, 9); break;
+            case 'multiply-2': a = this.randInt(1, 10); b = 2; break;
+            case 'multiply-5': a = this.randInt(1, 10); b = 5; break;
+            default: throw new Error(`Compétence inconnue : ${skillId}`);
         }
-    }
-
-    generateSingleExercise(skillId, type = 'numeric') {
-        let exercise = {};
-
-        switch (skillId) {
-            case 'addition-simple':
-                exercise = this.generateAddition(type);
-                break;
-            case 'multiply-2':
-                exercise = this.generateMultiplyBy2(type);
-                break;
-            case 'multiply-5':
-                exercise = this.generateMultiplyBy5(type);
-                break;
-        }
-
-        exercise.skill = skillId;
-        exercise.type = type;
-        return exercise;
-    }
-
-    generateAddition(type) {
-        const a = Math.floor(Math.random() * 9) + 1;  // 1-9
-        const b = Math.floor(Math.random() * 9) + 1;  // 1-9
-        const answer = a + b;
+        const op = SKILLS[skillId].operation;
+        const total = op === '+' ? a + b : a * b;
+        const ex = {
+            skill: skillId, type, operation: op,
+            operands: [a, b], total,
+            animation: SKILLS[skillId].animation,
+            key: `${op}:${a}:${b}`          // sert à éviter les doublons dans une session
+        };
 
         if (type === 'missing') {
-            // a + ? = c
-            const distractors = [b - 2, b - 1, b + 1, b + 2]
-                .filter(n => n > 0 && n !== b);
-            const choices = [b, ...distractors.slice(0, 3)]
-                .sort(() => Math.random() - 0.5);
-
-            return {
-                question: `${a} + ? = ${answer}`,
-                answer: b,
-                choices: choices,
-                operands: [a, b],
-                operation: '+',
-                animation: 'blocks'
-            };
+            // le nombre manquant est le premier opérande en ×, le second en +
+            const hidden = op === '+' ? b : a;
+            ex.answer = hidden;
+            ex.question = op === '+' ? `${a} + ? = ${total}` : `? × ${b} = ${total}`;
+            ex.choices = this.makeChoices(hidden, [-3, -2, -1, 1, 2, 3]);
+        } else if (type === 'multiple') {
+            ex.answer = total;
+            ex.question = `${a} ${op} ${b} = ?`;
+            ex.choices = this.makeChoices(total, op === '×' ? [-10, -5, 5, 10, -1, 1, 2] : [-2, -1, 1, 2, 3]);
+        } else {
+            ex.answer = total;
+            ex.question = `${a} ${op} ${b} = ?`;
         }
-
-        // Numeric: a + b = ?
-        return {
-            question: `${a} + ${b} = ?`,
-            answer: answer,
-            operands: [a, b],
-            operation: '+',
-            animation: 'blocks'
-        };
+        return ex;
     }
 
-    generateMultiplyBy2(type) {
-        const a = Math.floor(Math.random() * 10) + 1;  // 1-10
-        const answer = a * 2;
-
-        if (type === 'missing') {
-            // ? * 2 = c
-            const distractors = [a - 2, a - 1, a + 1, a + 2]
-                .filter(n => n > 0 && n !== a);
-            const choices = [a, ...distractors.slice(0, 3)]
-                .sort(() => Math.random() - 0.5);
-
-            return {
-                question: `? × 2 = ${answer}`,
-                answer: a,
-                choices: choices,
-                operands: [a, 2],
-                operation: '×',
-                animation: 'duplication'
-            };
+    // 4 choix distincts, > 0, dont la bonne réponse, mélangés
+    makeChoices(answer, offsets, count = 4) {
+        const pool = [...new Set(offsets.map(o => answer + o))].filter(n => n > 0 && n !== answer);
+        const picked = this.shuffle(pool).slice(0, count - 1);
+        for (let n = answer + 1; picked.length < count - 1; n++) {
+            if (n !== answer && !picked.includes(n)) picked.push(n);
         }
-
-        // Numeric: a × 2 = ?
-        return {
-            question: `${a} × 2 = ?`,
-            answer: answer,
-            operands: [a, 2],
-            operation: '×',
-            animation: 'duplication'
-        };
+        return this.shuffle([answer, ...picked]);
     }
 
-    generateMultiplyBy5(type) {
-        const a = Math.floor(Math.random() * 9) + 1;  // 1-9
-        const answer = a * 5;
-
-        if (type === 'multiple') {
-            // a × 5 = ? (choose from 4 options)
-            const distractors = [
-                a * 5 - 5,
-                a * 5 - 2,
-                a * 5 + 3,
-                a * 5 + 5
-            ].filter(n => n > 0 && n !== answer);
-
-            const choices = [answer, ...distractors.slice(0, 3)]
-                .sort(() => Math.random() - 0.5);
-
-            return {
-                question: `${a} × 5 = ?`,
-                answer: answer,
-                choices: choices,
-                operands: [a, 5],
-                operation: '×',
-                animation: 'groups'
-            };
-        }
-
-        if (type === 'missing') {
-            // ? × 5 = c
-            const distractors = [a - 2, a - 1, a + 1, a + 2]
-                .filter(n => n > 0 && n !== a);
-            const choices = [a, ...distractors.slice(0, 3)]
-                .sort(() => Math.random() - 0.5);
-
-            return {
-                question: `? × 5 = ${answer}`,
-                answer: a,
-                choices: choices,
-                operands: [a, 5],
-                operation: '×',
-                animation: 'groups'
-            };
-        }
-
-        // Numeric: a × 5 = ?
-        return {
-            question: `${a} × 5 = ?`,
-            answer: answer,
-            operands: [a, 5],
-            operation: '×',
-            animation: 'groups'
-        };
-    }
-
+    // ---------- Validation / explication ----------
     validateAnswer(exercise, answer) {
-        const numAnswer = parseInt(answer);
-        return numAnswer === exercise.answer;
+        const s = String(answer).trim();
+        return /^\d+$/.test(s) && Number(s) === exercise.answer;
     }
 
     getExplanation(exercise) {
         const [a, b] = exercise.operands;
-        const answer = exercise.answer;
+        const t = exercise.total;
+        if (exercise.operation === '+') return `${a} et ${b} font ${t} ensemble.`;
+        if (b === 2) return `Le double de ${a}, c'est ${a} + ${a} = ${t}.`;
+        return `${a} groupes de ${b} font ${t}.`;
+    }
 
-        switch (exercise.operation) {
-            case '+':
-                return `${a} and ${b} make ${answer} together`;
-            case '×':
-                return `${a} groups of ${b} make ${answer}`;
-            default:
-                return `The answer is ${answer}`;
+    // ---------- Utilitaires ----------
+    randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    shuffle(list) {
+        const arr = [...list];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
+        return arr;
     }
 }

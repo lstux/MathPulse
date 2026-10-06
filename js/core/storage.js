@@ -1,111 +1,82 @@
-// MathPulse - Local Storage Abstraction
+// MathPulse - Abstraction localStorage (toutes les lectures/écritures passent ici)
 
 const storage = {
-    // Keys
     KEYS: {
         PROGRESSION: 'mathpulse_progression',
         SESSION_HISTORY: 'mathpulse_history',
         USER_PREFS: 'mathpulse_prefs'
     },
 
-    // Initialize storage
+    MAX_HISTORY: 200,
+
     init() {
-        console.log('✓ Storage initialized');
         this.ensureDefaults();
     },
 
-    // Ensure default data exists
     ensureDefaults() {
-        if (!this.get(this.KEYS.PROGRESSION)) {
-            this.set(this.KEYS.PROGRESSION, { skills: {} });
-        }
-        if (!this.get(this.KEYS.SESSION_HISTORY)) {
-            this.set(this.KEYS.SESSION_HISTORY, []);
-        }
-        if (!this.get(this.KEYS.USER_PREFS)) {
-            this.set(this.KEYS.USER_PREFS, { theme: 'auto', sound: true });
-        }
+        if (!this.get(this.KEYS.PROGRESSION)) this.set(this.KEYS.PROGRESSION, { version: 1, skills: {}, totalStars: 0, discovered: {} });
+        if (!this.get(this.KEYS.SESSION_HISTORY)) this.set(this.KEYS.SESSION_HISTORY, []);
+        if (!this.get(this.KEYS.USER_PREFS)) this.set(this.KEYS.USER_PREFS, { sound: false });
     },
 
-    // Get from localStorage
     get(key) {
         try {
             const data = localStorage.getItem(key);
             return data ? JSON.parse(data) : null;
         } catch (error) {
-            console.error(`Storage.get error for key "${key}":`, error);
+            console.error(`storage.get("${key}"):`, error);
             return null;
         }
     },
 
-    // Set to localStorage
     set(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
             return true;
         } catch (error) {
-            console.error(`Storage.set error for key "${key}":`, error);
+            console.error(`storage.set("${key}"):`, error);
             return false;
         }
     },
 
-    // Append to array
-    append(key, item) {
-        try {
-            const data = this.get(key) || [];
-            if (Array.isArray(data)) {
-                data.push(item);
-                this.set(key, data);
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error(`Storage.append error for key "${key}":`, error);
-            return false;
-        }
+    append(key, item, max = this.MAX_HISTORY) {
+        const data = this.get(key);
+        const list = Array.isArray(data) ? data : [];
+        list.push(item);
+        return this.set(key, list.slice(-max));
     },
 
-    // Remove from storage
     remove(key) {
         try {
             localStorage.removeItem(key);
             return true;
         } catch (error) {
-            console.error(`Storage.remove error for key "${key}":`, error);
             return false;
         }
     },
 
-    // Clear all
-    clear() {
-        try {
-            localStorage.clear();
-            return true;
-        } catch (error) {
-            console.error('Storage.clear error:', error);
-            return false;
-        }
-    },
-
-    // Export all data
     exportData() {
         return {
+            app: 'mathpulse',
+            version: 1,
+            exportedAt: new Date().toISOString(),
             progression: this.get(this.KEYS.PROGRESSION),
             history: this.get(this.KEYS.SESSION_HISTORY),
             prefs: this.get(this.KEYS.USER_PREFS)
         };
     },
 
-    // Import data
     importData(data) {
-        try {
-            if (data.progression) this.set(this.KEYS.PROGRESSION, data.progression);
-            if (data.history) this.set(this.KEYS.SESSION_HISTORY, data.history);
-            if (data.prefs) this.set(this.KEYS.USER_PREFS, data.prefs);
-            return true;
-        } catch (error) {
-            console.error('Storage.importData error:', error);
-            return false;
-        }
+        if (!data || data.app !== 'mathpulse' || !data.progression) return false;
+        this.set(this.KEYS.PROGRESSION, data.progression);
+        this.set(this.KEYS.SESSION_HISTORY, data.history || []);
+        this.set(this.KEYS.USER_PREFS, data.prefs || { sound: false });
+        return true;
+    },
+
+    // Supprime uniquement les clés de MathPulse (jamais localStorage.clear())
+    resetAll() {
+        Object.values(this.KEYS).forEach(k => this.remove(k));
+        this.ensureDefaults();
     }
 };

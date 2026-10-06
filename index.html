@@ -2,14 +2,14 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MathPulse - Un jeu de calcul mental pour enfants">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="MathPulse - un jeu de calcul mental pour enfants">
     <meta name="theme-color" content="#1a1a2e">
 
-    <title>MathPulse 🚀</title>
+    <title>MathPulse</title>
 
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🚀</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
     <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 
     <link rel="stylesheet" href="css/main.css">
@@ -17,35 +17,18 @@
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
-    <div id="app" class="app-container">
-        <!-- Screens will be injected here -->
-    </div>
+    <div id="app" class="app-container"></div>
+    <noscript>MathPulse a besoin de JavaScript pour fonctionner.</noscript>
 
-    <script src="js/utils/dom.js"></script>
-    <script src="js/utils/math.js"></script>
-    <script src="js/utils/random.js"></script>
-
+    <script src="js/content/skills.js"></script>
     <script src="js/core/storage.js"></script>
     <script src="js/core/progression.js"></script>
-    <script src="js/core/session.js"></script>
     <script src="js/core/engine.js"></script>
-
-    <script src="js/content/operations.js"></script>
-    <script src="js/content/skills.js"></script>
-    <script src="js/content/exercises.js"></script>
-
-    <script src="js/games/baseGame.js"></script>
-    <script src="js/games/numeric.js"></script>
-    <script src="js/games/multiple.js"></script>
-    <script src="js/games/missing.js"></script>
-    <script src="js/games/series.js"></script>
-
-    <script src="js/ui/components.js"></script>
+    <script src="js/core/session.js"></script>
     <script src="js/ui/animations.js"></script>
-    <script src="js/ui/universe.js"></script>
     <script src="js/ui/discovery.js"></script>
+    <script src="js/ui/universe.js"></script>
     <script src="js/ui/screen.js"></script>
-
     <script src="js/app.js"></script>
 </body>
 </html>

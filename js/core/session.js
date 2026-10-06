@@ -1,47 +1,43 @@
-// MathPulse - Session Management
+// MathPulse - Session de jeu (5 questions sur une compétence)
 
 class Session {
     constructor(engine, progression) {
         this.engine = engine;
         this.progression = progression;
+        this.skill = null;
         this.exercises = [];
         this.currentIndex = 0;
         this.results = [];
-        this.startTime = null;
-        this.skill = null;
+        this.questionStart = null;
+        this.completed = false;
+        this.summary = null;
     }
 
     start() {
         this.skill = this.engine.selectSkillForSession();
-        this.exercises = this.engine.generateExercise(this.skill, 5);
-        this.startTime = Date.now();
+        this.exercises = this.engine.generateSession(this.skill);
         this.currentIndex = 0;
         this.results = [];
+        this.completed = false;
+        this.summary = null;
     }
 
     getCurrentExercise() {
         return this.exercises[this.currentIndex];
     }
 
-    submitAnswer(answer) {
+    // À appeler quand la question est réellement affichée (le chrono ne tourne pas pendant la découverte)
+    beginQuestion() {
+        this.questionStart = Date.now();
+    }
+
+    submitAnswer(answer, hinted = false) {
         const exercise = this.getCurrentExercise();
-        const isCorrect = this.engine.validateAnswer(exercise, answer);
-        const timeMs = Date.now() - this.startTime;
-
-        this.results.push({
-            exercise: exercise,
-            answer: answer,
-            correct: isCorrect,
-            time_ms: timeMs
-        });
-
-        // Record in progression
-        this.progression.recordAnswer(this.skill, isCorrect, timeMs);
-
-        return {
-            correct: isCorrect,
-            answer: exercise.answer
-        };
+        const timeMs = this.questionStart ? Date.now() - this.questionStart : 0;
+        const correct = this.engine.validateAnswer(exercise, answer);
+        this.results.push({ key: exercise.key, question: exercise.question, answer: String(answer), correct, time_ms: timeMs, hinted });
+        this.progression.recordAnswer(this.skill, correct, timeMs);
+        return { correct, answer: exercise.answer };
     }
 
     next() {
@@ -52,43 +48,25 @@ class Session {
         return this.currentIndex >= this.exercises.length;
     }
 
-    getResults() {
-        const correct = this.results.filter(r => r.correct).length;
+    // Finalise la session une seule fois : crédite les étoiles et archive l'historique
+    complete() {
+        if (this.completed) return this.summary;
         const total = this.results.length;
-        const avgTime = this.results.reduce((sum, r) => sum + r.time_ms, 0) / total;
+        const correct = this.results.filter(r => r.correct).length;
+        const starsEarned = starsForScore(correct);
+        const before = this.progression.getTotalStars();
+        const after = this.progression.addStars(starsEarned);
+        const newPlanets = PLANETS.filter(p => before < p.unlockAt && after >= p.unlockAt);
 
-        return {
-            skill: this.skill,
-            correct: correct,
-            total: total,
-            percentage: (correct / total * 100).toFixed(0),
-            avgTime: avgTime,
-            starsEarned: Math.floor(correct / 2), // 1-2 stars per session
-            results: this.results
+        this.summary = {
+            skill: this.skill, correct, total, starsEarned,
+            totalStars: after, newPlanets,
+            avgTime: total ? this.results.reduce((s, r) => s + r.time_ms, 0) / total : 0
         };
-    }
-
-    renderCurrentGame() {
-        const exercise = this.getCurrentExercise();
-        if (!exercise) return '';
-
-        let html = `
-            <div class="game-board">
-                <div class="text-center">
-                    <p class="text-sm text-text-light mb-md">${this.currentIndex + 1} / ${this.exercises.length}</p>
-                </div>
-
-                <div class="question">${exercise.question}</div>
-
-                <div id="animation-container" class="animation-${exercise.animation} mb-2xl"></div>
-
-                <div class="input-area">
-                    <input type="number" id="answer-input" placeholder="Réponse" autofocus>
-                    <button class="btn-primary" id="btn-submit">✓</button>
-                </div>
-            </div>
-        `;
-
-        return html;
+        storage.append(storage.KEYS.SESSION_HISTORY, {
+            at: new Date().toISOString(), skill: this.skill, correct, total, starsEarned
+        });
+        this.completed = true;
+        return this.summary;
     }
 }

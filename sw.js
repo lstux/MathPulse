@@ -1,88 +1,63 @@
-// MathPulse Service Worker
-// Gère le caching et le mode offline
+// MathPulse - Service worker (usage hors ligne)
+// Chemins relatifs : l'app peut être servie à la racine ou dans un sous-dossier (GitHub Pages).
+// Pensez à incrémenter CACHE_VERSION à chaque livraison.
 
-const CACHE_NAME = 'mathpulse-v1';
-const URLS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/css/main.css',
-    '/css/animations.css',
-    '/css/responsive.css',
-    '/js/app.js',
-    '/js/utils/dom.js',
-    '/js/utils/math.js',
-    '/js/utils/random.js',
-    '/js/core/storage.js',
-    '/js/core/progression.js',
-    '/js/core/session.js',
-    '/js/core/engine.js',
-    '/js/content/operations.js',
-    '/js/content/skills.js',
-    '/js/content/exercises.js',
-    '/js/games/baseGame.js',
-    '/js/games/numeric.js',
-    '/js/games/multiple.js',
-    '/js/games/missing.js',
-    '/js/games/series.js',
-    '/js/ui/components.js',
-    '/js/ui/animations.js',
-    '/js/ui/universe.js',
-    '/js/ui/screen.js'
+const CACHE_VERSION = 'mathpulse-v2';
+
+const PRECACHE = [
+    './',
+    './index.html',
+    './manifest.json',
+    './css/main.css',
+    './css/animations.css',
+    './css/responsive.css',
+    './js/content/skills.js',
+    './js/core/storage.js',
+    './js/core/progression.js',
+    './js/core/engine.js',
+    './js/core/session.js',
+    './js/ui/animations.js',
+    './js/ui/discovery.js',
+    './js/ui/universe.js',
+    './js/ui/screen.js',
+    './js/app.js',
+    './assets/icons/icon.svg',
+    './assets/icons/icon-192.png',
+    './assets/icons/icon-512.png',
+    './assets/icons/icon-maskable-512.png',
+    './assets/icons/apple-touch-icon.png'
 ];
 
-// Install event
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll(URLS_TO_CACHE);
-        }).then(() => {
-            self.skipWaiting();
-        })
+        caches.open(CACHE_VERSION)
+            .then(cache => cache.addAll(PRECACHE))
+            .then(() => self.skipWaiting())
     );
 });
 
-// Activate event
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(() => {
-            self.clients.claim();
-        })
+        caches.keys()
+            .then(keys => Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k))))
+            .then(() => self.clients.claim())
     );
 });
 
-// Fetch event
+// Réseau d'abord (toujours la dernière version en ligne), cache en secours hors ligne.
 self.addEventListener('fetch', event => {
-    // Network first, fall back to cache
+    const req = event.request;
+    if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+
     event.respondWith(
-        fetch(event.request)
-            .then(response => {
-                // Cache the response
-                if (response.status === 200) {
-                    const responseToCache = response.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, responseToCache);
-                    });
+        fetch(req)
+            .then(res => {
+                if (res.ok) {
+                    const copy = res.clone();
+                    caches.open(CACHE_VERSION).then(cache => cache.put(req, copy));
                 }
-                return response;
+                return res;
             })
-            .catch(() => {
-                // Return cached version if offline
-                return caches.match(event.request)
-                    .then(response => {
-                        return response || new Response(
-                            'Offline - page not cached',
-                            { status: 503, statusText: 'Service Unavailable' }
-                        );
-                    });
-            })
+            .catch(() => caches.match(req).then(hit => hit || (req.mode === 'navigate' ? caches.match('./index.html') : Response.error())))
     );
 });

@@ -1,61 +1,80 @@
-// MathPulse - Screen Manager
-// Handles navigation between all screens
+// MathPulse - Gestionnaire d'écrans : home, universe, discovery, game, result, parent
 
 class ScreenManager {
     constructor(appContainer, engine, progression) {
         this.appContainer = appContainer;
         this.engine = engine;
         this.progression = progression;
-        this.currentScreen = null;
         this.session = null;
+        this.currentScreen = null;
+        this.timers = [];
     }
 
-    show(screenName, data = {}) {
-        let screen;
-        switch (screenName) {
-            case 'home': screen = this.createHomeScreen(); break;
-            case 'universe': screen = this.createUniverseScreen(); break;
-            case 'game': screen = this.createGameScreen(); break;
-            case 'result': screen = this.createResultScreen(data); break;
-            case 'parent': screen = this.createParentScreen(); break;
-            default: screen = this.createHomeScreen();
-        }
+    // setTimeout rattaché à l'écran courant : annulé automatiquement quand on change d'écran
+    later(fn, ms) {
+        this.timers.push(setTimeout(fn, ms));
+    }
+
+    show(name, data = {}) {
+        this.timers.forEach(clearTimeout);
+        this.timers = [];
+
+        const builders = {
+            home: () => this.createHomeScreen(),
+            universe: () => this.createUniverseScreen(),
+            discovery: () => Discovery.create(data.skillId, () => this.show('game')),
+            game: () => this.createGameScreen(),
+            result: () => this.createResultScreen(data.summary),
+            parent: () => this.createParentScreen()
+        };
+        const screen = (builders[name] || builders.home)();
         this.appContainer.innerHTML = '';
         this.appContainer.appendChild(screen);
-        this.currentScreen = screenName;
+        this.currentScreen = name;
+        window.scrollTo(0, 0);
+
+        const focusTarget = screen.querySelector('[data-autofocus]');
+        if (focusTarget) focusTarget.focus();
     }
 
+    screenEl(extraClass = '') {
+        const el = document.createElement('main');
+        el.className = `screen active flex flex-col flex-center gap-lg p-lg ${extraClass}`;
+        return el;
+    }
+
+    stars(n, max = 3) {
+        return '⭐'.repeat(n) + '☆'.repeat(Math.max(0, max - n));
+    }
+
+    // ---------- Accueil ----------
     createHomeScreen() {
-        const screen = document.createElement('div');
-        screen.className = 'screen active flex flex-col flex-center gap-lg p-lg';
+        const screen = this.screenEl();
         screen.innerHTML = `
             <div class="text-center">
-                <div class="text-3xl mb-lg">🧮</div>
+                <div class="fox-big" aria-hidden="true">🦊🚀</div>
                 <h1 class="text-3xl font-bold mb-md">MathPulse</h1>
-                <p class="text-lg text-text-light mb-2xl">Apprends le calcul mental en t'amusant !</p>
+                <p class="text-lg muted">Le calcul mental, version aventure !</p>
             </div>
-            <div class="flex flex-col gap-md" style="width: 100%; max-width: 300px;">
-                <button class="btn-primary btn-large" id="btn-play">🎮 JOUER</button>
-                <button class="btn-secondary" id="btn-parent">👨‍👩‍👧‍👦 Espace Parent</button>
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-play">Jouer</button>
+                <button class="btn-secondary" id="btn-parent">Espace parent</button>
             </div>
-            <div class="mt-md text-center text-sm text-text-light">
-                <p>⭐ ${this.progression.getTotalStars()} étoiles collectées</p>
-            </div>
+            <p class="text-sm muted">⭐ ${this.progression.getTotalStars()}</p>
         `;
         screen.querySelector('#btn-play').addEventListener('click', () => this.show('universe'));
         screen.querySelector('#btn-parent').addEventListener('click', () => this.show('parent'));
         return screen;
     }
 
+    // ---------- Univers ----------
     createUniverseScreen() {
-        const screen = document.createElement('div');
-        screen.className = 'screen active flex flex-col flex-center gap-lg p-lg';
-        const universe = new Universe(this.progression);
+        const screen = this.screenEl();
         screen.innerHTML = `
-            <div style="width: 100%; overflow-y: auto; flex: 1;">${universe.render()}</div>
-            <div class="flex flex-col gap-md" style="width: 100%; max-width: 300px;">
-                <button class="btn-primary btn-large" id="btn-start-session">▶️ Démarrer une session</button>
-                <button class="btn-secondary" id="btn-back-home">⬅️ Retour</button>
+            <div class="universe-wrap">${new Universe(this.progression).render()}</div>
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-start-session">C'est parti !</button>
+                <button class="btn-secondary" id="btn-back-home">Retour</button>
             </div>
         `;
         screen.querySelector('#btn-start-session').addEventListener('click', () => this.startSession());
@@ -63,170 +82,175 @@ class ScreenManager {
         return screen;
     }
 
-    createGameScreen() {
-        const screen = document.createElement('div');
-        screen.className = 'screen active flex flex-col flex-center gap-lg p-lg';
-        if (!this.session) {
-            screen.innerHTML = '<p>No session</p>';
-            return screen;
-        }
-        const exercise = this.session.getCurrentExercise();
-        if (!exercise) {
-            screen.innerHTML = '<p>Session complete</p>';
-            return screen;
-        }
-        screen.innerHTML = `
-            <div class="flex flex-between" style="width: 100%; max-width: 500px; margin-bottom: 1rem;">
-                <span class="text-sm text-text-light">Question ${this.session.currentIndex + 1}/${this.session.exercises.length}</span>
-                <span class="text-sm font-bold">⭐ ${this.progression.getTotalStars()}</span>
-            </div>
-            <div class="question text-2xl font-bold mb-lg">${exercise.question}</div>
-            <div id="animation-${exercise.animation}" class="animation-${exercise.animation} mb-2xl" style="min-height: 120px;"></div>
-            <div class="input-area gap-md mb-lg">
-                <input type="number" id="answer-input" placeholder="Réponse" autofocus style="font-size: 1.25rem; padding: 0.75rem;">
-                <button class="btn-primary" id="btn-submit">✓</button>
-            </div>
-            <div id="feedback-container" style="min-height: 60px;"></div>
-        `;
-        const inputEl = screen.querySelector('#answer-input');
-        const submitBtn = screen.querySelector('#btn-submit');
-        const handleSubmit = () => {
-            const answer = inputEl.value;
-            if (!answer) return;
-            const result = this.session.submitAnswer(answer);
-            this.showFeedback(result, exercise);
-            inputEl.disabled = true;
-            submitBtn.disabled = true;
-            setTimeout(() => {
-                this.session.next();
-                if (this.session.isComplete()) {
-                    this.show('result', { results: this.session.getResults() });
-                } else {
-                    this.show('game');
-                }
-            }, 2000);
-        };
-        submitBtn.addEventListener('click', handleSubmit);
-        inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSubmit(); });
-        this.renderAnimation(exercise, screen);
-        return screen;
-    }
-
-    renderAnimation(exercise, screen) {
-        const container = screen.querySelector(`#animation-${exercise.animation}`);
-        if (!container) return;
-        switch (exercise.animation) {
-            case 'blocks': this.renderBlocksAnimation(exercise, container); break;
-            case 'duplication': this.renderDuplicationAnimation(exercise, container); break;
-            case 'groups': this.renderGroupsAnimation(exercise, container); break;
-        }
-    }
-
-    renderBlocksAnimation(exercise, container) {
-        const [a, b] = exercise.operands;
-        container.innerHTML = `
-            <div style="display: flex; gap: 2rem; justify-content: center; align-items: flex-end;">
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; max-width: 150px;">
-                    ${Array(a).fill('').map((_, i) => `<div class="block addition-first" style="animation-delay: ${i * 50}ms;"></div>`).join('')}
-                </div>
-                <div style="font-size: 1.5rem; font-weight: bold;">+</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; max-width: 150px;">
-                    ${Array(b).fill('').map((_, i) => `<div class="block addition-second" style="animation-delay: ${(a + i) * 50}ms;"></div>`).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    renderDuplicationAnimation(exercise, container) {
-        const [a, b] = exercise.operands;
-        container.innerHTML = `
-            <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; flex-wrap: wrap;">
-                ${Array(b).fill('').map((_, i) => `<div style="font-size: 2rem; animation-delay: ${i * 200}ms;" class="double-item">${Array(a).fill('🍎').join('')}</div>`).join('')}
-            </div>
-        `;
-    }
-
-    renderGroupsAnimation(exercise, container) {
-        const [a, b] = exercise.operands;
-        container.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 1rem; justify-content: center; align-items: center;">
-                ${Array(a).fill('').map((_, i) => `<div class="group" style="animation-delay: ${i * 100}ms;">${Array(b).fill('').map((_, j) => `<div class="group-item" style="animation-delay: ${(i * b + j) * 30}ms;">🍎</div>`).join('')}</div>`).join('')}
-            </div>
-        `;
-    }
-
-    showFeedback(result, exercise) {
-        const feedbackDiv = document.querySelector('#feedback-container');
-        if (!feedbackDiv) return;
-        if (result.correct) {
-            feedbackDiv.innerHTML = `<div class="feedback-success" style="text-align: center;"><div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div><p class="text-lg font-bold">Bravo !</p></div>`;
-        } else {
-            feedbackDiv.innerHTML = `<div class="feedback-error" style="text-align: center;"><p class="text-sm mb-md">Pas cette fois-ci...</p><p class="text-lg font-bold">La réponse est ${result.answer}</p><p class="text-sm text-text-light mt-md">${this.engine.getExplanation(exercise)}</p></div>`;
-        }
-    }
-
-    createResultScreen(data) {
-        const screen = document.createElement('div');
-        screen.className = 'screen active flex flex-col flex-center gap-lg p-lg';
-        const results = data.results || { correct: 0, total: 0, starsEarned: 0 };
-        const percentage = results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0;
-        screen.innerHTML = `
-            <div class="text-center" style="width: 100%;">
-                <div class="text-3xl mb-lg">${results.correct === results.total ? '🎉' : '✨'}</div>
-                <h2 class="text-2xl font-bold mb-lg">Session complète !</h2>
-                <div style="background: linear-gradient(135deg, rgba(106, 90, 205, 0.1) 0%, rgba(74, 222, 128, 0.1) 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-                    <p class="text-lg mb-md">${results.correct} / ${results.total} calculs réussis</p>
-                    <p class="text-sm text-text-light mb-lg">${percentage}%</p>
-                    ${results.starsEarned > 0 ? `<div style="font-size: 2rem; margin: 1rem 0;">${Array(results.starsEarned).fill('⭐').join('')}</div><p class="text-sm font-bold">+${results.starsEarned} étoiles !</p>` : ''}
-                </div>
-                <div class="flex flex-col gap-md" style="width: 100%; max-width: 300px;">
-                    <button class="btn-primary btn-large" id="btn-next">▶️ Suivant</button>
-                    <button class="btn-secondary" id="btn-home">🏠 Accueil</button>
-                </div>
-            </div>
-        `;
-        screen.querySelector('#btn-next').addEventListener('click', () => this.startSession());
-        screen.querySelector('#btn-home').addEventListener('click', () => this.show('home'));
-        return screen;
-    }
-
-    createParentScreen() {
-        const screen = document.createElement('div');
-        screen.className = 'screen active flex flex-col gap-lg p-lg';
-        const stats = this.progression.getStats();
-        let skillsHtml = '';
-        for (const [skillId, skillStats] of Object.entries(stats)) {
-            const percent = skillStats.seen > 0 ? Math.round((skillStats.correct / skillStats.seen) * 100) : 0;
-            const stars = this.getMasteryStars(skillStats);
-            skillsHtml += `<div style="padding: 1rem; background: linear-gradient(135deg, rgba(106, 90, 205, 0.1) 0%, rgba(106, 90, 205, 0.05) 100%); border-radius: 8px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"><h3 class="font-bold">${skillStats.name}</h3><span>${stars}</span></div><p class="text-sm text-text-light">${percent}% maîtrisé • ${skillStats.seen} questions</p></div>`;
-        }
-        screen.innerHTML = `<div><h1 class="text-2xl font-bold mb-lg">📊 Progression</h1><div style="margin-bottom: 2rem;"><h2 class="text-lg font-bold mb-lg">Total: ⭐ ${this.progression.getTotalStars()}</h2></div><h3 class="text-lg font-bold mb-lg">Compétences</h3><div class="flex flex-col gap-md mb-2xl">${skillsHtml || '<p class="text-text-light">Aucune compétence encore</p>'}</div><button class="btn-secondary" id="btn-back-home">⬅️ Retour</button></div>`;
-        screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
-        return screen;
-    }
-
-    getMasteryStars(stats) {
-        const percent = stats.seen > 0 ? (stats.correct / stats.seen) * 100 : 0;
-        if (percent >= 90) return '⭐⭐⭐';
-        if (percent >= 70) return '⭐⭐☆';
-        return '⭐☆☆';
-    }
-
     startSession() {
         this.session = new Session(this.engine, this.progression);
         this.session.start();
-
-        // Show discovery phase first if not yet seen
         const skillId = this.session.skill;
-        const hasSeenDiscovery = localStorage.getItem(`discovery-${skillId}`);
-
-        if (!hasSeenDiscovery) {
-            localStorage.setItem(`discovery-${skillId}`, 'true');
-            const discovery = new DiscoveryPhase(skillId, this);
-            discovery.show();
+        if (!this.progression.hasSeenDiscovery(skillId)) {
+            this.progression.markDiscovery(skillId);
+            this.show('discovery', { skillId });
         } else {
             this.show('game');
         }
     }
-}
 
+    // ---------- Jeu ----------
+    createGameScreen() {
+        const screen = this.screenEl('game-screen');
+        const s = this.session;
+        const ex = s.getCurrentExercise();
+        s.beginQuestion();
+        let hinted = false;
+        let answered = false;
+
+        const dots = s.exercises.map((_, i) =>
+            `<span class="dot ${i < s.currentIndex ? 'done' : i === s.currentIndex ? 'current' : ''}"></span>`).join('');
+
+        const answerArea = ex.choices
+            ? `<div class="choices">${ex.choices.map(c => `<button class="choice" data-value="${c}">${c}</button>`).join('')}</div>`
+            : `<form class="input-area" id="answer-form" autocomplete="off">
+                   <input type="text" inputmode="numeric" pattern="[0-9]*" id="answer-input" aria-label="Ta réponse" placeholder="?" data-autofocus>
+                   <button type="submit" class="btn-primary" id="btn-submit" aria-label="Valider">✓</button>
+               </form>`;
+
+        screen.innerHTML = `
+            <div class="game-top">
+                <button class="btn-quit" id="btn-quit" aria-label="Quitter la session">✕</button>
+                <div class="dots" aria-label="Question ${s.currentIndex + 1} sur ${s.exercises.length}">${dots}</div>
+                <span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
+            </div>
+            <div class="question" id="question">${ex.question}</div>
+            <div id="visual-slot"></div>
+            ${answerArea}
+            <button class="btn-hint" id="btn-hint">💡 Un coup de pouce</button>
+            <div id="feedback" class="feedback-container" aria-live="polite"></div>
+        `;
+
+        const controls = () => screen.querySelectorAll('.choice, #answer-input, #btn-submit, #btn-hint');
+        const advance = () => {
+            s.next();
+            if (s.isComplete()) this.show('result', { summary: s.complete() });
+            else this.show('game');
+        };
+
+        const submit = (value, chosenBtn) => {
+            if (answered || String(value).trim() === '') return;
+            answered = true;
+            const result = s.submitAnswer(value, hinted);
+            controls().forEach(c => { c.disabled = true; });
+
+            // Le retour d'un choix ne repose pas que sur la couleur : ✓ / ✗
+            screen.querySelectorAll('.choice').forEach(btn => {
+                if (Number(btn.dataset.value) === result.answer) { btn.classList.add('correct'); btn.textContent += ' ✓'; }
+                else if (btn === chosenBtn) { btn.classList.add('wrong'); btn.textContent += ' ✗'; }
+            });
+
+            const fb = screen.querySelector('#feedback');
+            if (result.correct) {
+                fb.innerHTML = `<div class="feedback-success"><div class="fox-big" aria-hidden="true">🦊</div><p class="text-lg font-bold">Bravo !</p></div>`;
+                this.later(advance, 1100);
+            } else {
+                fb.innerHTML = `
+                    <div class="feedback-error">
+                        <p class="text-lg font-bold">Presque ! La réponse est ${result.answer}.</p>
+                        <p class="muted">${this.engine.getExplanation(ex)}</p>
+                        ${Animations.forExercise(ex)}
+                        <button class="btn-primary btn-large mt-md" id="btn-continue">Continuer</button>
+                    </div>`;
+                const cont = fb.querySelector('#btn-continue');
+                cont.addEventListener('click', advance);
+                cont.focus();
+            }
+        };
+
+        const form = screen.querySelector('#answer-form');
+        if (form) form.addEventListener('submit', e => { e.preventDefault(); submit(screen.querySelector('#answer-input').value); });
+        screen.querySelectorAll('.choice').forEach(btn =>
+            btn.addEventListener('click', () => submit(btn.dataset.value, btn)));
+
+        screen.querySelector('#btn-hint').addEventListener('click', e => {
+            hinted = true;
+            screen.querySelector('#visual-slot').innerHTML = Animations.forExercise(ex);
+            e.currentTarget.hidden = true;
+        });
+        screen.querySelector('#btn-quit').addEventListener('click', () => this.show('universe'));
+        return screen;
+    }
+
+    // ---------- Résultat ----------
+    createResultScreen(summary) {
+        const screen = this.screenEl();
+        const { correct, total, starsEarned, newPlanets, skill } = summary;
+        const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
+        const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
+        screen.innerHTML = `
+            <div class="text-center">
+                <div class="fox-big" aria-hidden="true">${correct === total ? '🎉' : '🦊'}</div>
+                <h1 class="text-2xl font-bold mb-md">${title}</h1>
+                <div class="result-card">
+                    <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
+                    <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
+                    <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
+                    ${planets}
+                </div>
+            </div>
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-again">Encore !</button>
+                <button class="btn-secondary" id="btn-universe">Mon univers</button>
+            </div>
+        `;
+        screen.querySelector('#btn-again').addEventListener('click', () => this.startSession());
+        screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
+        return screen;
+    }
+
+    // ---------- Espace parent ----------
+    createParentScreen() {
+        const screen = this.screenEl('parent-screen');
+        const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
+        const cards = SKILL_ORDER.map(id => {
+            const st = this.progression.getSkillStats(id);
+            if (!st) return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">Pas encore pratiquée</p></div>`;
+            const acc = Math.round((st.correct / st.seen) * 100);
+            return `<div class="skill-card">
+                <div class="skill-head"><h3>${SKILLS[id].name}</h3><span aria-label="Maîtrise ${st.mastery_level} sur 3">${this.stars(st.mastery_level)}</span></div>
+                <p class="muted text-sm">${acc} % de réussite · ${st.seen} questions · ${(st.avg_time_ms / 1000).toFixed(1)} s en moyenne</p>
+            </div>`;
+        }).join('');
+        const recent = history.slice(-5).reverse().map(h =>
+            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill} · ${h.correct}/${h.total}</li>`).join('');
+
+        screen.innerHTML = `
+            <div class="parent-wrap">
+                <h1 class="text-2xl font-bold mb-md">Progression</h1>
+                <p class="mb-lg">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
+                <div class="flex flex-col gap-md mb-lg">${cards}</div>
+                <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
+                <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
+                <div class="flex flex-col gap-md">
+                    <button class="btn-secondary" id="btn-export">Exporter les données</button>
+                    <button class="btn-secondary" id="btn-reset">Réinitialiser la progression</button>
+                    <button class="btn-primary" id="btn-back-home">Retour</button>
+                </div>
+            </div>
+        `;
+        screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
+        screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
+        screen.querySelector('#btn-reset').addEventListener('click', () => {
+            if (confirm('Effacer toute la progression de cet appareil ? Cette action est définitive.')) {
+                this.progression.reset();
+                this.show('parent');
+            }
+        });
+        return screen;
+    }
+
+    exportData() {
+        const blob = new Blob([JSON.stringify(storage.exportData(), null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `mathpulse-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+}
