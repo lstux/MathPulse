@@ -1,13 +1,13 @@
 {
-  "name": "MathPulse - Calcul Mental",
+  "name": "MathPulse - Calcul Mental pour enfants",
   "short_name": "MathPulse",
-  "description": "Un jeu ludique pour apprendre le calcul mental",
-  "scope": "/",
-  "start_url": "/",
+  "description": "Un jeu ludique pour apprendre le calcul mental en s'amusant - Pour enfants ~8 ans (CE2)",
+  "scope": "./",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#1a1a2e",
-  "background_color": "#ffffff",
+  "background_color": "#f0f4f8",
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231a1a2e' width='192' height='192'/><text x='96' y='144' font-size='120' text-anchor='middle' fill='%23ffffff'>🚀</text></svg>",

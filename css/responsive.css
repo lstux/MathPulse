@@ -343,3 +343,149 @@ input:focus-visible {
         border: 2px solid currentColor;
     }
 }
+
+/* Mobile-First Touch Optimization */
+@media (max-width: 640px) {
+    /* Larger touch targets */
+    button, input[type="number"], input[type="text"] {
+        min-height: 56px;
+        font-size: 16px; /* Prevent iOS zoom */
+    }
+
+    h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .question {
+        font-size: var(--font-size-xl);
+        min-height: 3rem;
+    }
+
+    .game-board {
+        min-height: 100vh;
+        padding: var(--spacing-md);
+    }
+
+    .planets-container {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .space-scene {
+        min-height: 150px;
+    }
+
+    .block {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .double-item {
+        font-size: 1.5rem;
+    }
+
+    .group-item {
+        font-size: 1.5rem;
+    }
+
+    .input-area {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .input-area input {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .input-area button {
+        width: 100%;
+    }
+}
+
+/* iPhone notch support */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(var(--spacing-md), env(safe-area-inset-left));
+        padding-right: max(var(--spacing-md), env(safe-area-inset-right));
+    }
+
+    .screen {
+        padding-top: max(var(--spacing-md), env(safe-area-inset-top));
+        padding-bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
+    }
+}
+
+/* Landscape orientation optimization */
+@media (orientation: landscape) and (max-height: 600px) {
+    .screen {
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .question {
+        font-size: var(--font-size-lg);
+        min-height: 2rem;
+    }
+
+    .animation-blocks,
+    .animation-groups,
+    .animation-doubling {
+        min-height: 80px;
+    }
+
+    .btn-large {
+        min-height: 48px;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+}
+
+/* Tablets and larger */
+@media (min-width: 768px) {
+    .container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .question {
+        font-size: var(--font-size-3xl);
+    }
+
+    .game-board {
+        padding: var(--spacing-2xl);
+    }
+}
+
+/* Smooth scrolling for full-screen layouts */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Prevent zoom on input focus (iOS) */
+input[type="number"],
+input[type="text"],
+button {
+    font-size: 16px;
+}
+
+/* Performance: GPU acceleration for animations */
+.block,
+.group,
+.double-item,
+.rocket,
+.planet-card,
+.feedback-success,
+.feedback-error {
+    will-change: transform, opacity;
+}
+
+/* Remove after animation to save GPU memory */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        will-change: auto;
+    }
+}
