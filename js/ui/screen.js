@@ -18,6 +18,10 @@ class ScreenManager {
     show(name, data = {}) {
         this.timers.forEach(clearTimeout);
         this.timers = [];
+        if (this.keyHandler) {
+            document.removeEventListener('keydown', this.keyHandler);
+            this.keyHandler = null;
+        }
 
         const builders = {
             home: () => this.createHomeScreen(),
@@ -32,15 +36,29 @@ class ScreenManager {
         this.appContainer.appendChild(screen);
         this.currentScreen = name;
         window.scrollTo(0, 0);
-
-        const focusTarget = screen.querySelector('[data-autofocus]');
-        if (focusTarget) focusTarget.focus();
     }
 
     screenEl(extraClass = '') {
         const el = document.createElement('main');
         el.className = `screen active flex flex-col flex-center gap-lg p-lg ${extraClass}`;
         return el;
+    }
+
+    // Tête d'un personnage (fox | rabbit) dans une expression : content | bravo | think | comfort
+    face(who, mood, alt = '') {
+        return `<img class="face face-${who}" src="assets/story/expr/${who}-${mood}.svg" alt="${alt}" width="96" height="96">`;
+    }
+
+    // Fait réagir le renard de la partie : change d'expression + petite animation (rejouée à chaque appel)
+    reactFox(screen, mood, anim) {
+        const box = screen.querySelector('#mascot');
+        if (!box) return;
+        const img = box.querySelector('img');
+        img.src = `assets/story/expr/fox-${mood}.svg`;
+        box.dataset.mood = mood;
+        box.classList.remove('hop', 'tilt', 'nod');
+        void box.offsetWidth; // relance l'animation
+        if (anim) box.classList.add(anim);
     }
 
     stars(n, max = 3) {
@@ -52,7 +70,7 @@ class ScreenManager {
         const screen = this.screenEl();
         screen.innerHTML = `
             <div class="text-center">
-                <div class="fox-big" aria-hidden="true">🦊🚀</div>
+                <img class="intro-img" src="assets/story/intro.svg" alt="Un renard et une lapine pilote spatiale devant son vaisseau en panne : « 2 + 3 = ? »" width="360" height="520">
                 <h1 class="text-3xl font-bold mb-md">MathPulse</h1>
                 <p class="text-lg muted">Le calcul mental, version aventure !</p>
             </div>
@@ -100,18 +118,27 @@ class ScreenManager {
         const s = this.session;
         const ex = s.getCurrentExercise();
         s.beginQuestion();
-        let hinted = false;
         let answered = false;
+
+        const hintLabel = () => {
+            const left = s.freeHintsLeft();
+            return left > 0
+                ? `💡 Un coup de pouce · ${left} gratuit${left > 1 ? 's' : ''}`
+                : `💡 Un coup de pouce · ${HINTS.maxStarsOverQuota}⭐ max cette session`;
+        };
 
         const dots = s.exercises.map((_, i) =>
             `<span class="dot ${i < s.currentIndex ? 'done' : i === s.currentIndex ? 'current' : ''}"></span>`).join('');
 
         const answerArea = ex.choices
             ? `<div class="choices">${ex.choices.map(c => `<button class="choice" data-value="${c}">${c}</button>`).join('')}</div>`
-            : `<form class="input-area" id="answer-form" autocomplete="off">
-                   <input type="text" inputmode="numeric" pattern="[0-9]*" id="answer-input" aria-label="Ta réponse" placeholder="?" data-autofocus>
-                   <button type="submit" class="btn-primary" id="btn-submit" aria-label="Valider">✓</button>
-               </form>`;
+            : `<output class="answer-display empty" id="answer-display" aria-live="polite" aria-label="Ta réponse">?</output>
+               <div class="keypad" id="keypad">
+                   ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button class="key" data-key="${n}">${n}</button>`).join('')}
+                   <button class="key key-del" data-key="del" aria-label="Effacer">⌫</button>
+                   <button class="key" data-key="0">0</button>
+                   <button class="key key-ok" data-key="ok" aria-label="Valider">✓</button>
+               </div>`;
 
         screen.innerHTML = `
             <div class="game-top">
@@ -119,14 +146,16 @@ class ScreenManager {
                 <div class="dots" aria-label="Question ${s.currentIndex + 1} sur ${s.exercises.length}">${dots}</div>
                 <span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
             </div>
+            <div class="mascot" id="mascot" data-mood="content">${this.face('fox', 'content')}</div>
+            ${ex.review ? '<p class="review-tag" id="review-tag">🔁 Un calcul à retenter</p>' : ''}
             <div class="question" id="question">${ex.question}</div>
             <div id="visual-slot"></div>
             ${answerArea}
-            <button class="btn-hint" id="btn-hint">💡 Un coup de pouce</button>
+            <button class="btn-hint" id="btn-hint">${hintLabel()}</button>
             <div id="feedback" class="feedback-container" aria-live="polite"></div>
         `;
 
-        const controls = () => screen.querySelectorAll('.choice, #answer-input, #btn-submit, #btn-hint');
+        const controls = () => screen.querySelectorAll('.choice, .key, #btn-hint');
         const advance = () => {
             s.next();
             if (s.isComplete()) this.show('result', { summary: s.complete() });
@@ -136,8 +165,17 @@ class ScreenManager {
         const submit = (value, chosenBtn) => {
             if (answered || String(value).trim() === '') return;
             answered = true;
-            const result = s.submitAnswer(value, hinted);
+            const result = s.submitAnswer(value);
             controls().forEach(c => { c.disabled = true; });
+            screen.querySelector('#btn-hint').hidden = true;
+
+            // Pavé numérique : on affiche la réponse validée (✓ / ✗) et on libère la place pour le retour
+            const display = screen.querySelector('#answer-display');
+            if (display) {
+                display.textContent = `${value} ${result.correct ? '✓' : '✗'}`;
+                display.classList.add(result.correct ? 'correct' : 'wrong');
+                screen.querySelector('#keypad').hidden = true;
+            }
 
             // Le retour d'un choix ne repose pas que sur la couleur : ✓ / ✗
             screen.querySelectorAll('.choice').forEach(btn => {
@@ -146,8 +184,9 @@ class ScreenManager {
             });
 
             const fb = screen.querySelector('#feedback');
+            this.reactFox(screen, result.correct ? 'bravo' : 'comfort', result.correct ? 'hop' : 'tilt');
             if (result.correct) {
-                fb.innerHTML = `<div class="feedback-success"><div class="fox-big" aria-hidden="true">🦊</div><p class="text-lg font-bold">Bravo !</p></div>`;
+                fb.innerHTML = `<div class="feedback-success"><p class="text-lg font-bold">Bravo !</p></div>`;
                 this.later(advance, 1100);
             } else {
                 fb.innerHTML = `
@@ -163,13 +202,43 @@ class ScreenManager {
             }
         };
 
-        const form = screen.querySelector('#answer-form');
-        if (form) form.addEventListener('submit', e => { e.preventDefault(); submit(screen.querySelector('#answer-input').value); });
+        // Pavé numérique (3 chiffres maximum : les réponses attendues vont jusqu'à 50)
+        if (!ex.choices) {
+            let typed = '';
+            const display = screen.querySelector('#answer-display');
+            const press = key => {
+                if (answered) return;
+                if (key === 'ok') return submit(typed);
+                if (key === 'del') typed = typed.slice(0, -1);
+                else if (typed.length < 3) typed = (typed + key).replace(/^0+(?=\d)/, '');
+                display.textContent = typed || '?';
+                display.classList.toggle('empty', !typed);
+            };
+            // e.detail > 0 : clic souris/tactile → on retire le focus pour que Entrée au clavier valide la réponse
+            // (e.detail === 0 : activation au clavier, le focus doit rester pour la navigation Tab)
+            screen.querySelectorAll('.key').forEach(k => k.addEventListener('click', e => {
+                press(k.dataset.key);
+                if (e.detail > 0) k.blur();
+            }));
+
+            // Clavier physique (ordinateur) : chiffres, Retour arrière, Entrée
+            this.keyHandler = e => {
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+                if (/^\d$/.test(e.key)) press(e.key);
+                else if (e.key === 'Backspace') press('del');
+                else if (e.key === 'Enter' && !(document.activeElement && document.activeElement.tagName === 'BUTTON')) press('ok');
+                else return;
+                e.preventDefault();
+            };
+            document.addEventListener('keydown', this.keyHandler);
+        }
         screen.querySelectorAll('.choice').forEach(btn =>
             btn.addEventListener('click', () => submit(btn.dataset.value, btn)));
 
         screen.querySelector('#btn-hint').addEventListener('click', e => {
-            hinted = true;
+            s.useHint();
+            this.reactFox(screen, 'think', 'nod');
+            this.later(() => { if (!answered) this.reactFox(screen, 'content', null); }, 1600);
             screen.querySelector('#visual-slot').innerHTML = Animations.forExercise(ex);
             e.currentTarget.hidden = true;
         });
@@ -180,17 +249,24 @@ class ScreenManager {
     // ---------- Résultat ----------
     createResultScreen(summary) {
         const screen = this.screenEl();
-        const { correct, total, starsEarned, newPlanets, skill } = summary;
+        const { correct, total, starsEarned, newPlanets, skill, capped, cleared } = summary;
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
         const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
+        const mood = correct === total ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
+        const line = { bravo: 'Tu pourrais piloter mon vaisseau !', content: 'Bien joué, on avance !', comfort: 'Pas grave, on réessaie ensemble !' }[mood];
         screen.innerHTML = `
             <div class="text-center">
-                <div class="fox-big" aria-hidden="true">${correct === total ? '🎉' : '🦊'}</div>
+                <div class="rabbit-says" id="rabbit-says" data-mood="${mood}">
+                    ${this.face('rabbit', mood)}
+                    <p class="speech">${line}</p>
+                </div>
                 <h1 class="text-2xl font-bold mb-md">${title}</h1>
                 <div class="result-card">
                     <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
+                    ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
+                    ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
                     ${planets}
                 </div>
             </div>
@@ -220,11 +296,18 @@ class ScreenManager {
         const recent = history.slice(-5).reverse().map(h =>
             `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill} · ${h.correct}/${h.total}</li>`).join('');
 
+        const pending = this.progression.getPendingErrors();
+        const toReview = pending.length
+            ? `<h2 class="text-lg font-bold mb-md">Calculs à revoir</h2>
+               <p class="muted mb-md" id="review-list">${pending.map(e => `${e.operands[0]} ${SKILLS[e.skill].operation} ${e.operands[1]}`).join(', ')}</p>`
+            : '';
+
         screen.innerHTML = `
             <div class="parent-wrap">
                 <h1 class="text-2xl font-bold mb-md">Progression</h1>
                 <p class="mb-lg">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
                 <div class="flex flex-col gap-md mb-lg">${cards}</div>
+                ${toReview}
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
                 <div class="flex flex-col gap-md">

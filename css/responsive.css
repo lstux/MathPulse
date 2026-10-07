@@ -25,6 +25,8 @@
     .fox-big { font-size: 2.5rem; }
     .space-scene { height: 130px; }
     .question { font-size: var(--font-size-2xl); }
+    .key { min-height: 44px; }
+    .answer-display { min-height: 52px; line-height: 46px; }
 }
 
 /* Tablette / bureau */

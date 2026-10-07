@@ -25,9 +25,15 @@ class Engine {
     generateSession(skillId) {
         const skill = SKILLS[skillId];
         if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
+        // Calculs ratés à revoir : placés aux questions 2 et 4 (la première et la dernière restent « fraîches »)
+        const reviews = this.pickReviews();
+        const reviewSlots = new Set();
+        for (let i = skill.plan.length - 2, n = 0; n < reviews.length && i >= 0; i -= 2, n++) reviewSlots.add(i);
+
         const exercises = [];
-        const seen = new Set();
-        for (const type of skill.plan) {
+        const seen = new Set(reviews.map(r => r.key));
+        skill.plan.forEach((type, i) => {
+            if (reviewSlots.has(i)) { exercises.push(reviews.shift()); return; }
             let ex = null;
             for (let tries = 0; tries < 30; tries++) {
                 ex = this.generateExercise(skillId, type);
@@ -35,8 +41,18 @@ class Engine {
             }
             seen.add(ex.key);
             exercises.push(ex);
-        }
+        });
         return exercises;
+    }
+
+    // Reconstruit les exercices correspondant aux erreurs mémorisées (même opération, même type)
+    pickReviews() {
+        const max = Math.min(REVIEW.maxPerSession, 2);   // 2 emplacements possibles dans une session de 5
+        return this.progression.getPendingErrors().slice(0, max).map(e => {
+            const ex = this.buildExercise(e.skill, e.type, e.operands[0], e.operands[1]);
+            ex.review = true;
+            return ex;
+        });
     }
 
     generateExercise(skillId, type = 'numeric') {
@@ -47,6 +63,10 @@ class Engine {
             case 'multiply-5': a = this.randInt(1, 10); b = 5; break;
             default: throw new Error(`Compétence inconnue : ${skillId}`);
         }
+        return this.buildExercise(skillId, type, a, b);
+    }
+
+    buildExercise(skillId, type, a, b) {
         const op = SKILLS[skillId].operation;
         const total = op === '+' ? a + b : a * b;
         const ex = {

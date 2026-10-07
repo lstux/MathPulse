@@ -8,7 +8,8 @@ Jeu de calcul mental pour enfants (~8 ans, CE2), en HTML/CSS/JS sans dépendance
 
 - 3 compétences : additions (1–9), ×2, ×5. Sessions de 5 questions : réponse numérique, QCM, nombre manquant.
 - Découverte animée la première fois qu'une compétence est jouée.
-- Erreur = explication visuelle (blocs / groupes), jamais de punition. Bouton « 💡 coup de pouce » pour voir l'illustration avant de répondre.
+- Erreur = explication visuelle (blocs / groupes), jamais de punition. Bouton « 💡 coup de pouce » pour voir l'illustration avant de répondre : **2 gratuits par session** ; au-delà, la session rapporte 2 étoiles au maximum et les réponses aidées ne comptent plus dans la maîtrise.
+- Saisie par pavé numérique intégré (clavier physique accepté sur ordinateur).
 - Étoiles de session (0–3) qui font avancer la fusée et débloquent des planètes (10 / 25 / 50 étoiles). Maîtrise par compétence (⭐ à ⭐⭐⭐) affichée dans l'espace parent.
 - Espace parent : progression, historique, export JSON, réinitialisation.
 - Hors ligne (service worker), thème clair/sombre automatique, animations réduites si demandé par le système.
@@ -24,7 +25,8 @@ Le service worker n'est pas enregistré sur `localhost` (pour ne pas masquer vos
 
 ```bash
 node tests/run.js                                   # tests unitaires (aucune dépendance)
-python3 tests/smoke.py http://localhost:8000/index.html   # parcours complet + hors ligne (Playwright)
+python3 tests/smoke.py                              # parcours complet + hors ligne (Playwright ; démarre son propre serveur)
+python3 tests/smoke.py https://lstux.github.io/MathPulse/   # même test sur la version en ligne
 ```
 
 ## Structure
@@ -46,7 +48,11 @@ Ajouter une compétence : une entrée dans `SKILLS` (skills.js), un cas dans `En
 
 ## Déploiement (GitHub Pages)
 
-Les chemins sont relatifs : le dépôt peut être servi tel quel depuis `https://<utilisateur>.github.io/MathPulse/`. Réglage : *Settings → Pages → Deploy from a branch → `main` / root*. Pensez à incrémenter `CACHE_VERSION` dans `sw.js` à chaque livraison. _Le déploiement n'a pas encore été effectué ni testé sur appareils réels._
+À chaque push sur `main`, le workflow `.github/workflows/ci-pages.yml` lance les tests (unitaires + navigateur) puis publie le site sur **https://lstux.github.io/MathPulse/**. Seuls les fichiers de l'application sont publiés (pas `tests/` ni `docs/`), et l'étiquette du cache hors ligne (`CACHE_VERSION` dans `sw.js`) est remplacée automatiquement par l'identifiant du commit : pas besoin de l'incrémenter à la main.
+
+Réglage à faire **une seule fois** : *Settings → Pages → Build and deployment → Source : GitHub Actions*. Les chemins sont relatifs, l'application fonctionne telle quelle dans le sous-dossier `/MathPulse/`.
+
+Sur téléphone : ouvrir l'adresse dans Chrome (Android) puis « Installer l'application », ou dans Safari (iPhone/iPad) « Partager → Sur l'écran d'accueil ».
 
 ## Inspirations
 

@@ -34,7 +34,7 @@ _Revue du 6 octobre 2026, réalisée en exécutant l'application (Chromium headl
 
 | Prévu dans la spec | État |
 |---|---|
-| Réapparition des erreurs plus tard (§12, §14, §27) | **Non implémenté** : une erreur n'influence pas les sessions suivantes. |
+| Réapparition des erreurs plus tard (§12, §14, §27) | ✅ **Fait** (7 oct.) : un calcul raté revient en question 2 et/ou 4 des sessions suivantes (2 max par session, même si la compétence du jour est autre) jusqu'à 2 réussites consécutives sans coup de pouce ; liste « Calculs à revoir » côté parent. Réglages : `REVIEW` dans `skills.js`. |
 | Mélange et rappel des anciennes notions (§13) | **Non implémenté** : une session = une compétence (celle de maîtrise la plus basse, en rotation). |
 | Série rapide (jeu MVP, §27) ; opération manquante, memory, classement (§9) | Non implémenté (hors périmètre « 3 compétences » choisi). |
 | Contenu MVP : soustraction, ×10, nombres jusqu'à 100 (§27) | Non implémenté : seules additions, ×2, ×5 (choix « option B »). |
@@ -49,11 +49,15 @@ Classées par échéance. La recommandation est une proposition, pas une décisi
 
 ### Avant la bêta
 
+_Mise à jour du 6 octobre : Q1, Q2, Q4, Q5 et Q6 sont tranchées._
+
 **Q1 — Aide visuelle : quand l'enfant peut-il la voir, et que vaut une réponse aidée ?**
+_✅ Décidé le 6 oct. : **2 coups de pouce gratuits par session** (pas par jour). Au-delà : la session rapporte **2 étoiles au maximum** (étoiles de récompense, pas la maîtrise) et les réponses aidées hors quota **ne comptent plus dans la maîtrise**. **Fait** (voir `HINTS` dans `skills.js`, tests `coups de pouce`)._
 Aujourd'hui : masquée, accessible par « 💡 », automatique après une erreur. Une réponse correcte après aide compte comme une réussite normale, ce qui permet de gonfler la maîtrise en cliquant systématiquement sur l'aide.
 _Recommandation :_ garder l'aide opt-in ; une réponse aidée donne les étoiles de session mais ne compte pas pour passer au niveau ⭐⭐⭐. À implémenter avant la bêta (petit).
 
 **Q2 — Vitesse requise pour ⭐⭐⭐ (moyenne ≤ 3 s, que vous avez validée).**
+_✅ Décidé le 6 oct. : les temps seront ajustés après les premiers tests. Seuils inchangés d'ici là (réglables dans `MASTERY`, `skills.js`)._
 Sur téléphone, taper un nombre prend déjà 1,5 à 2,5 s pour un enfant de 8 ans. La spec précise aussi que « la vitesse reste secondaire ». Le risque : un enfant précis mais jamais ⭐⭐⭐, donc démotivé.
 _Recommandation :_ conserver 3 s pour les QCM, 5 s pour la saisie, et décider définitivement avec les temps réels mesurés pendant la bêta (ils sont dans l'export).
 
@@ -62,14 +66,17 @@ Aujourd'hui la précision est calculée sur toute la vie de la compétence : une
 _Recommandation :_ fenêtre des 20 dernières réponses (la maîtrise peut monter et redescendre, ce qui alimente aussi le rappel des notions anciennes).
 
 **Q4 — Accès à l'espace parent.**
+_✅ Décidé le 6 oct. : espace parent non protégé (la réinitialisation garde sa confirmation)._
 Il est actuellement accessible depuis l'accueil, avec un bouton « Réinitialiser » : un enfant peut effacer sa progression en deux clics.
 _Recommandation :_ une barrière simple, par exemple appui long de 2 s ou une opération hors de portée d'un enfant de 8 ans (« 17 × 6 »). Pas de code PIN à retenir.
 
 **Q5 — Un ou plusieurs enfants sur le même appareil ?**
+_✅ Décidé le 6 oct. : un seul profil (le champ `version` des données permettra une migration si besoin)._
 Le stockage est pour un seul profil. Ajouter des profils après coup oblige à migrer les données ; le faire maintenant coûte peu.
 _Recommandation :_ si une fratrie utilise le même appareil, ajouter les profils avant la bêta ; sinon, rester sur un profil et conserver le champ `version` des données pour migrer plus tard.
 
 **Q6 — Saisie des réponses.**
+_✅ Décidé le 6 oct. : pavé numérique intégré — **fait** (3 chiffres max, ⌫, ✓, clavier physique sur ordinateur)._
 Le clavier du téléphone occupe la moitié de l'écran et varie selon l'appareil.
 _Recommandation :_ un pavé numérique intégré, grandes touches, dans le jeu.
 

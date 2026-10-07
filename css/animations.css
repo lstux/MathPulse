@@ -20,3 +20,19 @@
 
 /* Déblocage d'une planète */
 @keyframes planetAppear { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+
+/* Mascotte : le renard en coin pendant les exercices */
+.mascot { animation: breathe 3.6s ease-in-out infinite; transform-origin: 50% 90%; }
+.mascot.hop { animation: foxHop .6s var(--easing-out) 1; }
+.mascot.tilt { animation: foxTilt .8s ease-in-out 1; }
+.mascot.nod { animation: foxNod .7s ease-in-out 1; }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes foxHop { 0% { transform: translateY(0); } 35% { transform: translateY(-14px) scale(1.06); } 60% { transform: translateY(0) scale(.97); } 80% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
+@keyframes foxTilt { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-9deg); } 65% { transform: rotate(5deg); } }
+@keyframes foxNod { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(5px) rotate(-3deg); } 60% { transform: translateY(-2px); } }
+
+/* Lapine de fin de session : arrivée avec rebond */
+.rabbit-says { display: flex; align-items: center; justify-content: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.rabbit-says .face { animation: rabbitIn .7s var(--easing-out) backwards; }
+.rabbit-says .speech { animation: fadeIn .5s ease .35s backwards; }
+@keyframes rabbitIn { 0% { transform: translateX(-40px) scale(.7); opacity: 0; } 65% { transform: translateX(6px) scale(1.05); opacity: 1; } 100% { transform: translateX(0) scale(1); } }

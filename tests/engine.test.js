@@ -138,3 +138,179 @@ test('session: le chrono mesure la question, pas la session', () => {
     s.submitAnswer(s.getCurrentExercise().answer);
     assert.ok(s.results[0].time_ms >= 1900 && s.results[0].time_ms < 4000);
 });
+
+// ---------- Coups de pouce : 2 gratuits par session, au-delà 2⭐ max et hors maîtrise ----------
+
+function playSession(engine, progression, hintOnQuestions = [], wrongOn = []) {
+    const s = new Session(engine, progression);
+    s.start();
+    s.exercises.forEach((ex, i) => {
+        s.beginQuestion();
+        if (hintOnQuestions.includes(i)) s.useHint();
+        s.submitAnswer(wrongOn.includes(i) ? ex.answer + 1 : ex.answer);
+        s.next();
+    });
+    return s;
+}
+
+test('coups de pouce: 2 gratuits → aucune pénalité, tout compte pour la maîtrise', () => {
+    const { engine, progression } = setup();
+    const s = playSession(engine, progression, [0, 1]);
+    assert.strictEqual(s.hintsUsed, 2);
+    assert.strictEqual(s.freeHintsLeft(), 0);
+    const sum = s.complete();
+    assert.strictEqual(sum.starsEarned, 3, '5/5 avec 2 coups de pouce garde 3 étoiles');
+    assert.strictEqual(sum.capped, false);
+    assert.strictEqual(progression.getSkillStats(s.skill).seen, 5, 'les 5 réponses comptent');
+});
+
+test('coups de pouce: au-delà du quota → 2 étoiles max et réponses aidées hors maîtrise', () => {
+    const { engine, progression } = setup();
+    const s = playSession(engine, progression, [0, 1, 2, 3]);   // 4 coups de pouce : les 3e et 4e sont hors quota
+    assert.ok(s.isOverHintQuota());
+    assert.deepStrictEqual(s.results.map(r => r.countedForMastery), [true, true, false, false, true]);
+    const sum = s.complete();
+    assert.strictEqual(sum.correct, 5);
+    assert.strictEqual(sum.starsEarned, 2, '5/5 mais plafonné à 2 étoiles');
+    assert.strictEqual(sum.capped, true);
+    assert.strictEqual(progression.getSkillStats(s.skill).seen, 3, 'seules 3 réponses comptent dans la maîtrise');
+    assert.strictEqual(progression.getTotalStars(), 2);
+});
+
+test('coups de pouce: le plafond ne touche pas une session déjà ≤ 2 étoiles', () => {
+    const { engine, progression } = setup();
+    const s = playSession(engine, progression, [0, 1, 2], [3]);  // 4/5 → 2 étoiles
+    const sum = s.complete();
+    assert.strictEqual(sum.starsEarned, 2);
+    assert.strictEqual(sum.capped, false, "pas de message « plafonné » si le plafond n'a rien retiré");
+});
+
+test('coups de pouce: un seul par question, et le quota est par session', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start();
+    s.beginQuestion();
+    s.useHint(); s.useHint(); s.useHint();
+    assert.strictEqual(s.hintsUsed, 1, 'trois clics sur la même question = un seul coup de pouce');
+    const s2 = new Session(engine, progression);
+    s2.start();
+    assert.strictEqual(s2.freeHintsLeft(), HINTS.freePerSession, 'nouvelle session : quota remis à 2');
+});
+
+// ---------- Réapparition des erreurs ----------
+
+// Joue une session en répondant faux aux questions (indices) listées, juste aux autres
+function playWith(engine, progression, { wrongOn = [], hintOn = [] } = {}) {
+    const s = new Session(engine, progression);
+    s.start();
+    s.exercises.forEach((ex, i) => {
+        s.beginQuestion();
+        if (hintOn.includes(i)) s.useHint();
+        s.submitAnswer(wrongOn.includes(i) ? ex.answer + 1 : ex.answer);
+        s.next();
+    });
+    return s;
+}
+
+test('erreurs: une erreur est mémorisée, une réussite non', () => {
+    const { engine, progression } = setup();
+    const s = playWith(engine, progression, { wrongOn: [0] });
+    const wrongKey = s.exercises[0].key;
+    const pending = progression.getPendingErrors();
+    assert.deepStrictEqual(pending.map(e => e.key), [wrongKey]);
+    assert.strictEqual(pending[0].streak, 0);
+});
+
+test('erreurs: elle réapparaît à la session suivante, même si la compétence est autre', () => {
+    const { engine, progression } = setup();
+    const first = playWith(engine, progression, { wrongOn: [0] });
+    const wrong = first.exercises[0];
+    const next = new Session(engine, progression);
+    next.start();
+    assert.notStrictEqual(next.skill, first.skill, 'la rotation passe à une autre compétence');
+    const idx = next.exercises.findIndex(e => e.key === wrong.key);
+    assert.ok(idx === 1 || idx === 3, `à revoir en question 2 ou 4 (index ${idx})`);
+    const again = next.exercises[idx];
+    assert.strictEqual(again.review, true);
+    assert.strictEqual(again.skill, wrong.skill, 'garde sa compétence d\'origine');
+    assert.strictEqual(again.type, wrong.type, 'même type d\'exercice');
+    assert.strictEqual(next.exercises.length, 5);
+    assert.ok(!next.exercises[0].review && !next.exercises[4].review, 'première et dernière questions restent fraîches');
+});
+
+test('erreurs: acquise après 2 réussites consécutives ; une erreur remet la série à zéro', () => {
+    const { engine, progression } = setup();
+    const ex = engine.buildExercise('multiply-5', 'numeric', 7, 5);
+    progression.noteResult(ex, false);
+    assert.strictEqual(progression.noteResult(ex, true), 'progress');
+    assert.strictEqual(progression.noteResult(ex, false), 'added', 'une erreur remet la série à 0');
+    assert.strictEqual(progression.getPendingErrors()[0].streak, 0);
+    assert.strictEqual(progression.noteResult(ex, true), 'progress');
+    assert.strictEqual(progression.noteResult(ex, true), 'cleared');
+    assert.strictEqual(progression.getPendingErrors().length, 0);
+});
+
+test('erreurs: une réussite avec coup de pouce ne fait pas avancer la série', () => {
+    const { engine, progression } = setup();
+    const ex = engine.buildExercise('addition-simple', 'numeric', 8, 6);
+    progression.noteResult(ex, false);
+    assert.strictEqual(progression.noteResult(ex, true, true), null);
+    assert.strictEqual(progression.noteResult(ex, true, true), null);
+    assert.strictEqual(progression.getPendingErrors()[0].streak, 0);
+});
+
+test('erreurs: au plus 2 par session, 5 questions, sans doublon, les moins récemment posées d\'abord', () => {
+    const { engine, progression } = setup();
+    [[2, 3], [4, 4], [6, 5], [7, 8]].forEach(([a, b]) =>
+        progression.noteResult(engine.buildExercise('addition-simple', 'numeric', a, b), false));
+    const asked = [];
+    for (let n = 0; n < 4; n++) {
+        const s = new Session(engine, progression);
+        s.start();
+        assert.strictEqual(s.exercises.length, 5);
+        assert.strictEqual(s.exercises.filter(e => e.review).length, 2);
+        const keys = s.exercises.map(e => e.key);
+        assert.strictEqual(new Set(keys).size, 5, `doublon : ${keys}`);
+        asked.push(...s.exercises.filter(e => e.review).map(e => e.key));
+    }
+    assert.strictEqual(new Set(asked).size, 4, 'les 4 erreurs passent chacune à leur tour : ' + asked);
+});
+
+test('erreurs: un calcul à revoir compte pour la maîtrise de sa propre compétence', () => {
+    const { engine, progression } = setup();
+    progression.recordAnswer('addition-simple', true, 1000);   // l'addition a déjà été jouée : la rotation passe à la suivante
+    progression.noteResult(engine.buildExercise('addition-simple', 'numeric', 9, 9), false);
+    const s = new Session(engine, progression);
+    s.start();
+    assert.notStrictEqual(s.skill, 'addition-simple');
+    s.exercises.forEach(ex => { s.beginQuestion(); s.submitAnswer(ex.answer); s.next(); });
+    assert.strictEqual(progression.getSkillStats('addition-simple').seen, 2, '1 déjà vue + le calcul à revoir');
+    assert.strictEqual(progression.getSkillStats(s.skill).seen, 4);
+});
+
+test('erreurs: résumé de session (revues, calculs acquis) et persistance', () => {
+    const { engine, progression } = setup();
+    const ex = engine.buildExercise('multiply-2', 'numeric', 6, 2);
+    progression.noteResult(ex, false);
+    progression.noteResult(ex, true);            // 1 réussite déjà ; la prochaine l'acquiert
+    const s = new Session(engine, progression);
+    s.start();
+    s.exercises.forEach(e => { s.beginQuestion(); s.submitAnswer(e.answer); s.next(); });
+    const sum = s.complete();
+    assert.strictEqual(sum.reviewed, 1);
+    assert.strictEqual(sum.cleared, 1);
+
+    // persistance : une erreur non acquise survit au rechargement
+    progression.noteResult(engine.buildExercise('addition-simple', 'numeric', 5, 6), false);
+    const reloaded = new Progression(); reloaded.load();
+    assert.deepStrictEqual(reloaded.getPendingErrors().map(e => e.key), ['+:5:6']);
+});
+
+test('erreurs: stockage plafonné (les plus anciennes sont oubliées)', () => {
+    const { engine, progression } = setup();
+    for (let i = 1; i <= REVIEW.maxStored + 5; i++) {
+        progression.noteResult(engine.buildExercise('multiply-5', 'numeric', i, 5), false);
+    }
+    assert.strictEqual(progression.getPendingErrors().length, REVIEW.maxStored);
+    assert.ok(!progression.data.errors['×:1:5'], 'la plus ancienne a été oubliée');
+});

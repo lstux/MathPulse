@@ -16,7 +16,8 @@ function makeContext() {
         removeItem: k => store.delete(k),
         clear: () => store.clear()
     };
-    const ctx = vm.createContext({ localStorage, console, assert, Date, Math, JSON, Number, String, Set, Array, Object, Error });
+    // Pas de Object/Array/... de Node : le contexte a les siens (sinon deepStrictEqual échoue entre « realms »)
+    const ctx = vm.createContext({ localStorage, console, assert });
     ctx.__store = store;
     return ctx;
 }

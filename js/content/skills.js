@@ -46,6 +46,15 @@ function starsForScore(correct) {
     return 0;
 }
 
+// Coups de pouce (💡) : gratuits dans la limite du quota par session.
+// Au-delà : la session rapporte au plus `maxStarsOverQuota` étoiles et les réponses aidées
+// ne comptent plus dans la maîtrise (elles restent visibles dans l'historique de session).
+const HINTS = { freePerSession: 2, maxStarsOverQuota: 2 };
+
+// Réapparition des erreurs : un calcul raté revient dans les sessions suivantes (quelle que soit la
+// compétence du jour) jusqu'à `clearAfter` réussites consécutives sans coup de pouce.
+const REVIEW = { maxPerSession: 2, clearAfter: 2, maxStored: 30 };
+
 // Planètes déverrouillées avec le total d'étoiles collectées
 const PLANETS = [
     { name: 'Lune', emoji: '🌕', unlockAt: 10 },
