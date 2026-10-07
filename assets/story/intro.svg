@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 440" role="img" aria-labelledby="t d">
   <title id="t">Le renard rencontre la lapine venue d'ailleurs</title>
-  <desc id="d">Une nuit étoilée dans les bois. Un petit renard au foulard rose fait face à une lapine extraterrestre à antennes lumineuses, qui tient une clé à molette devant son vaisseau en panne qui fume. Elle lui propose un test : « 2 + 3 = ? ».</desc>
+  <desc id="d">Une nuit étoilée dans les bois. Un petit renard fait face à une lapine extraterrestre qui tient une clé à molette devant son vaisseau en panne qui fume. Elle lui propose un test : « 2 + 3 = ? ».</desc>
 
   <defs>
     <linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="320">
@@ -22,8 +22,6 @@
       <stop offset="1" stop-color="#565d84"/>
     </linearGradient>
     <radialGradient id="moonGlow"><stop offset="0" stop-color="#fdf1c4" stop-opacity=".35"/><stop offset="1" stop-color="#fdf1c4" stop-opacity="0"/></radialGradient>
-    <radialGradient id="glowCyan"><stop offset="0" stop-color="#5eead4" stop-opacity=".75"/><stop offset="1" stop-color="#5eead4" stop-opacity="0"/></radialGradient>
-    <radialGradient id="glowPink"><stop offset="0" stop-color="#ff8fc0" stop-opacity=".75"/><stop offset="1" stop-color="#ff8fc0" stop-opacity="0"/></radialGradient>
     <radialGradient id="glowYellow"><stop offset="0" stop-color="#fff3a0" stop-opacity=".8"/><stop offset="1" stop-color="#fff3a0" stop-opacity="0"/></radialGradient>
     <mask id="crescent">
       <rect width="360" height="440" fill="#fff"/>
@@ -122,8 +120,6 @@
     <ellipse cx="0" cy="388" rx="31" ry="28" fill="#f08a2e"/>
     <ellipse cx="0" cy="394" rx="16" ry="20" fill="#fff3e6"/>
     <ellipse cx="-13" cy="413" rx="9" ry="5" fill="#4a2a1c"/><ellipse cx="13" cy="413" rx="9" ry="5" fill="#4a2a1c"/>
-    <path d="M-24 362 Q0 376 24 362 L22 374 Q0 388 -22 374Z" fill="#ff6b9d"/>
-    <path d="M10 372 L22 392 L12 394 L4 376Z" fill="#e0457f"/>
     <g transform="rotate(-6 0 332)">
       <path d="M-30 318 L-34 280 L-10 304Z" fill="#f08a2e"/><path d="M-27 312 L-29 289 L-15 304Z" fill="#ffd9b0"/><path d="M-34 280 L-32 290 L-25 288Z" fill="#3a2418"/>
       <path d="M30 318 L34 280 L10 304Z" fill="#f08a2e"/><path d="M27 312 L29 289 L15 304Z" fill="#ffd9b0"/><path d="M34 280 L32 290 L25 288Z" fill="#3a2418"/>
@@ -154,9 +150,6 @@
     <g transform="rotate(14 19 276)"><ellipse cx="19" cy="276" rx="9" ry="31" fill="#f4efff"/><ellipse cx="19" cy="278" rx="4.5" ry="23" fill="#ffb8d6"/></g>
     <circle cx="0" cy="322" r="27" fill="#f4efff"/>
     <ellipse cx="0" cy="347" rx="17" ry="5" fill="#e9edff"/>
-    <path d="M-3 298 L-7 268 M3 298 L7 268" fill="none" stroke="#cfd6ff" stroke-width="2" stroke-linecap="round"/>
-    <circle cx="-7" cy="266" r="11" fill="url(#glowCyan)"/><circle cx="-7" cy="266" r="4" fill="#5eead4"/>
-    <circle cx="7" cy="266" r="11" fill="url(#glowPink)"/><circle cx="7" cy="266" r="4" fill="#ff8fc0"/>
     <ellipse cx="-10" cy="322" rx="5" ry="7" fill="#231a4a"/><ellipse cx="10" cy="322" rx="5" ry="7" fill="#231a4a"/>
     <circle cx="-8.5" cy="319.5" r="2" fill="#fff"/><circle cx="11.5" cy="319.5" r="2" fill="#fff"/>
     <circle cx="-11.5" cy="325" r="1" fill="#fff"/><circle cx="8.5" cy="325" r="1" fill="#fff"/>
