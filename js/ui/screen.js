@@ -53,7 +53,7 @@ class ScreenManager {
         const screen = this.screenEl();
         screen.innerHTML = `
             <div class="text-center">
-                <div class="fox-big" aria-hidden="true">🦊🚀</div>
+                <img class="intro-img" src="assets/story/intro.svg" alt="Un renard et une lapine pilote spatiale devant son vaisseau en panne : « 2 + 3 = ? »" width="360" height="520">
                 <h1 class="text-3xl font-bold mb-md">MathPulse</h1>
                 <p class="text-lg muted">Le calcul mental, version aventure !</p>
             </div>

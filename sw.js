@@ -2,7 +2,7 @@
 // Chemins relatifs : l'app peut être servie à la racine ou dans un sous-dossier (GitHub Pages).
 // Pensez à incrémenter CACHE_VERSION à chaque livraison.
 
-const CACHE_VERSION = 'mathpulse-v2';
+const CACHE_VERSION = 'mathpulse-v3';
 
 const PRECACHE = [
     './',
@@ -21,6 +21,7 @@ const PRECACHE = [
     './js/ui/universe.js',
     './js/ui/screen.js',
     './js/app.js',
+    './assets/story/intro.svg',
     './assets/icons/icon.svg',
     './assets/icons/icon-192.png',
     './assets/icons/icon-512.png',
