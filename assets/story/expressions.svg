@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 640" role="img" aria-labelledby="ex-t">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1030 640" role="img" aria-labelledby="ex-t">
   <title id="ex-t">Planche d'expressions : le renard et la lapine</title>
   <!-- Planche d'expressions. Chaque tête reprend fox.svg / rabbit.svg ; seuls les groupes yeux (+ sourcils) et bouche changent. -->
-  <rect width="780" height="640" fill="#f4f1ff"/>
+  <rect width="1030" height="640" fill="#f4f1ff"/>
   <g id="fox1" transform="translate(20 20) scale(.47)">
   <defs>
     <path id="f1-head-shape" d="M92 22 C90 70 90 110 84 160 C74 250 58 322 40 372 C84 398 134 424 192 436 L256 446 L320 436 C378 424 428 398 472 372 C454 322 438 250 428 160 C422 110 422 70 420 22 L312 132 C292 118 274 112 256 112 C238 112 220 118 200 132Z"/>
@@ -124,6 +124,44 @@
   <g id="f3-mouth" fill="none" stroke="#4a4747" stroke-width="7" stroke-linecap="round"><path d="M256 436 L256 456"/><path d="M236 466 Q250 458 262 466 T282 462"/></g>
 </g>
   <text x="640" y="288" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-size="22" font-weight="700" fill="#1a1a2e">Je réfléchis</text>
+  <g id="fox4" transform="translate(770 20) scale(.47)">
+  <defs>
+    <path id="f4-head-shape" d="M92 22 C90 70 90 110 84 160 C74 250 58 322 40 372 C84 398 134 424 192 436 L256 446 L320 436 C378 424 428 398 472 372 C454 322 438 250 428 160 C422 110 422 70 420 22 L312 132 C292 118 274 112 256 112 C238 112 220 118 200 132Z"/>
+    <clipPath id="f4-clip"><use href="#f4-head-shape"/></clipPath>
+  </defs>
+
+  <g id="f4-head">
+    <use href="#f4-head-shape" fill="#ff6212"/>
+    <!-- intérieur des oreilles (le long de l'axe de l'oreille) -->
+    <g id="f4-ear-inner" fill="#ff9211">
+      <ellipse cx="126" cy="98" rx="21" ry="50" transform="rotate(-24 126 98)"/>
+      <ellipse cx="386" cy="98" rx="21" ry="50" transform="rotate(24 386 98)"/>
+    </g>
+    <!-- bouts d'oreilles (découpés dans la forme de la tête) -->
+    <g id="f4-ear-tips" clip-path="url(#f4-clip)" fill="#575b5e">
+      <path d="M40 0 H200 L166 52 L70 84Z"/>
+      <path d="M472 0 H312 L346 52 L442 84Z"/>
+    </g>
+  </g>
+
+  <!-- joues grises + traits blancs -->
+  <g id="f4-cheeks">
+    <path d="M20 370 C90 358 160 372 232 408 L232 484 C150 468 70 430 20 370Z" fill="#dedede"/>
+    <path d="M492 370 C422 358 352 372 280 408 L280 484 C362 468 442 430 492 370Z" fill="#dedede"/>
+    <g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".9">
+      <path d="M64 394 C98 390 134 398 160 412"/><path d="M92 424 C120 422 146 430 168 444"/>
+      <path d="M448 394 C414 390 378 398 352 412"/><path d="M420 424 C392 422 366 430 344 444"/>
+    </g>
+  </g>
+
+  <!-- museau -->
+  <path id="f4-muzzle" d="M200 392 C200 440 212 480 234 502 C246 514 266 514 278 502 C300 480 312 440 312 392 C312 372 292 364 256 364 C220 364 200 372 200 392Z" fill="#fde8cf"/>
+
+  <g id="f4-eyes" fill="#2d2927"><ellipse cx="178" cy="284" rx="25" ry="32"/><ellipse cx="334" cy="284" rx="25" ry="32"/><g fill="#fff"><ellipse cx="168" cy="268" rx="10" ry="13"/><circle cx="192" cy="302" r="5"/><ellipse cx="324" cy="268" rx="10" ry="13"/><circle cx="348" cy="302" r="5"/></g></g><g fill="none" stroke="#b8430c" stroke-width="11" stroke-linecap="round"><path d="M140 246 Q172 236 208 218"/><path d="M304 218 Q340 236 372 246"/></g>
+  <path id="f4-nose" d="M218 398 C218 384 232 378 256 378 C280 378 294 384 294 398 C294 416 274 432 256 436 C238 432 218 416 218 398Z" fill="#2d2927"/>
+  <g id="f4-mouth" fill="none" stroke="#4a4747" stroke-width="7" stroke-linecap="round"><path d="M256 436 L256 456"/><path d="M238 462 Q256 478 274 462"/></g>
+</g>
+  <text x="890" y="288" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-size="22" font-weight="700" fill="#1a1a2e">Courage !</text>
   <g id="rabbit1" transform="translate(20 320) scale(.47)">
   <!-- tête + oreilles -->
   <path id="rb1-head" fill="#b5c1c6" d="M256 210 C250 150 238 80 222 40 C214 18 196 10 178 10 C150 10 128 34 124 74 C120 130 134 190 132 240 C130 292 92 332 92 394 C92 472 166 504 256 504 C346 504 420 472 420 394 C420 332 382 292 380 240 C378 190 392 130 388 74 C384 34 362 10 334 10 C316 10 298 18 290 40 C274 80 262 150 256 210Z"/>
@@ -205,4 +243,26 @@
   <g id="rb3-mouth"><path d="M236 376 C242 388 250 394 256 394 C262 394 270 388 276 376" fill="none" stroke="#2d2927" stroke-width="11" stroke-linecap="round"/><path d="M256 394 L256 412" stroke="#2d2927" stroke-width="10" stroke-linecap="round"/><path d="M236 430 Q248 422 258 430 T278 426" fill="none" stroke="#2d2927" stroke-width="9" stroke-linecap="round"/></g>
 </g>
   <text x="640" y="588" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-size="22" font-weight="700" fill="#1a1a2e">Je réfléchis</text>
+  <g id="rabbit4" transform="translate(770 320) scale(.47)">
+  <!-- tête + oreilles -->
+  <path id="rb4-head" fill="#b5c1c6" d="M256 210 C250 150 238 80 222 40 C214 18 196 10 178 10 C150 10 128 34 124 74 C120 130 134 190 132 240 C130 292 92 332 92 394 C92 472 166 504 256 504 C346 504 420 472 420 394 C420 332 382 292 380 240 C378 190 392 130 388 74 C384 34 362 10 334 10 C316 10 298 18 290 40 C274 80 262 150 256 210Z"/>
+  <g id="rb4-ear-inner" fill="#fba9a9">
+    <path d="M178 52 C160 70 150 120 154 170 C156 192 166 204 178 204 C192 204 202 176 200 130 C198 86 190 58 178 52Z"/>
+    <path d="M334 52 C352 70 362 120 358 170 C356 192 346 204 334 204 C320 204 310 176 312 130 C314 86 322 58 334 52Z"/>
+  </g>
+
+  <!-- liseré blanc qui s'élargit en museau -->
+  <path id="rb4-blaze" fill="#fff" d="M240 222 C240 214 246 210 256 210 C266 210 272 214 272 222 L274 304 C274 316 288 326 312 344 C348 370 360 410 348 448 C336 482 296 494 256 494 C216 494 176 482 164 448 C152 410 164 370 200 344 C224 326 238 316 238 304Z"/>
+
+  <g id="rb4-eyes" fill="#2d2927"><ellipse cx="184" cy="300" rx="18" ry="30"/><ellipse cx="328" cy="300" rx="18" ry="30"/><g fill="#9a9a9a"><ellipse cx="177" cy="288" rx="6" ry="9"/><ellipse cx="321" cy="288" rx="6" ry="9"/></g></g><g fill="none" stroke="#7d8a90" stroke-width="10" stroke-linecap="round"><path d="M152 252 Q180 246 212 228"/><path d="M300 228 Q332 246 360 252"/></g>
+
+  <g id="rb4-whiskers" fill="none" stroke="#858585" stroke-width="9" stroke-linecap="round">
+    <path d="M126 400 C106 396 84 394 62 396"/><path d="M124 424 C102 426 80 428 58 432"/><path d="M130 448 C114 456 94 464 78 474"/>
+    <path d="M386 400 C406 396 428 394 450 396"/><path d="M388 424 C410 426 432 428 454 432"/><path d="M382 448 C398 456 418 464 434 474"/>
+  </g>
+
+  <!-- truffe en « Y », sourire et dents du bonheur -->
+  <g id="rb4-mouth"><path d="M236 376 C242 388 250 394 256 394 C262 394 270 388 276 376" fill="none" stroke="#2d2927" stroke-width="11" stroke-linecap="round"/><path d="M256 394 L256 412" stroke="#2d2927" stroke-width="10" stroke-linecap="round"/><path d="M236 428 Q256 446 278 428" fill="none" stroke="#2d2927" stroke-width="9" stroke-linecap="round"/></g>
+</g>
+  <text x="890" y="588" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-size="22" font-weight="700" fill="#1a1a2e">Courage !</text>
 </svg>

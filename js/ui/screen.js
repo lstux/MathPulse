@@ -44,6 +44,23 @@ class ScreenManager {
         return el;
     }
 
+    // Tête d'un personnage (fox | rabbit) dans une expression : content | bravo | think | comfort
+    face(who, mood, alt = '') {
+        return `<img class="face face-${who}" src="assets/story/expr/${who}-${mood}.svg" alt="${alt}" width="96" height="96">`;
+    }
+
+    // Fait réagir le renard de la partie : change d'expression + petite animation (rejouée à chaque appel)
+    reactFox(screen, mood, anim) {
+        const box = screen.querySelector('#mascot');
+        if (!box) return;
+        const img = box.querySelector('img');
+        img.src = `assets/story/expr/fox-${mood}.svg`;
+        box.dataset.mood = mood;
+        box.classList.remove('hop', 'tilt', 'nod');
+        void box.offsetWidth; // relance l'animation
+        if (anim) box.classList.add(anim);
+    }
+
     stars(n, max = 3) {
         return '⭐'.repeat(n) + '☆'.repeat(Math.max(0, max - n));
     }
@@ -129,6 +146,7 @@ class ScreenManager {
                 <div class="dots" aria-label="Question ${s.currentIndex + 1} sur ${s.exercises.length}">${dots}</div>
                 <span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
             </div>
+            <div class="mascot" id="mascot" data-mood="content">${this.face('fox', 'content')}</div>
             ${ex.review ? '<p class="review-tag" id="review-tag">🔁 Un calcul à retenter</p>' : ''}
             <div class="question" id="question">${ex.question}</div>
             <div id="visual-slot"></div>
@@ -166,8 +184,9 @@ class ScreenManager {
             });
 
             const fb = screen.querySelector('#feedback');
+            this.reactFox(screen, result.correct ? 'bravo' : 'comfort', result.correct ? 'hop' : 'tilt');
             if (result.correct) {
-                fb.innerHTML = `<div class="feedback-success"><div class="fox-big" aria-hidden="true">🦊</div><p class="text-lg font-bold">Bravo !</p></div>`;
+                fb.innerHTML = `<div class="feedback-success"><p class="text-lg font-bold">Bravo !</p></div>`;
                 this.later(advance, 1100);
             } else {
                 fb.innerHTML = `
@@ -218,6 +237,8 @@ class ScreenManager {
 
         screen.querySelector('#btn-hint').addEventListener('click', e => {
             s.useHint();
+            this.reactFox(screen, 'think', 'nod');
+            this.later(() => { if (!answered) this.reactFox(screen, 'content', null); }, 1600);
             screen.querySelector('#visual-slot').innerHTML = Animations.forExercise(ex);
             e.currentTarget.hidden = true;
         });
@@ -231,9 +252,14 @@ class ScreenManager {
         const { correct, total, starsEarned, newPlanets, skill, capped, cleared } = summary;
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
         const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
+        const mood = correct === total ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
+        const line = { bravo: 'Tu pourrais piloter mon vaisseau !', content: 'Bien joué, on avance !', comfort: 'Pas grave, on réessaie ensemble !' }[mood];
         screen.innerHTML = `
             <div class="text-center">
-                <div class="fox-big" aria-hidden="true">${correct === total ? '🎉' : '🦊'}</div>
+                <div class="rabbit-says" id="rabbit-says" data-mood="${mood}">
+                    ${this.face('rabbit', mood)}
+                    <p class="speech">${line}</p>
+                </div>
                 <h1 class="text-2xl font-bold mb-md">${title}</h1>
                 <div class="result-card">
                     <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>

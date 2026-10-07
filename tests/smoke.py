@@ -40,6 +40,7 @@ with sync_playwright() as p:
     # coups de pouce : 2 gratuits annoncés, le décompte baisse, le dernier annonce le plafond
     assert '2 gratuits' in pg.inner_text('#btn-hint'), pg.inner_text('#btn-hint')
     pg.click('#btn-hint'); assert pg.locator('.visual').count() == 1, 'illustration attendue après le coup de pouce'
+    assert pg.get_attribute('#mascot', 'data-mood') == 'think', 'le renard réfléchit pendant le coup de pouce'
     def answer_current():
         ans = solve(pg.inner_text('#question'))
         if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')
@@ -67,6 +68,7 @@ with sync_playwright() as p:
                 pg.click('.key[data-key="ok"]')
             pg.wait_for_timeout(1400)
         assert pg.locator('.result-card').count(), 'écran de résultat attendu'
+        assert pg.locator('#rabbit-says').count() == 1, 'la lapine doit apparaître en fin de session'
         if session < 2: pg.click('#btn-again'); pg.wait_for_timeout(300)
 
     # Réapparition des erreurs : un calcul raté revient (étiqueté) aux deux sessions suivantes, puis est acquis
@@ -82,9 +84,12 @@ with sync_playwright() as p:
             else:
                 for d in str(ans + 1 if wrong else ans): pg.click(f'.key[data-key="{d}"]')
                 pg.click('.key[data-key="ok"]')
+            mood = pg.get_attribute('#mascot', 'data-mood')
+            assert mood == ('comfort' if wrong else 'bravo'), f'réaction du renard inattendue : {mood}'
             if wrong: pg.click('#btn-continue'); pg.wait_for_timeout(200)
             else: pg.wait_for_timeout(1400)
         assert pg.locator('.result-card').count(), 'écran de résultat attendu'
+        assert pg.locator('#rabbit-says').count() == 1, 'la lapine doit apparaître en fin de session'
         return seen
 
     pg.click('#btn-again'); pg.wait_for_timeout(300)
