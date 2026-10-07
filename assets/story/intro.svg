@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 440" role="img" aria-labelledby="t d">
+  <title id="t">Le renard rencontre la lapine venue d'ailleurs</title>
+  <desc id="d">Une nuit étoilée dans les bois. Un petit renard au foulard rose fait face à une lapine extraterrestre à antennes lumineuses, qui tient une clé à molette devant son vaisseau en panne qui fume. Elle lui propose un test : « 2 + 3 = ? ».</desc>
+
+  <defs>
+    <linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="320">
+      <stop offset="0" stop-color="#0e0d2b"/>
+      <stop offset=".55" stop-color="#2b2370"/>
+      <stop offset=".85" stop-color="#6a4fc0"/>
+      <stop offset="1" stop-color="#d0689c"/>
+    </linearGradient>
+    <linearGradient id="meadow" gradientUnits="userSpaceOnUse" x1="0" y1="350" x2="0" y2="440">
+      <stop offset="0" stop-color="#3b8a5f"/>
+      <stop offset="1" stop-color="#1d4a3b"/>
+    </linearGradient>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eef0ff"/>
+      <stop offset="1" stop-color="#a3abcf"/>
+    </linearGradient>
+    <linearGradient id="hullLow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8f97b8"/>
+      <stop offset="1" stop-color="#565d84"/>
+    </linearGradient>
+    <radialGradient id="moonGlow"><stop offset="0" stop-color="#fdf1c4" stop-opacity=".35"/><stop offset="1" stop-color="#fdf1c4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glowCyan"><stop offset="0" stop-color="#5eead4" stop-opacity=".75"/><stop offset="1" stop-color="#5eead4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glowPink"><stop offset="0" stop-color="#ff8fc0" stop-opacity=".75"/><stop offset="1" stop-color="#ff8fc0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glowYellow"><stop offset="0" stop-color="#fff3a0" stop-opacity=".8"/><stop offset="1" stop-color="#fff3a0" stop-opacity="0"/></radialGradient>
+    <mask id="crescent">
+      <rect width="360" height="440" fill="#fff"/>
+      <circle cx="76" cy="58" r="20" fill="#000"/>
+    </mask>
+    <path id="sparkle" d="M0-6 L1.6-1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6-1.6Z"/>
+    <g id="pine">
+      <rect x="-3" y="-10" width="6" height="10"/>
+      <path d="M0-100 L16-62 L-16-62Z M0-80 L21-36 L-21-36Z M0-58 L26-8 L-26-8Z"/>
+    </g>
+  </defs>
+
+  <!-- Ciel -->
+  <rect width="360" height="440" fill="url(#sky)"/>
+  <g fill="#fff6d6">
+    <circle cx="24" cy="28" r="1.2" opacity=".9"/><circle cx="52" cy="110" r="1" opacity=".7"/>
+    <circle cx="96" cy="40" r="1.4" opacity=".95"/><circle cx="120" cy="88" r="1" opacity=".6"/>
+    <circle cx="150" cy="22" r="1.2" opacity=".8"/><circle cx="176" cy="66" r="1" opacity=".7"/>
+    <circle cx="205" cy="36" r="1.6"/><circle cx="238" cy="98" r="1" opacity=".6"/>
+    <circle cx="262" cy="52" r="1.2" opacity=".85"/><circle cx="300" cy="24" r="1" opacity=".7"/>
+    <circle cx="326" cy="92" r="1.3" opacity=".9"/><circle cx="344" cy="48" r="1" opacity=".7"/>
+    <circle cx="18" cy="150" r="1" opacity=".6"/><circle cx="88" cy="160" r="1.2" opacity=".7"/>
+    <circle cx="140" cy="140" r="1" opacity=".5"/><circle cx="318" cy="150" r="1" opacity=".6"/>
+    <circle cx="352" cy="120" r="1.2" opacity=".8"/><circle cx="40" cy="76" r="1" opacity=".6"/>
+    <circle cx="190" cy="124" r="1" opacity=".5"/><circle cx="282" cy="132" r="1" opacity=".55"/>
+    <use href="#sparkle" transform="translate(116 58)" opacity=".9"/>
+    <use href="#sparkle" transform="translate(240 72) scale(.8)" opacity=".8"/>
+    <use href="#sparkle" transform="translate(326 64) scale(.6)" opacity=".7"/>
+  </g>
+  <circle cx="66" cy="66" r="44" fill="url(#moonGlow)"/>
+  <circle cx="66" cy="66" r="22" fill="#fdf1c4" mask="url(#crescent)"/>
+
+  <!-- Collines et forêt lointaine -->
+  <path d="M0 262 C60 232 120 252 180 242 S300 226 360 250 L360 440 L0 440Z" fill="#2a2a6b" opacity=".95"/>
+  <g fill="#1c3a55">
+    <use href="#pine" transform="translate(14 296) scale(.7)"/><use href="#pine" transform="translate(52 290) scale(.85)"/>
+    <use href="#pine" transform="translate(96 298) scale(.65)"/><use href="#pine" transform="translate(136 292) scale(.8)"/>
+    <use href="#pine" transform="translate(300 292) scale(.85)"/><use href="#pine" transform="translate(338 298) scale(.7)"/>
+  </g>
+  <path d="M0 322 C70 304 150 316 220 310 S330 300 360 308 L360 440 L0 440Z" fill="#2a5f4d"/>
+  <g fill="#1f5a4a">
+    <use href="#pine" transform="translate(74 330) scale(1.05)"/><use href="#pine" transform="translate(112 326) scale(.8)"/>
+    <use href="#pine" transform="translate(318 328) scale(1.1)"/>
+  </g>
+  <!-- Grands sapins qui encadrent la scène -->
+  <g fill="#0f2a22">
+    <use href="#pine" transform="translate(6 430) scale(2.1)"/>
+    <use href="#pine" transform="translate(356 430) scale(1.9)"/>
+  </g>
+
+  <!-- Vaisseau en panne -->
+  <ellipse cx="205" cy="355" rx="72" ry="7" fill="#0b1a14" opacity=".4"/>
+  <g transform="translate(205 334) rotate(-8) scale(1.1)">
+    <g stroke="#454b6e" stroke-width="5" stroke-linecap="round"><path d="M-40 12 L-46 24"/><path d="M40 12 L50 22"/></g>
+    <ellipse cx="0" cy="7" rx="62" ry="18" fill="url(#hullLow)"/>
+    <path d="M-30-4 C-30-40 30-40 30-4Z" fill="#9be7ff" fill-opacity=".85" stroke="#d6f6ff" stroke-width="2"/>
+    <path d="M-20-12 C-18-24 -8-30 2-30" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+    <ellipse cx="0" cy="0" rx="62" ry="17" fill="url(#hull)"/>
+    <circle cx="-44" cy="2" r="3.5" fill="#ff8fc0"/><circle cx="-22" cy="5" r="3.5" fill="#7a809f"/>
+    <circle cx="0" cy="6" r="3.5" fill="#fbbf24"/><circle cx="22" cy="5" r="3.5" fill="#7a809f"/>
+    <circle cx="44" cy="2" r="3.5" fill="#5eead4"/>
+    <path d="M-34-12 L-28-5 L-35-1 L-29 7" fill="none" stroke="#454b6e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><path d="M-44-16 L-50-22"/><path d="M-47-6 L-55-8"/><path d="M-36-20 L-35-28"/></g>
+    <g fill="#8a86b8"><circle cx="-26" cy="-28" r="6" opacity=".55"/><circle cx="-30" cy="-42" r="8" opacity=".4"/><circle cx="-24" cy="-58" r="10" opacity=".28"/></g>
+  </g>
+
+  <!-- Prairie -->
+  <path d="M0 358 C70 346 150 360 210 356 S320 346 360 352 L360 440 L0 440Z" fill="url(#meadow)"/>
+  <g stroke="#4aa56f" stroke-width="2" stroke-linecap="round" fill="none">
+    <path d="M30 432 q-2-10-5-14 M30 432 q0-12 1-17 M30 432 q3-9 6-12"/>
+    <path d="M150 428 q-2-10-5-14 M150 428 q0-12 1-17 M150 428 q3-9 6-12"/>
+    <path d="M232 434 q-2-10-5-14 M232 434 q0-12 1-17 M232 434 q3-9 6-12"/>
+    <path d="M334 430 q-2-10-5-14 M334 430 q0-12 1-17 M334 430 q3-9 6-12"/>
+  </g>
+  <g><circle cx="190" cy="418" r="3" fill="#fff"/><circle cx="190" cy="418" r="1.2" fill="#fbbf24"/>
+     <circle cx="252" cy="394" r="3" fill="#ffb8d6"/><circle cx="252" cy="394" r="1.2" fill="#fbbf24"/>
+     <circle cx="46" cy="422" r="3" fill="#ffb8d6"/><circle cx="46" cy="422" r="1.2" fill="#fbbf24"/></g>
+  <g>
+    <circle cx="150" cy="372" r="7" fill="url(#glowYellow)"/><circle cx="150" cy="372" r="1.8" fill="#fff9c4"/>
+    <circle cx="232" cy="384" r="7" fill="url(#glowYellow)"/><circle cx="232" cy="384" r="1.8" fill="#fff9c4"/>
+    <circle cx="182" cy="398" r="7" fill="url(#glowYellow)"/><circle cx="182" cy="398" r="1.8" fill="#fff9c4"/>
+    <circle cx="62" cy="380" r="7" fill="url(#glowYellow)"/><circle cx="62" cy="380" r="1.8" fill="#fff9c4"/>
+    <circle cx="336" cy="372" r="7" fill="url(#glowYellow)"/><circle cx="336" cy="372" r="1.8" fill="#fff9c4"/>
+  </g>
+
+  <!-- Bulle : le test de la lapine -->
+  <path d="M238 262 L284 318 L256 262Z" fill="#fff"/>
+  <rect x="140" y="214" width="120" height="52" rx="16" fill="#fff"/>
+  <text x="200" y="249" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="24" font-weight="800" fill="#1a1a2e">2 + 3 = ?</text>
+
+  <!-- Le renard -->
+  <g transform="translate(100 0)">
+    <ellipse cx="0" cy="414" rx="40" ry="6" fill="#0b1a14" opacity=".35"/>
+    <path d="M-26 404 C-68 410 -86 366 -64 336 C-60 332 -54 336 -56 342 C-64 362 -50 384 -24 388Z" fill="#e8782a"/>
+    <path d="M-64 336 C-60 332 -54 336 -56 342 C-57 346 -59 350 -60 354 C-70 352 -72 344 -64 336Z" fill="#fff3e6"/>
+    <ellipse cx="0" cy="388" rx="31" ry="28" fill="#f08a2e"/>
+    <ellipse cx="0" cy="394" rx="16" ry="20" fill="#fff3e6"/>
+    <ellipse cx="-13" cy="413" rx="9" ry="5" fill="#4a2a1c"/><ellipse cx="13" cy="413" rx="9" ry="5" fill="#4a2a1c"/>
+    <path d="M-24 362 Q0 376 24 362 L22 374 Q0 388 -22 374Z" fill="#ff6b9d"/>
+    <path d="M10 372 L22 392 L12 394 L4 376Z" fill="#e0457f"/>
+    <g transform="rotate(-6 0 332)">
+      <path d="M-30 318 L-34 280 L-10 304Z" fill="#f08a2e"/><path d="M-27 312 L-29 289 L-15 304Z" fill="#ffd9b0"/><path d="M-34 280 L-32 290 L-25 288Z" fill="#3a2418"/>
+      <path d="M30 318 L34 280 L10 304Z" fill="#f08a2e"/><path d="M27 312 L29 289 L15 304Z" fill="#ffd9b0"/><path d="M34 280 L32 290 L25 288Z" fill="#3a2418"/>
+      <path d="M-33 332 Q-33 303 0 303 Q33 303 33 332 Q33 354 0 364 Q-33 354 -33 332Z" fill="#f08a2e"/>
+      <path d="M-31 338 Q-18 352 0 347 Q18 352 31 338 Q26 360 0 366 Q-26 360 -31 338Z" fill="#fff3e6"/>
+      <ellipse cx="-13" cy="330" rx="4.6" ry="6.2" fill="#2a1a14"/><ellipse cx="13" cy="330" rx="4.6" ry="6.2" fill="#2a1a14"/>
+      <circle cx="-11.5" cy="327.5" r="1.8" fill="#fff"/><circle cx="14.5" cy="327.5" r="1.8" fill="#fff"/>
+      <circle cx="-22" cy="342" r="4" fill="#ff8fb0" opacity=".5"/><circle cx="22" cy="342" r="4" fill="#ff8fb0" opacity=".5"/>
+      <ellipse cx="0" cy="350" rx="5" ry="3.6" fill="#2a1a14"/>
+      <path d="M-6 355 Q0 361 6 355" fill="none" stroke="#2a1a14" stroke-width="1.6" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- La lapine extraterrestre -->
+  <g transform="translate(300 0)">
+    <ellipse cx="0" cy="410" rx="38" ry="5" fill="#0b1a14" opacity=".35"/>
+    <ellipse cx="-12" cy="405" rx="11" ry="5.5" fill="#e4dbf7"/><ellipse cx="12" cy="405" rx="11" ry="5.5" fill="#e4dbf7"/>
+    <ellipse cx="0" cy="376" rx="29" ry="33" fill="#7280f0"/>
+    <path d="M-28 382 Q0 394 28 382" fill="none" stroke="#aab4ff" stroke-width="3"/>
+    <path d="M0 357 L1.76 361.57 L6.66 361.84 L2.85 364.93 L4.11 369.66 L0 367 L-4.11 369.66 L-2.85 364.93 L-6.66 361.84 L-1.76 361.57Z" fill="#fbbf24"/>
+    <path d="M-26 360 Q-44 352 -48 332" fill="none" stroke="#7280f0" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="-48" cy="330" r="6.5" fill="#f4efff"/>
+    <path d="M26 364 Q40 376 40 392" fill="none" stroke="#7280f0" stroke-width="11" stroke-linecap="round"/>
+    <path d="M36 372 A6 6 0 1 1 45 372" fill="none" stroke="#aeb6d4" stroke-width="4" stroke-linecap="round"/>
+    <path d="M40.5 374 L40.5 408" stroke="#aeb6d4" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="40" cy="394" r="6" fill="#f4efff"/>
+    <g transform="rotate(-14 -19 276)"><ellipse cx="-19" cy="276" rx="9" ry="31" fill="#f4efff"/><ellipse cx="-19" cy="278" rx="4.5" ry="23" fill="#ffb8d6"/></g>
+    <g transform="rotate(14 19 276)"><ellipse cx="19" cy="276" rx="9" ry="31" fill="#f4efff"/><ellipse cx="19" cy="278" rx="4.5" ry="23" fill="#ffb8d6"/></g>
+    <circle cx="0" cy="322" r="27" fill="#f4efff"/>
+    <ellipse cx="0" cy="347" rx="17" ry="5" fill="#e9edff"/>
+    <path d="M-3 298 L-7 268 M3 298 L7 268" fill="none" stroke="#cfd6ff" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="-7" cy="266" r="11" fill="url(#glowCyan)"/><circle cx="-7" cy="266" r="4" fill="#5eead4"/>
+    <circle cx="7" cy="266" r="11" fill="url(#glowPink)"/><circle cx="7" cy="266" r="4" fill="#ff8fc0"/>
+    <ellipse cx="-10" cy="322" rx="5" ry="7" fill="#231a4a"/><ellipse cx="10" cy="322" rx="5" ry="7" fill="#231a4a"/>
+    <circle cx="-8.5" cy="319.5" r="2" fill="#fff"/><circle cx="11.5" cy="319.5" r="2" fill="#fff"/>
+    <circle cx="-11.5" cy="325" r="1" fill="#fff"/><circle cx="8.5" cy="325" r="1" fill="#fff"/>
+    <circle cx="-17" cy="331" r="4.2" fill="#ff9ec4" opacity=".55"/><circle cx="17" cy="331" r="4.2" fill="#ff9ec4" opacity=".55"/>
+    <path d="M-3 331 L3 331 L0 335Z" fill="#ff8fb7"/>
+    <path d="M-6 337 Q-3 341 0 337 Q3 341 6 337" fill="none" stroke="#5a3a7a" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>
