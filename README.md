@@ -59,3 +59,7 @@ Sur téléphone : ouvrir l'adresse dans Chrome (Android) puis « Installer l'app
 [Slovingo](https://github.com/lstux/Slovingo) (architecture légère, offline d'abord) et la spec de conception initiale (v0.2).
 
 _Licence : à définir (aucun fichier LICENSE pour l'instant)._
+
+## Sons
+
+Effets sonores Mixkit (voir `assets/sounds/CREDITS.md`). `assets/sounds/bank/` contient tous les sons réencodés ; les sons utilisés sont copiés dans `assets/sounds/` sous un nom court (`./assets/sounds/encode.sh pick <nom-dans-bank> <nom-court>`). Activés par défaut, coupables via le bouton 🔊/🔇 (jeu et espace parent) ; le réglage est mémorisé.

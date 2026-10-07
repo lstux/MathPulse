@@ -269,3 +269,8 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .mascot .face { width: 56px; height: 56px; }
 .speech { position: relative; max-width: 11rem; padding: .6rem .9rem; background: var(--color-surface); border: 2px solid var(--color-border); border-radius: 16px; text-align: left; font-weight: 700; }
 .speech::before { content: ''; position: absolute; left: -9px; top: 50%; width: 14px; height: 14px; background: inherit; border-left: 2px solid var(--color-border); border-bottom: 2px solid var(--color-border); transform: translateY(-50%) rotate(45deg); }
+
+/* Bouton son (écran de jeu) */
+.btn-sound { min-width: 44px; min-height: 44px; font-size: 1.25rem; background: transparent; border: 0; border-radius: 12px; cursor: pointer; }
+.btn-sound:focus-visible { outline: 3px solid var(--color-primary); }
+.game-top-right { display: flex; align-items: center; gap: .25rem; }

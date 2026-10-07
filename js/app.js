@@ -11,6 +11,7 @@ class MathPulse {
             this.registerServiceWorker();
             storage.init();
             this.requestPersistentStorage();
+            Sound.init();
 
             this.progression = new Progression();
             this.progression.load();

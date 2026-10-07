@@ -16,7 +16,7 @@ const storage = {
     ensureDefaults() {
         if (!this.get(this.KEYS.PROGRESSION)) this.set(this.KEYS.PROGRESSION, { version: 1, skills: {}, totalStars: 0, discovered: {} });
         if (!this.get(this.KEYS.SESSION_HISTORY)) this.set(this.KEYS.SESSION_HISTORY, []);
-        if (!this.get(this.KEYS.USER_PREFS)) this.set(this.KEYS.USER_PREFS, { sound: false });
+        if (!this.get(this.KEYS.USER_PREFS)) this.set(this.KEYS.USER_PREFS, { sound: true });
     },
 
     get(key) {

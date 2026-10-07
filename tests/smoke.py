@@ -41,6 +41,13 @@ with sync_playwright() as p:
     assert '2 gratuits' in pg.inner_text('#btn-hint'), pg.inner_text('#btn-hint')
     pg.click('#btn-hint'); assert pg.locator('.visual').count() == 1, 'illustration attendue après le coup de pouce'
     assert pg.get_attribute('#mascot', 'data-mood') == 'think', 'le renard réfléchit pendant le coup de pouce'
+    # sons : activés par défaut, journalisés ; le bouton 🔇 coupe tout
+    assert pg.get_attribute('#btn-sound', 'aria-pressed') == 'true'
+    log = pg.evaluate('Sound.log'); assert 'start' in log and 'hint' in log, log
+    pg.click('#btn-sound'); assert pg.get_attribute('#btn-sound', 'aria-pressed') == 'false'
+    n = len(pg.evaluate('Sound.log')); pg.evaluate("Sound.play('good')"); assert len(pg.evaluate('Sound.log')) == n, 'aucun son attendu une fois coupé'
+    pg.click('#btn-sound'); assert pg.get_attribute('#btn-sound', 'aria-pressed') == 'true'
+    assert pg.evaluate('storage.get(storage.KEYS.USER_PREFS).sound') is True
     def answer_current():
         ans = solve(pg.inner_text('#question'))
         if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')

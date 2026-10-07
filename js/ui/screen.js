@@ -61,6 +61,20 @@ class ScreenManager {
         if (anim) box.classList.add(anim);
     }
 
+    soundLabel() { return Sound.isOn() ? '🔊' : '🔇'; }
+
+    // Bouton son (jeu) : bascule le réglage et met à jour l'icône + l'état pour les lecteurs d'écran
+    bindSoundButton(btn, withText = false) {
+        const refresh = () => {
+            const on = Sound.isOn();
+            btn.setAttribute('aria-pressed', String(on));
+            btn.setAttribute('aria-label', on ? 'Couper le son' : 'Activer le son');
+            btn.textContent = withText ? (on ? '🔊 Sons activés' : '🔇 Sons coupés') : this.soundLabel();
+        };
+        refresh();
+        btn.addEventListener('click', () => { Sound.toggle(); refresh(); });
+    }
+
     stars(n, max = 3) {
         return '⭐'.repeat(n) + '☆'.repeat(Math.max(0, max - n));
     }
@@ -103,6 +117,7 @@ class ScreenManager {
     startSession() {
         this.session = new Session(this.engine, this.progression);
         this.session.start();
+        Sound.play('start');
         const skillId = this.session.skill;
         if (!this.progression.hasSeenDiscovery(skillId)) {
             this.progression.markDiscovery(skillId);
@@ -144,7 +159,8 @@ class ScreenManager {
             <div class="game-top">
                 <button class="btn-quit" id="btn-quit" aria-label="Quitter la session">✕</button>
                 <div class="dots" aria-label="Question ${s.currentIndex + 1} sur ${s.exercises.length}">${dots}</div>
-                <span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
+                <div class="game-top-right"><span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
+                <button class="btn-sound" id="btn-sound"></button></div>
             </div>
             <div class="mascot" id="mascot" data-mood="content">${this.face('fox', 'content')}</div>
             ${ex.review ? '<p class="review-tag" id="review-tag">🔁 Un calcul à retenter</p>' : ''}
@@ -185,6 +201,7 @@ class ScreenManager {
 
             const fb = screen.querySelector('#feedback');
             this.reactFox(screen, result.correct ? 'bravo' : 'comfort', result.correct ? 'hop' : 'tilt');
+            Sound.play(result.correct ? 'good' : 'wrong');
             if (result.correct) {
                 fb.innerHTML = `<div class="feedback-success"><p class="text-lg font-bold">Bravo !</p></div>`;
                 this.later(advance, 1100);
@@ -238,11 +255,13 @@ class ScreenManager {
         screen.querySelector('#btn-hint').addEventListener('click', e => {
             s.useHint();
             this.reactFox(screen, 'think', 'nod');
+            Sound.play('hint');
             this.later(() => { if (!answered) this.reactFox(screen, 'content', null); }, 1600);
             screen.querySelector('#visual-slot').innerHTML = Animations.forExercise(ex);
             e.currentTarget.hidden = true;
         });
         screen.querySelector('#btn-quit').addEventListener('click', () => this.show('universe'));
+        this.bindSoundButton(screen.querySelector('#btn-sound'));
         return screen;
     }
 
@@ -275,6 +294,11 @@ class ScreenManager {
                 <button class="btn-secondary" id="btn-universe">Mon univers</button>
             </div>
         `;
+        // Sons de fin de session, échelonnés : étoiles, puis calcul acquis, puis planète
+        let at = 150;
+        if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 3 ? 'stars3' : 'stars'), at); at += 1100; }
+        if (cleared > 0) { this.later(() => Sound.play('cleared'), at); at += 1100; }
+        if (newPlanets.length) this.later(() => Sound.play('planet'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.startSession());
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
@@ -311,6 +335,7 @@ class ScreenManager {
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
                 <div class="flex flex-col gap-md">
+                    <button class="btn-secondary" id="btn-sound-parent"></button>
                     <button class="btn-secondary" id="btn-export">Exporter les données</button>
                     <button class="btn-secondary" id="btn-reset">Réinitialiser la progression</button>
                     <button class="btn-primary" id="btn-back-home">Retour</button>
@@ -318,6 +343,7 @@ class ScreenManager {
             </div>
         `;
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
+        this.bindSoundButton(screen.querySelector('#btn-sound-parent'), true);
         screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
         screen.querySelector('#btn-reset').addEventListener('click', () => {
             if (confirm('Effacer toute la progression de cet appareil ? Cette action est définitive.')) {
