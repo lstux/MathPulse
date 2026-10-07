@@ -1,66 +1,34 @@
 # Crédits — Sons MathPulse
 
-## Mixkit License
+Tous les effets sonores viennent de **Mixkit** et sont libres d'utilisation (gratuits, sans attribution obligatoire) sous la **Mixkit License**. Un crédit reste apprécié.
 
-All sound effects used in MathPulse are sourced from **Mixkit** and are free to use under the **Mixkit License**.
+- Site : https://mixkit.co
+- Licence : https://mixkit.co/license/
 
-No attribution required, but credit is appreciated.
+## Organisation
 
-- **Website** : https://mixkit.co
-- **License** : https://mixkit.co/license/
-- **Collection** : Game Show & UI sound effects
+- `bank/` : tous les sons disponibles, réencodés (MP3 mono 96 kbit/s, volume homogène), **sous leur nom Mixkit d'origine** (`mixkit-<titre>-<numéro>.mp3`). Le numéro final permet de retrouver le son sur mixkit.co.
+- ce dossier : les sons **utilisés par l'application**, copiés depuis `bank/` sous un **nom court**.
+- `encode.sh` : réencode `bank/*.wav` et copie un son choisi (`./encode.sh pick <nom-dans-bank> <nom-court>`). Les WAV d'origine ne sont plus dans le dépôt ; ils sont dans l'historique git (commit `36e1ba6`).
 
----
+## Sons utilisés (nom d'origine → nom court)
 
-## Sons utilisés
+| Fichier utilisé | Source dans `bank/` | Titre Mixkit | Usage |
+|---|---|---|---|
+| `good.mp3` | `mixkit-correct-answer-notification-947.mp3` | Correct answer notification | Bonne réponse |
+| `wrong.mp3` | `mixkit-wrong-answer-fail-notification-946.mp3` | Wrong answer fail notification | Mauvaise réponse (doux, volume bas) |
+| `hint.mp3` | `mixkit-game-magic-hint-962.mp3` | Game magic hint | Coup de pouce |
+| `start.mp3` | `mixkit-tile-game-reveal-960.mp3` | Tile game reveal | Début de session |
+| `stars.mp3` | `mixkit-correct-answer-reward-952.mp3` | Correct answer reward | Fin de session : 1 ou 2⭐ |
+| `stars3.mp3` | `mixkit-musical-reveal-961.mp3` | Musical reveal | Fin de session : 3⭐ |
+| `planet.mp3` | `mixkit-revealing-bonus-notification-958.mp3` | Revealing bonus notification | Nouvelle planète |
+| `cleared.mp3` | `mixkit-positive-notification-951.mp3` | Positive notification | Un calcul qui résistait est acquis |
 
-| Fichier | Nom Mixkit | Durée | Usage |
-|---------|-----------|-------|-------|
-| `mixkit-correct-answer-tone-2870.wav` | Correct answer tone | 0:01 | Réponse juste ✅ |
-| `mixkit-wrong-answer-fail-notification-946.wav` | Wrong answer fail notification | 0:01 | Erreur (doux) ❌ |
-| `mixkit-correct-answer-reward-952.wav` | Correct answer reward | 0:02 | Étoile gagnée ⭐ |
-| `mixkit-positive-interface-beep-221.wav` | Positive interface beep | 0:01 | Déverrouillage 🔓 |
-| `mixkit-correct-answer-notification-947.wav` | Correct answer notification | 0:01 | Variante succès |
-| `mixkit-game-show-wrong-answer-buzz-950.wav` | Game show wrong answer buzz | 0:01 | Variante erreur |
-| `mixkit-positive-notification-951.wav` | Positive notification | 0:02 | Ambiance positive |
-| `mixkit-musical-reveal-961.wav` | Musical reveal | 0:03 | Révélation (bonus) |
+## Sons disponibles mais non utilisés
 
----
+`bank/` contient aussi : correct-answer-tone-2870, correct-positive-notification-957, positive-interface-beep-221, game-show-wrong-answer-buzz-950, wrong-electricity-buzz-955, retro-arcade-casino-notification-211, simple-game-countdown-921. Les buzz, le casino et le compte à rebours sont volontairement écartés (trop agressifs ou mettant la pression).
 
 ## Notes techniques
 
-- **Format** : WAV (PCM, ~44.1 kHz, mono/stéréo)
-- **Volume** : À régler à -6dB à -12dB en code (discret, pas dominant)
-- **Offline** : Mis en cache par le service worker (`sw.js`)
-- **Licence** : Compatible GPL-3
-- **Crédits** : Tous les sons proviennent de Mixkit (https://mixkit.co)
-
----
-
-## Utilisation dans le code
-
-Les sons essentiels pour le MVP (Option A) :
-```js
-// À implémenter dans SoundManager
-const essentialSounds = {
-  success: 'mixkit-correct-answer-tone-2870.wav',
-  error: 'mixkit-wrong-answer-fail-notification-946.wav',
-  star: 'mixkit-correct-answer-reward-952.wav',
-  unlock: 'mixkit-positive-interface-beep-221.wav'
-};
-```
-
-Les sons bonus (Beta — Option B) :
-```js
-const bonusSounds = {
-  successAlt: 'mixkit-correct-answer-notification-947.wav',
-  errorAlt: 'mixkit-game-show-wrong-answer-buzz-950.wav',
-  positive: 'mixkit-positive-notification-951.wav',
-  reveal: 'mixkit-musical-reveal-961.wav'
-};
-```
-
----
-
-**Généré le** : 7 octobre 2026  
-**Pour** : MathPulse MVP v0.5
+- Volume cible : -18 LUFS (discret) ; le réglage final se fait dans le code.
+- Mise en cache hors ligne : par le service worker (`sw.js`).
