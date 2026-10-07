@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 440" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-labelledby="t d">
   <title id="t">Le renard rencontre la lapine venue d'ailleurs</title>
-  <desc id="d">Une nuit étoilée dans les bois. Un petit renard fait face à une lapine extraterrestre qui tient une clé à molette devant son vaisseau en panne qui fume. Elle lui propose un test : « 2 + 3 = ? ».</desc>
+  <desc id="d">Une nuit étoilée dans les bois. Un petit renard en sweat et sac à dos fait face à une lapine extraterrestre, pilote spatiale en combinaison argentée, qui tient une clé à molette devant son vaisseau en panne qui fume. Elle lui propose un test : « 2 + 3 = ? ».</desc>
 
   <defs>
-    <linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="320">
+    <linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="400">
       <stop offset="0" stop-color="#0e0d2b"/>
       <stop offset=".55" stop-color="#2b2370"/>
       <stop offset=".85" stop-color="#6a4fc0"/>
@@ -24,7 +24,7 @@
     <radialGradient id="moonGlow"><stop offset="0" stop-color="#fdf1c4" stop-opacity=".35"/><stop offset="1" stop-color="#fdf1c4" stop-opacity="0"/></radialGradient>
     <radialGradient id="glowYellow"><stop offset="0" stop-color="#fff3a0" stop-opacity=".8"/><stop offset="1" stop-color="#fff3a0" stop-opacity="0"/></radialGradient>
     <mask id="crescent">
-      <rect width="360" height="440" fill="#fff"/>
+      <rect width="360" height="520" fill="#fff"/>
       <circle cx="76" cy="58" r="20" fill="#000"/>
     </mask>
     <path id="sparkle" d="M0-6 L1.6-1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6-1.6Z"/>
@@ -35,7 +35,7 @@
   </defs>
 
   <!-- Ciel -->
-  <rect width="360" height="440" fill="url(#sky)"/>
+  <rect width="360" height="520" fill="url(#sky)"/>
   <g fill="#fff6d6">
     <circle cx="24" cy="28" r="1.2" opacity=".9"/><circle cx="52" cy="110" r="1" opacity=".7"/>
     <circle cx="96" cy="40" r="1.4" opacity=".95"/><circle cx="120" cy="88" r="1" opacity=".6"/>
@@ -54,6 +54,7 @@
   <circle cx="66" cy="66" r="44" fill="url(#moonGlow)"/>
   <circle cx="66" cy="66" r="22" fill="#fdf1c4" mask="url(#crescent)"/>
 
+  <g id="landscape" transform="translate(0 80)">
   <!-- Collines et forêt lointaine -->
   <path d="M0 262 C60 232 120 252 180 242 S300 226 360 250 L360 440 L0 440Z" fill="#2a2a6b" opacity=".95"/>
   <g fill="#1c3a55">
@@ -73,8 +74,8 @@
   </g>
 
   <!-- Vaisseau en panne -->
-  <ellipse cx="205" cy="355" rx="72" ry="7" fill="#0b1a14" opacity=".4"/>
-  <g transform="translate(205 334) rotate(-8) scale(1.1)">
+  <ellipse cx="192" cy="333" rx="66" ry="7" fill="#0b1a14" opacity=".4"/>
+  <g transform="translate(192 312) rotate(-8) scale(1.0)">
     <g stroke="#454b6e" stroke-width="5" stroke-linecap="round"><path d="M-40 12 L-46 24"/><path d="M40 12 L50 22"/></g>
     <ellipse cx="0" cy="7" rx="62" ry="18" fill="url(#hullLow)"/>
     <path d="M-30-4 C-30-40 30-40 30-4Z" fill="#9be7ff" fill-opacity=".85" stroke="#d6f6ff" stroke-width="2"/>
@@ -107,54 +108,197 @@
     <circle cx="336" cy="372" r="7" fill="url(#glowYellow)"/><circle cx="336" cy="372" r="1.8" fill="#fff9c4"/>
   </g>
 
-  <!-- Bulle : le test de la lapine -->
-  <path d="M238 262 L284 318 L256 262Z" fill="#fff"/>
-  <rect x="140" y="214" width="120" height="52" rx="16" fill="#fff"/>
-  <text x="200" y="249" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="24" font-weight="800" fill="#1a1a2e">2 + 3 = ?</text>
+  </g>
 
-  <!-- Le renard -->
-  <g transform="translate(100 0)">
-    <ellipse cx="0" cy="414" rx="40" ry="6" fill="#0b1a14" opacity=".35"/>
-    <path d="M-26 404 C-68 410 -86 366 -64 336 C-60 332 -54 336 -56 342 C-64 362 -50 384 -24 388Z" fill="#e8782a"/>
-    <path d="M-64 336 C-60 332 -54 336 -56 342 C-57 346 -59 350 -60 354 C-70 352 -72 344 -64 336Z" fill="#fff3e6"/>
-    <ellipse cx="0" cy="388" rx="31" ry="28" fill="#f08a2e"/>
-    <ellipse cx="0" cy="394" rx="16" ry="20" fill="#fff3e6"/>
-    <ellipse cx="-13" cy="413" rx="9" ry="5" fill="#4a2a1c"/><ellipse cx="13" cy="413" rx="9" ry="5" fill="#4a2a1c"/>
-    <g transform="rotate(-6 0 332)">
-      <path d="M-30 318 L-34 280 L-10 304Z" fill="#f08a2e"/><path d="M-27 312 L-29 289 L-15 304Z" fill="#ffd9b0"/><path d="M-34 280 L-32 290 L-25 288Z" fill="#3a2418"/>
-      <path d="M30 318 L34 280 L10 304Z" fill="#f08a2e"/><path d="M27 312 L29 289 L15 304Z" fill="#ffd9b0"/><path d="M34 280 L32 290 L25 288Z" fill="#3a2418"/>
-      <path d="M-33 332 Q-33 303 0 303 Q33 303 33 332 Q33 354 0 364 Q-33 354 -33 332Z" fill="#f08a2e"/>
-      <path d="M-31 338 Q-18 352 0 347 Q18 352 31 338 Q26 360 0 366 Q-26 360 -31 338Z" fill="#fff3e6"/>
-      <ellipse cx="-13" cy="330" rx="4.6" ry="6.2" fill="#2a1a14"/><ellipse cx="13" cy="330" rx="4.6" ry="6.2" fill="#2a1a14"/>
-      <circle cx="-11.5" cy="327.5" r="1.8" fill="#fff"/><circle cx="14.5" cy="327.5" r="1.8" fill="#fff"/>
-      <circle cx="-22" cy="342" r="4" fill="#ff8fb0" opacity=".5"/><circle cx="22" cy="342" r="4" fill="#ff8fb0" opacity=".5"/>
-      <ellipse cx="0" cy="350" rx="5" ry="3.6" fill="#2a1a14"/>
-      <path d="M-6 355 Q0 361 6 355" fill="none" stroke="#2a1a14" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- Bulle : le test de la pilote -->
+  <path d="M206 212 L270 276 L234 212Z" fill="#fff"/>
+  <rect x="114" y="160" width="124" height="52" rx="16" fill="#fff"/>
+  <text x="176" y="195" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="24" font-weight="800" fill="#1a1a2e">2 + 3 = ?</text>
+
+  <!-- Personnages (fox-full.svg et rabbit-full.svg, réduits à 36 %) -->
+  <g id="fox" transform="translate(13.6 209) scale(.36)">
+    <defs>
+    <path id="foxf-tail-shape" d="M190 520 C120 540 40 500 36 410 C34 350 70 316 104 316 C84 350 96 396 140 430 C166 450 188 456 204 462Z"/>
+    <clipPath id="foxf-tail-clip"><use href="#foxf-tail-shape"/></clipPath>
+    <g id="foxf-shoe">
+      <path d="M192 688 H238 L240 716 C240 730 232 738 218 738 H178 C164 738 160 728 168 720 C182 708 190 704 192 688Z" fill="#f4f6ff"/>
+      <path d="M166 728 H240 V740 C240 744 236 747 232 747 H172 C164 747 160 738 166 728Z" fill="#aab2d4"/>
+      <path d="M176 716 C190 712 204 714 214 722" fill="none" stroke="#f2b134" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <ellipse id="foxf-shadow" cx="240" cy="745" rx="106" ry="10" fill="#1a1a2e" opacity=".16"/>
+
+  <!-- queue touffue, bout crème -->
+  <g id="foxf-tail">
+    <use href="#foxf-tail-shape" fill="#ff6212"/>
+    <path d="M0 300 H140 V372 L0 424Z" fill="#fde8cf" clip-path="url(#foxf-tail-clip)"/>
+  </g>
+
+  <!-- jambes et baskets -->
+  <g id="foxf-legs">
+    <path d="M180 496 H240 L232 690 H196Z" fill="#2b3270"/>
+    <path d="M300 496 H240 L248 690 H284Z" fill="#2b3270"/>
+    <rect x="193" y="668" width="41" height="22" rx="6" fill="#444fa0"/>
+    <rect x="246" y="668" width="41" height="22" rx="6" fill="#444fa0"/>
+    <use href="#foxf-shoe"/>
+    <use href="#foxf-shoe" transform="translate(480 0) scale(-1 1)"/>
+  </g>
+
+  <!-- bras gauche : détendu -->
+  <g id="foxf-arm-l">
+    <path d="M182 356 C162 398 156 446 160 492" fill="none" stroke="#4655c9" stroke-width="26" stroke-linecap="round"/>
+    <ellipse cx="160" cy="492" rx="15" ry="7" fill="#3340a8"/>
+    <ellipse cx="160" cy="514" rx="12" ry="18" fill="#ff6212"/>
+    <ellipse cx="173" cy="504" rx="4.5" ry="10" fill="#ff6212" transform="rotate(-18 173 504)"/>
+  </g>
+
+  <!-- cou, torse (sweat), sangles du sac à dos -->
+  <g id="foxf-torso">
+    <path d="M222 296 H258 V346 H222Z" fill="#ff6212"/>
+    <path d="M176 340 C198 326 282 326 304 340 L308 402 C310 440 302 472 300 508 L180 508 C178 472 170 440 172 402Z" fill="#4655c9"/>
+    <path d="M180 496 H300 V508 H180Z" fill="#3340a8"/>
+    <path d="M210 326 L270 326 L240 372Z" fill="#fde8cf"/>
+    <path d="M204 328 L240 382 L276 328" fill="none" stroke="#3340a8" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+    <g fill="none" stroke="#dfe3ff" stroke-width="4" stroke-linecap="round"><path d="M228 384 L226 420"/><path d="M252 384 L254 420"/></g>
+    <g fill="none" stroke="#f2b134" stroke-width="15" stroke-linecap="round"><path d="M200 340 C196 380 196 420 199 452"/><path d="M280 340 C284 380 284 420 281 452"/></g>
+    <path d="M200 396 H280" fill="none" stroke="#d99a1f" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- bras droit : main sur la sangle -->
+  <g id="foxf-arm-r">
+    <path d="M298 358 C322 386 332 414 324 432 C318 444 308 446 300 442" fill="none" stroke="#4655c9" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="296" cy="438" rx="13" ry="11" fill="#ff6212"/>
+    <ellipse cx="289" cy="427" rx="4.5" ry="9" fill="#ff6212" transform="rotate(14 289 427)"/>
+  </g>
+
+  <g id="foxf-head" transform="translate(132.5 98) scale(.42)">
+    <defs>
+    <path id="foxf-head-shape" d="M92 22 C90 70 90 110 84 160 C74 250 58 322 40 372 C84 398 134 424 192 436 L256 446 L320 436 C378 424 428 398 472 372 C454 322 438 250 428 160 C422 110 422 70 420 22 L312 132 C292 118 274 112 256 112 C238 112 220 118 200 132Z"/>
+    <clipPath id="foxf-clip"><use href="#foxf-head-shape"/></clipPath>
+  </defs>
+
+  <g id="foxf-head">
+    <use href="#foxf-head-shape" fill="#ff6212"/>
+    <!-- intérieur des oreilles (le long de l'axe de l'oreille) -->
+    <g id="foxf-ear-inner" fill="#ff9211">
+      <ellipse cx="126" cy="98" rx="21" ry="50" transform="rotate(-24 126 98)"/>
+      <ellipse cx="386" cy="98" rx="21" ry="50" transform="rotate(24 386 98)"/>
+    </g>
+    <!-- bouts d'oreilles (découpés dans la forme de la tête) -->
+    <g id="foxf-ear-tips" clip-path="url(#foxf-clip)" fill="#575b5e">
+      <path d="M40 0 H200 L166 52 L70 84Z"/>
+      <path d="M472 0 H312 L346 52 L442 84Z"/>
     </g>
   </g>
 
-  <!-- La lapine extraterrestre -->
-  <g transform="translate(300 0)">
-    <ellipse cx="0" cy="410" rx="38" ry="5" fill="#0b1a14" opacity=".35"/>
-    <ellipse cx="-12" cy="405" rx="11" ry="5.5" fill="#e4dbf7"/><ellipse cx="12" cy="405" rx="11" ry="5.5" fill="#e4dbf7"/>
-    <ellipse cx="0" cy="376" rx="29" ry="33" fill="#7280f0"/>
-    <path d="M-28 382 Q0 394 28 382" fill="none" stroke="#aab4ff" stroke-width="3"/>
-    <path d="M0 357 L1.76 361.57 L6.66 361.84 L2.85 364.93 L4.11 369.66 L0 367 L-4.11 369.66 L-2.85 364.93 L-6.66 361.84 L-1.76 361.57Z" fill="#fbbf24"/>
-    <path d="M-26 360 Q-44 352 -48 332" fill="none" stroke="#7280f0" stroke-width="11" stroke-linecap="round"/>
-    <circle cx="-48" cy="330" r="6.5" fill="#f4efff"/>
-    <path d="M26 364 Q40 376 40 392" fill="none" stroke="#7280f0" stroke-width="11" stroke-linecap="round"/>
-    <path d="M36 372 A6 6 0 1 1 45 372" fill="none" stroke="#aeb6d4" stroke-width="4" stroke-linecap="round"/>
-    <path d="M40.5 374 L40.5 408" stroke="#aeb6d4" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="40" cy="394" r="6" fill="#f4efff"/>
-    <g transform="rotate(-14 -19 276)"><ellipse cx="-19" cy="276" rx="9" ry="31" fill="#f4efff"/><ellipse cx="-19" cy="278" rx="4.5" ry="23" fill="#ffb8d6"/></g>
-    <g transform="rotate(14 19 276)"><ellipse cx="19" cy="276" rx="9" ry="31" fill="#f4efff"/><ellipse cx="19" cy="278" rx="4.5" ry="23" fill="#ffb8d6"/></g>
-    <circle cx="0" cy="322" r="27" fill="#f4efff"/>
-    <ellipse cx="0" cy="347" rx="17" ry="5" fill="#e9edff"/>
-    <ellipse cx="-10" cy="322" rx="5" ry="7" fill="#231a4a"/><ellipse cx="10" cy="322" rx="5" ry="7" fill="#231a4a"/>
-    <circle cx="-8.5" cy="319.5" r="2" fill="#fff"/><circle cx="11.5" cy="319.5" r="2" fill="#fff"/>
-    <circle cx="-11.5" cy="325" r="1" fill="#fff"/><circle cx="8.5" cy="325" r="1" fill="#fff"/>
-    <circle cx="-17" cy="331" r="4.2" fill="#ff9ec4" opacity=".55"/><circle cx="17" cy="331" r="4.2" fill="#ff9ec4" opacity=".55"/>
-    <path d="M-3 331 L3 331 L0 335Z" fill="#ff8fb7"/>
-    <path d="M-6 337 Q-3 341 0 337 Q3 341 6 337" fill="none" stroke="#5a3a7a" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- joues grises + traits blancs -->
+  <g id="foxf-cheeks">
+    <path d="M20 370 C90 358 160 372 232 408 L232 484 C150 468 70 430 20 370Z" fill="#dedede"/>
+    <path d="M492 370 C422 358 352 372 280 408 L280 484 C362 468 442 430 492 370Z" fill="#dedede"/>
+    <g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".9">
+      <path d="M64 394 C98 390 134 398 160 412"/><path d="M92 424 C120 422 146 430 168 444"/>
+      <path d="M448 394 C414 390 378 398 352 412"/><path d="M420 424 C392 422 366 430 344 444"/>
+    </g>
+  </g>
+
+  <!-- museau -->
+  <path id="foxf-muzzle" d="M200 392 C200 440 212 480 234 502 C246 514 266 514 278 502 C300 480 312 440 312 392 C312 372 292 364 256 364 C220 364 200 372 200 392Z" fill="#fde8cf"/>
+
+  <g id="foxf-eyes" fill="#2d2927">
+    <ellipse cx="178" cy="282" rx="24" ry="31"/><ellipse cx="334" cy="282" rx="24" ry="31"/>
+    <g fill="#fff"><ellipse cx="169" cy="268" rx="8.5" ry="11"/><circle cx="191" cy="300" r="4"/>
+       <ellipse cx="325" cy="268" rx="8.5" ry="11"/><circle cx="347" cy="300" r="4"/></g>
+  </g>
+
+  <path id="foxf-nose" d="M218 398 C218 384 232 378 256 378 C280 378 294 384 294 398 C294 416 274 432 256 436 C238 432 218 416 218 398Z" fill="#2d2927"/>
+  <g id="foxf-mouth" fill="none" stroke="#4a4747" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 436 L256 458"/>
+    <path d="M234 458 C242 471 254 469 256 458 C258 469 270 471 278 458"/>
+  </g>
+  </g>
+  </g>
+  <g id="rabbit" transform="translate(181.6 209) scale(.36)">
+    <defs>
+    <g id="rbf-boot">
+      <path d="M204 674 H240 L238 716 C238 728 232 736 222 736 H190 C180 736 176 728 182 722 C192 712 204 708 204 674Z" fill="#4b5174"/>
+      <path d="M178 728 H240 V738 C240 742 236 745 232 745 H184 C177 745 174 736 178 728Z" fill="#8a90b4"/>
+      <rect x="204" y="674" width="36" height="8" fill="#6b739c"/>
+    </g>
+  </defs>
+
+  <ellipse id="rbf-shadow" cx="240" cy="745" rx="96" ry="10" fill="#1a1a2e" opacity=".16"/>
+
+  <!-- jambes et bottes -->
+  <g id="rbf-legs">
+    <path d="M186 520 H240 L234 692 H204Z" fill="#c9d2f5"/>
+    <path d="M294 520 H240 L246 692 H276Z" fill="#c9d2f5"/>
+    <g fill="none" stroke="#ff6b9d" stroke-width="7" stroke-linecap="round"><path d="M193 534 L207 672"/><path d="M287 534 L273 672"/></g>
+    <use href="#rbf-boot"/>
+    <use href="#rbf-boot" transform="translate(480 0) scale(-1 1)"/>
+  </g>
+
+  <!-- bras qui salue -->
+  <g id="rbf-arm-wave">
+    <path d="M292 382 C322 394 338 374 346 348" fill="none" stroke="#c9d2f5" stroke-width="30" stroke-linecap="round"/>
+    <path d="M338 358 L354 362" stroke="#ff6b9d" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="349" cy="330" r="16" fill="#fff"/>
+    <g fill="#fff"><ellipse cx="341" cy="314" rx="5" ry="9"/><ellipse cx="350" cy="311" rx="5" ry="10"/><ellipse cx="359" cy="315" rx="5" ry="9"/><ellipse cx="335" cy="333" rx="5" ry="9" transform="rotate(-30 335 333)"/></g>
+  </g>
+
+  <!-- torse -->
+  <g id="rbf-torso">
+    <path d="M184 374 C206 362 274 362 296 374 L298 430 C297 462 300 496 304 526 L176 526 C180 496 183 462 182 430Z" fill="#c9d2f5"/>
+    <path d="M184 374 C206 362 274 362 296 374 L292 398 C270 386 210 386 188 398Z" fill="#9aa6e6"/>
+    <g id="rbf-pilot-badge" transform="translate(240 428)" fill="#fbbf24">
+      <path d="M-11 0 C-18 -6 -28 -7 -36 -3 C-30 -2 -26 0 -24 3 C-29 2 -33 4 -35 8 C-28 9 -18 8 -11 4Z"/>
+      <path d="M11 0 C18 -6 28 -7 36 -3 C30 -2 26 0 24 3 C29 2 33 4 35 8 C28 9 18 8 11 4Z"/>
+      <path transform="translate(0 1) scale(1.6)" d="M0 -7 L1.76 -2.43 L6.66 -2.16 L2.85 .93 L4.11 5.66 L0 3 L-4.11 5.66 L-2.85 .93 L-6.66 -2.16 L-1.76 -2.43Z"/>
+    </g>
+    <rect x="180" y="482" width="120" height="14" rx="6" fill="#4b5174"/>
+    <rect x="230" y="479" width="20" height="20" rx="4" fill="#fbbf24"/>
+    <ellipse cx="240" cy="366" rx="34" ry="10" fill="#fff"/>
+    <path d="M208 368 C226 380 254 380 272 368" fill="none" stroke="#ff6b9d" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- bras gauche : la clé à molette -->
+  <g id="rbf-arm-wrench">
+    <rect x="166" y="500" width="8" height="86" rx="4" fill="#aeb6d4"/>
+    <path d="M160 602 A12 12 0 1 1 180 602" fill="none" stroke="#aeb6d4" stroke-width="7" stroke-linecap="round"/>
+    <path d="M188 380 C168 420 164 460 170 494" fill="none" stroke="#c9d2f5" stroke-width="30" stroke-linecap="round"/>
+    <path d="M160 482 L182 486" stroke="#ff6b9d" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="170" cy="508" r="15" fill="#fff"/>
+  </g>
+
+  <g id="rbf-head" transform="translate(106.9 95.8) scale(.52)">
+    <!-- tête + oreilles -->
+  <path id="rbf-head" fill="#b5c1c6" d="M256 210 C250 150 238 80 222 40 C214 18 196 10 178 10 C150 10 128 34 124 74 C120 130 134 190 132 240 C130 292 92 332 92 394 C92 472 166 504 256 504 C346 504 420 472 420 394 C420 332 382 292 380 240 C378 190 392 130 388 74 C384 34 362 10 334 10 C316 10 298 18 290 40 C274 80 262 150 256 210Z"/>
+  <g id="rbf-ear-inner" fill="#fba9a9">
+    <path d="M178 52 C160 70 150 120 154 170 C156 192 166 204 178 204 C192 204 202 176 200 130 C198 86 190 58 178 52Z"/>
+    <path d="M334 52 C352 70 362 120 358 170 C356 192 346 204 334 204 C320 204 310 176 312 130 C314 86 322 58 334 52Z"/>
+  </g>
+
+  <!-- liseré blanc qui s'élargit en museau -->
+  <path id="rbf-blaze" fill="#fff" d="M240 222 C240 214 246 210 256 210 C266 210 272 214 272 222 L274 304 C274 316 288 326 312 344 C348 370 360 410 348 448 C336 482 296 494 256 494 C216 494 176 482 164 448 C152 410 164 370 200 344 C224 326 238 316 238 304Z"/>
+
+  <g id="rbf-eyes" fill="#2d2927">
+    <ellipse cx="184" cy="298" rx="17" ry="28"/><ellipse cx="328" cy="298" rx="17" ry="28"/>
+    <g fill="#7b7b7b"><ellipse cx="178" cy="287" rx="5" ry="8"/><ellipse cx="322" cy="287" rx="5" ry="8"/></g>
+  </g>
+
+  <g id="rbf-whiskers" fill="none" stroke="#858585" stroke-width="9" stroke-linecap="round">
+    <path d="M126 400 C106 396 84 394 62 396"/><path d="M124 424 C102 426 80 428 58 432"/><path d="M130 448 C114 456 94 464 78 474"/>
+    <path d="M386 400 C406 396 428 394 450 396"/><path d="M388 424 C410 426 432 428 454 432"/><path d="M382 448 C398 456 418 464 434 474"/>
+  </g>
+
+  <!-- truffe en « Y », sourire et dents du bonheur -->
+  <g id="rbf-mouth">
+    <path d="M236 376 C242 388 250 394 256 394 C262 394 270 388 276 376" fill="none" stroke="#2d2927" stroke-width="11" stroke-linecap="round"/>
+    <path d="M256 394 L256 412" stroke="#2d2927" stroke-width="10" stroke-linecap="round"/>
+    <path d="M232 414 C240 430 252 430 256 416 C260 430 272 430 280 414" fill="none" stroke="#2d2927" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="240" y="430" width="32" height="34" rx="9" fill="#ffe3b3"/>
+    <path d="M256 434 V462" stroke="#f3cf93" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  </g>
   </g>
 </svg>
