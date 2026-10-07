@@ -216,6 +216,9 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .dot.current { background: var(--color-primary); transform: scale(1.3); }
 
 .question { font-size: var(--font-size-3xl); font-weight: 800; text-align: center; margin-top: var(--spacing-md); }
+.review-tag { text-align: center; margin-top: var(--spacing-md); font-size: var(--font-size-sm); font-weight: 600; color: var(--color-primary); }
+.review-tag + .question { margin-top: var(--spacing-xs); }
+.cleared { color: var(--color-success-text); animation: planetAppear var(--duration-slow) var(--easing-out); }
 
 .choices { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); width: 100%; max-width: 360px; }
 .choice { min-height: 72px; font-size: var(--font-size-2xl); font-weight: 800; background: var(--color-surface); color: var(--color-text); border-color: var(--color-border); box-shadow: var(--shadow-md); }

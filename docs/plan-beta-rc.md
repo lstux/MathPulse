@@ -24,7 +24,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 |---|---|---|
 | Mise en ligne | ✅ Workflow Pages écrit (déploie après les tests) ; reste à activer *Settings → Pages → Source : GitHub Actions*, tester l'adresse réelle sur téléphone, afficher la version dans l'espace parent | S |
 | Intégration continue | ✅ Écrit (`ci-pages.yml` : tests unitaires + smoke à chaque push et PR) ; à valider au premier passage | S |
-| Réapparition des erreurs | Mémoriser les opérations ratées (clé `7×5`) ; en réinjecter 1 à 2 par session suivante jusqu'à 2 réussites consécutives | M |
+| Réapparition des erreurs | ✅ **Fait** (7 oct.) : opérations ratées mémorisées, 2 max réinjectées par session (questions 2 et 4) jusqu'à 2 réussites consécutives ; 8 tests unitaires + parcours navigateur | — |
 | Mélange des notions | Sessions à 60 % compétence ciblée / 40 % rappel de notions déjà vues (Q8) | M |
 | Maîtrise plus juste | Fenêtre glissante de 20 réponses (Q3) ; coups de pouce : ✅ **fait** (Q1) | M (fenêtre glissante restante) |
 | Pavé numérique | ✅ **Fait** (le 6 oct.) : grandes touches, ⌫, ✓, clavier physique | — |
@@ -32,7 +32,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 
 **Critères de sortie :**
 - [ ] Tests unitaires et smoke verts en CI sur chaque push.
-- [ ] Une erreur réapparaît bien dans la session suivante (test automatique).
+- [x] Une erreur réapparaît bien dans la session suivante (test automatique : unitaire + navigateur).
 - [ ] Application accessible en ligne et installable sur au moins un Android.
 - [x] Q1, Q2, Q4, Q5, Q6 tranchées (6 oct.) et consignées dans `revue-mvp.md`.
 
@@ -112,5 +112,5 @@ Utilisation normale par les enfants testeurs, sans aucune nouvelle fonctionnalit
 ## Premières actions (dès validation du plan)
 
 1. Activer GitHub Pages (*Source : GitHub Actions*) et vérifier l'adresse sur un téléphone.
-2. Implémenter la réapparition des erreurs (le plus gros manque pédagogique).
+2. ✅ Réapparition des erreurs (fait).
 3. Maîtrise sur les 20 dernières réponses, puis mélange des notions.

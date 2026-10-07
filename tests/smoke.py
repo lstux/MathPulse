@@ -69,6 +69,35 @@ with sync_playwright() as p:
         assert pg.locator('.result-card').count(), 'écran de résultat attendu'
         if session < 2: pg.click('#btn-again'); pg.wait_for_timeout(300)
 
+    # Réapparition des erreurs : un calcul raté revient (étiqueté) aux deux sessions suivantes, puis est acquis
+    def play_session(wrong_first=False):
+        seen = []
+        if pg.locator('#btn-start-game').count(): pg.click('#btn-start-game')
+        for i in range(5):
+            q = pg.inner_text('#question')
+            seen.append((q, pg.locator('#review-tag').count() == 1))
+            ans = solve(q)
+            wrong = wrong_first and i == 0
+            if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')
+            else:
+                for d in str(ans + 1 if wrong else ans): pg.click(f'.key[data-key="{d}"]')
+                pg.click('.key[data-key="ok"]')
+            if wrong: pg.click('#btn-continue'); pg.wait_for_timeout(200)
+            else: pg.wait_for_timeout(1400)
+        assert pg.locator('.result-card').count(), 'écran de résultat attendu'
+        return seen
+
+    pg.click('#btn-again'); pg.wait_for_timeout(300)
+    missed = play_session(wrong_first=True)[0][0]
+    pending = pg.evaluate('window.mathpulse.progression.getPendingErrors().length')
+    assert pending == 1, f'1 erreur mémorisée attendue ({pending})'
+    for round_ in (1, 2):
+        pg.click('#btn-again'); pg.wait_for_timeout(300)
+        seen = play_session()
+        assert seen.count((missed, True)) == 1, f'« {missed} » doit revenir étiqueté (passage {round_}) : {seen}'
+    assert pg.locator('.cleared').count() == 1, 'message « calcul acquis » attendu après 2 réussites'
+    assert pg.evaluate('window.mathpulse.progression.getPendingErrors().length') == 0, "l'erreur doit être acquise"
+
     stars = pg.evaluate('window.mathpulse.progression.getTotalStars()')
     assert stars >= 5, f'étoiles non créditées ({stars})'
     pg.wait_for_timeout(800)

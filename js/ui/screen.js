@@ -129,6 +129,7 @@ class ScreenManager {
                 <div class="dots" aria-label="Question ${s.currentIndex + 1} sur ${s.exercises.length}">${dots}</div>
                 <span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
             </div>
+            ${ex.review ? '<p class="review-tag" id="review-tag">🔁 Un calcul à retenter</p>' : ''}
             <div class="question" id="question">${ex.question}</div>
             <div id="visual-slot"></div>
             ${answerArea}
@@ -227,7 +228,7 @@ class ScreenManager {
     // ---------- Résultat ----------
     createResultScreen(summary) {
         const screen = this.screenEl();
-        const { correct, total, starsEarned, newPlanets, skill, capped } = summary;
+        const { correct, total, starsEarned, newPlanets, skill, capped, cleared } = summary;
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
         const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
         screen.innerHTML = `
@@ -239,6 +240,7 @@ class ScreenManager {
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
                     ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
+                    ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
                     ${planets}
                 </div>
             </div>
@@ -268,11 +270,18 @@ class ScreenManager {
         const recent = history.slice(-5).reverse().map(h =>
             `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill} · ${h.correct}/${h.total}</li>`).join('');
 
+        const pending = this.progression.getPendingErrors();
+        const toReview = pending.length
+            ? `<h2 class="text-lg font-bold mb-md">Calculs à revoir</h2>
+               <p class="muted mb-md" id="review-list">${pending.map(e => `${e.operands[0]} ${SKILLS[e.skill].operation} ${e.operands[1]}`).join(', ')}</p>`
+            : '';
+
         screen.innerHTML = `
             <div class="parent-wrap">
                 <h1 class="text-2xl font-bold mb-md">Progression</h1>
                 <p class="mb-lg">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
                 <div class="flex flex-col gap-md mb-lg">${cards}</div>
+                ${toReview}
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
                 <div class="flex flex-col gap-md">

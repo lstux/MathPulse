@@ -34,7 +34,7 @@ _Revue du 6 octobre 2026, réalisée en exécutant l'application (Chromium headl
 
 | Prévu dans la spec | État |
 |---|---|
-| Réapparition des erreurs plus tard (§12, §14, §27) | **Non implémenté** : une erreur n'influence pas les sessions suivantes. |
+| Réapparition des erreurs plus tard (§12, §14, §27) | ✅ **Fait** (7 oct.) : un calcul raté revient en question 2 et/ou 4 des sessions suivantes (2 max par session, même si la compétence du jour est autre) jusqu'à 2 réussites consécutives sans coup de pouce ; liste « Calculs à revoir » côté parent. Réglages : `REVIEW` dans `skills.js`. |
 | Mélange et rappel des anciennes notions (§13) | **Non implémenté** : une session = une compétence (celle de maîtrise la plus basse, en rotation). |
 | Série rapide (jeu MVP, §27) ; opération manquante, memory, classement (§9) | Non implémenté (hors périmètre « 3 compétences » choisi). |
 | Contenu MVP : soustraction, ×10, nombres jusqu'à 100 (§27) | Non implémenté : seules additions, ×2, ×5 (choix « option B »). |

@@ -11,6 +11,7 @@ class Session {
         this.questionStart = null;
         this.questionHint = null;     // {free: bool} si un coup de pouce a été pris sur la question courante
         this.hintsUsed = 0;
+        this.cleared = 0;
         this.completed = false;
         this.summary = null;
     }
@@ -18,6 +19,8 @@ class Session {
     start() {
         this.skill = this.engine.selectSkillForSession();
         this.exercises = this.engine.generateSession(this.skill);
+        this.progression.markAsked(this.exercises.filter(e => e.review).map(e => e.key));
+        this.cleared = 0;
         this.currentIndex = 0;
         this.results = [];
         this.hintsUsed = 0;
@@ -65,8 +68,11 @@ class Session {
             key: exercise.key, question: exercise.question, answer: String(answer),
             correct, time_ms: timeMs, hinted: !!hint, countedForMastery
         });
-        if (countedForMastery) this.progression.recordAnswer(this.skill, correct, timeMs);
-        return { correct, answer: exercise.answer, countedForMastery };
+        // La maîtrise va à la compétence de l'exercice (un calcul à revoir peut venir d'une autre compétence)
+        if (countedForMastery) this.progression.recordAnswer(exercise.skill, correct, timeMs);
+        const reviewOutcome = this.progression.noteResult(exercise, correct, !!hint);
+        if (reviewOutcome === 'cleared') this.cleared++;
+        return { correct, answer: exercise.answer, countedForMastery, reviewOutcome };
     }
 
     next() {
@@ -92,6 +98,7 @@ class Session {
         this.summary = {
             skill: this.skill, correct, total, starsEarned,
             hintsUsed: this.hintsUsed, capped,
+            reviewed: this.exercises.filter(e => e.review).length, cleared: this.cleared,
             totalStars: after, newPlanets,
             avgTime: total ? this.results.reduce((s, r) => s + r.time_ms, 0) / total : 0
         };
