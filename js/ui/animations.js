@@ -33,6 +33,14 @@ const Animations = {
         return `<div class="visual visual-tens" role="img" aria-label="${n} paquets de 10">${bars}</div>`;
     },
 
+    // Tableau de points : `rows` lignes de `cols` points. Les deux premières lignes forment « le double »,
+    // le reste est coloré autrement (×3 : double + 1 ligne ; ×4 : double + double). On lit a × n ou n × a.
+    table(cols, rows) {
+        const lines = Array.from({ length: rows }, (_, r) =>
+            `<div class="dot-row ${r < 2 ? 'dbl-1' : 'dbl-2'}" style="animation-delay:${r * 160}ms">${Array.from({ length: cols }, () => '<span class="dot-item"></span>').join('')}</div>`).join('');
+        return `<div class="visual visual-array" role="img" aria-label="${rows} lignes de ${cols} points : ${cols} × ${rows} = ${cols * rows}">${lines}</div>`;
+    },
+
     // `groupCount` groupes de `perGroup` objets
     groups(groupCount, perGroup, item = '🍎') {
         const groups = Array.from({ length: groupCount }, (_, g) => `
@@ -48,6 +56,7 @@ const Animations = {
         if (exercise.operation === '+') return this.blocks(a, b);
         if (exercise.operation === '−') return this.takeAway(a, b);
         if (b === 10) return this.tens(a);
+        if (b === 3 || b === 4) return this.table(a, b);
         if (b === 2) return this.groups(2, a);      // doubler : 2 groupes identiques
         return this.groups(a, b);
     }

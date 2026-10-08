@@ -48,7 +48,7 @@ class Progression {
         // Fenêtre glissante : c'est elle qui décide de la maîtrise
         skill.recent.push({ c: correct ? 1 : 0, t });
         if (skill.recent.length > MASTERY.window) skill.recent.splice(0, skill.recent.length - MASTERY.window);
-        skill.mastery_level = this.computeMastery(skill);
+        skill.mastery_level = this.computeMastery(skill, skillId);
 
         this.save();
         return skill;
@@ -74,10 +74,11 @@ class Progression {
         };
     }
 
-    computeMastery(skill) {
+    computeMastery(skill, skillId) {
         const w = this.windowStats(skill);
         const l3 = MASTERY.level3, l2 = MASTERY.level2;
-        if (w.n >= l3.minSeen && w.accuracy >= l3.minAccuracy && w.avgMs <= l3.maxAvgMs) return 3;
+        const maxAvgMs = (SKILLS[skillId] && SKILLS[skillId].maxAvgMs) || l3.maxAvgMs;   // seuil propre à la compétence, sinon général
+        if (w.n >= l3.minSeen && w.accuracy >= l3.minAccuracy && w.avgMs <= maxAvgMs) return 3;
         if (w.n >= l2.minSeen && w.accuracy >= l2.minAccuracy) return 2;
         return 1;
     }

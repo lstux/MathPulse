@@ -114,15 +114,13 @@ class Engine {
     }
 
     generateExercise(skillId, type = 'numeric') {
+        const skill = SKILLS[skillId];
+        if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
         let a, b;
-        switch (skillId) {
-            case 'addition-simple': a = this.randInt(1, 9); b = this.randInt(1, 9); break;
-            case 'multiply-2': a = this.randInt(1, 10); b = 2; break;
-            case 'multiply-5': a = this.randInt(1, 10); b = 5; break;
-            case 'multiply-10': a = this.randInt(1, 10); b = 10; break;
-            case 'subtract-simple': a = this.randInt(3, 18); b = this.randInt(1, Math.min(9, a - 1)); break;   // reste toujours ≥ 1
-            default: throw new Error(`Compétence inconnue : ${skillId}`);
-        }
+        if (skill.factor) { a = this.randInt(1, 10); b = skill.factor; }          // table de multiplication : a × n
+        else if (skillId === 'addition-simple') { a = this.randInt(1, 9); b = this.randInt(1, 9); }
+        else if (skillId === 'subtract-simple') { a = this.randInt(3, 18); b = this.randInt(1, Math.min(9, a - 1)); }   // reste toujours ≥ 1
+        else throw new Error(`Compétence inconnue : ${skillId}`);
         return this.buildExercise(skillId, type, a, b);
     }
 
@@ -145,7 +143,7 @@ class Engine {
         } else if (type === 'multiple') {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;
-            ex.choices = this.makeChoices(total, op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-10, -5, 5, 10, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
+            ex.choices = this.makeChoices(total, op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
         } else {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;
@@ -173,6 +171,8 @@ class Engine {
         const [a, b] = exercise.operands;
         const t = exercise.total;
         if (exercise.operation === '+') return `${a} et ${b} font ${t} ensemble.`;
+        const custom = SKILLS[exercise.skill] && SKILLS[exercise.skill].explain;
+        if (custom) return custom(a, b, t);
         if (exercise.operation === '−') return `Si on enlève ${b} de ${a}, il en reste ${t}.`;
         if (b === 10) return `Multiplier par 10, c'est ajouter un zéro : ${a} × 10 = ${t}.`;
         if (b === 2) return `Le double de ${a}, c'est ${a} + ${a} = ${t}.`;

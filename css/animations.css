@@ -64,3 +64,10 @@
 .countdown.beat { animation: countBeat .9s var(--easing-out); }
 @keyframes countBeat { 0% { transform: scale(1.8); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 100% { transform: scale(.92); opacity: 1; } }
 .replay-list { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+
+/* Tableau de points (×3, ×4) : a colonnes × n lignes, le « double » en bleu puis le reste en violet */
+.visual-array { display: flex; flex-direction: column; align-items: center; gap: .35rem; }
+.dot-row { display: flex; gap: .35rem; animation: groupAppear var(--duration-base) var(--easing-out) backwards; }
+.dot-item { width: 1.15rem; height: 1.15rem; border-radius: 50%; }
+.dbl-1 .dot-item { background: var(--color-space-blue); }
+.dbl-2 .dot-item { background: var(--color-space-purple); }

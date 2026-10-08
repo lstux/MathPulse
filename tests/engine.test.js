@@ -497,3 +497,35 @@ test('série rapide: seules les 2 premières séries du jour rapportent des éto
     }
     assert.deepStrictEqual(stars, [2, 2, 0, 0]);
 });
+
+test('tables ×3 et ×4: a × n avec a de 1 à 10, explication « double », QCM sur les résultats voisins', () => {
+    const { engine } = setup();
+    for (const [id, n] of [['multiply-3', 3], ['multiply-4', 4]]) {
+        const seen = new Set();
+        for (let k = 0; k < 400; k++) for (const ex of engine.generateSession(id)) {
+            assert.strictEqual(ex.operands[1], n);
+            assert.ok(ex.operands[0] >= 1 && ex.operands[0] <= 10);
+            assert.strictEqual(ex.total, ex.operands[0] * n);
+            seen.add(ex.operands[0]);
+            if (ex.type === 'multiple') assert.ok(ex.choices.length === 4 && ex.choices.includes(ex.total));
+        }
+        assert.strictEqual(seen.size, 10, `${id}: tous les facteurs de 1 à 10 sont tirés`);
+    }
+    assert.match(engine.getExplanation({ skill: 'multiply-3', operation: '×', operands: [7, 3], total: 21 }), /double de 7, c'est 14, et encore 7 de plus, ça fait 21/);
+    assert.match(engine.getExplanation({ skill: 'multiply-4', operation: '×', operands: [7, 4], total: 28 }), /double de 7, c'est 14, et le double de 14, c'est 28/);
+});
+
+test('tables ×3 et ×4: débloquées par ×2 niveau 2 ; seuil de temps propre à une compétence', () => {
+    const { engine, progression } = setup();
+    assert.ok(!engine.isUnlocked('multiply-3') && !engine.isUnlocked('multiply-4'));
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    assert.ok(engine.isUnlocked('multiply-3') && engine.isUnlocked('multiply-4'));
+    // seuil spécifique : avec maxAvgMs = 3000 sur une compétence, 4 s de moyenne ne donne que le niveau 2
+    SKILLS['multiply-4'].maxAvgMs = 3000;
+    try {
+        for (let i = 0; i < 6; i++) progression.recordAnswer('multiply-4', true, 4000);
+        assert.strictEqual(progression.getMasteryLevel('multiply-4'), 2);
+    } finally { delete SKILLS['multiply-4'].maxAvgMs; }
+    for (let i = 0; i < 6; i++) progression.recordAnswer('multiply-3', true, 4000);
+    assert.strictEqual(progression.getMasteryLevel('multiply-3'), 3, 'seuil général (5 s) : 4 s suffit');
+});

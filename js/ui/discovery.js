@@ -22,6 +22,16 @@ const Discovery = {
             visual: () => Animations.groups(2, 3),
             text: 'Le double de 3, c\'est 6', formula: '3 × 2 = 6'
         },
+        'multiply-3': {
+            title: 'Les paquets de 3 !',
+            visual: () => Animations.table(4, 3),
+            text: '4 × 3 : le double de 4 (en bleu) plus encore 4 (en violet)', formula: '4 × 3 = 8 + 4 = 12'
+        },
+        'multiply-4': {
+            title: 'Doubler deux fois !',
+            visual: () => Animations.table(3, 4),
+            text: '3 × 4 : le double de 3 (en bleu), puis encore le double (en violet)', formula: '3 × 4 = 6 + 6 = 12'
+        },
         'multiply-5': {
             title: 'Des groupes de 5 !',
             visual: () => Animations.groups(3, 5),

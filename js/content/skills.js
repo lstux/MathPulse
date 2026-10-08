@@ -26,6 +26,7 @@ const SKILLS = {
     },
     'multiply-2': {
         id: 'multiply-2',
+        factor: 2,   // table de multiplication : a × 2, a de 1 à 10
         name: '×2 (doubler)',
         title: 'Doubler',
         operation: '×',
@@ -34,6 +35,7 @@ const SKILLS = {
     },
     'multiply-10': {
         id: 'multiply-10',
+        factor: 10,   // table de multiplication : a × 10, a de 1 à 10
         name: '×10 (un zéro de plus)',
         title: 'Les paquets de 10',
         operation: '×',
@@ -41,8 +43,31 @@ const SKILLS = {
         requires: { skill: 'multiply-2', level: 2 },
         plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
     },
+    'multiply-3': {
+        id: 'multiply-3',
+        factor: 3,
+        name: '×3 (paquets de 3)',
+        title: 'Les paquets de 3',
+        operation: '×',
+        animation: 'table',
+        requires: { skill: 'multiply-2', level: 2 },
+        explain: (a, b, t) => `${a} × 3 : le double de ${a}, c'est ${2 * a}, et encore ${a} de plus, ça fait ${t}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    'multiply-4': {
+        id: 'multiply-4',
+        factor: 4,
+        name: '×4 (doubler deux fois)',
+        title: 'Doubler deux fois',
+        operation: '×',
+        animation: 'table',
+        requires: { skill: 'multiply-2', level: 2 },
+        explain: (a, b, t) => `${a} × 4 : le double de ${a}, c'est ${2 * a}, et le double de ${2 * a}, c'est ${t}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
     'multiply-5': {
         id: 'multiply-5',
+        factor: 5,   // table de multiplication : a × 5, a de 1 à 10
         name: '×5 (groupes de 5)',
         title: 'Les groupes de 5',
         operation: '×',
@@ -51,9 +76,9 @@ const SKILLS = {
     }
 };
 
-const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-5', 'multiply-10'];
+const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-10'];
 
-// Seuils de maîtrise (niveau 1 = vu, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
+// Seuils de maîtrise (niveau 1 = vu ; une compétence peut surcharger le temps avec `maxAvgMs` dans SKILLS, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
 const MASTERY = {
     level2: { minSeen: 3, minAccuracy: 70 },
     level3: { minSeen: 5, minAccuracy: 90, maxAvgMs: 5000 },  // temps de réflexion moyen (jusqu'au premier chiffre tapé),

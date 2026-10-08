@@ -105,7 +105,7 @@ Paliers alignés sur les attendus CE2, du plus simple au plus difficile :
 
 | Lot | Contenu | Taille | Quand |
 |---|---|---|---|
-| P1 | Voie A : **×3, ×4** (+ fabrique `makeTable`, seuils par compétence, tableau de points) | M | **dans la bêta** si on veut couvrir le CE2 |
+| P1 | Voie A : **×3, ×4** (+ générateur par `factor`, seuils par compétence `maxAvgMs`, tableau de points) | M | ✅ **fait** (v0.5.0) |
 | P2 | Voie A : ×9, ×6, ×8, ×7, tables mélangées | M | bêta ou 1.0 |
 | P3 | Voie B1 : ÷2, ÷5, ÷10 (opérateur `÷`, partage/groupement) | M | 1.0 ou 1.1 |
 | P4 | Voie B2–B3 : ÷3 à ÷9 | S | 1.1 |
