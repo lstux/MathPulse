@@ -26,6 +26,7 @@ class ScreenManager {
         const builders = {
             home: () => this.createHomeScreen(),
             universe: () => this.createUniverseScreen(),
+            rapidIntro: () => this.createRapidIntroScreen(),
             discovery: () => Discovery.create(data.skillId, () => this.show('game')),
             game: () => this.createGameScreen(),
             result: () => this.createResultScreen(data.summary),
@@ -54,7 +55,7 @@ class ScreenManager {
         const box = screen.querySelector('#mascot');
         if (!box) return;
         const img = box.querySelector('img');
-        img.src = `assets/story/expr/fox-${mood}.svg`;
+        img.src = `assets/story/expr/${this.session && this.session.rapid ? 'rabbit' : 'fox'}-${mood}.svg`;
         box.dataset.mood = mood;
         box.classList.remove('hop', 'tilt', 'nod');
         void box.offsetWidth; // relance l'animation
@@ -106,12 +107,53 @@ class ScreenManager {
             <div class="universe-wrap">${new Universe(this.progression).render()}</div>
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-start-session">C'est parti !</button>
+                ${this.engine.rapidAvailable() ? '<button class="btn-secondary" id="btn-rapid">⚡ Série rapide</button>' : ''}
                 <button class="btn-secondary" id="btn-back-home">Retour</button>
             </div>
         `;
         screen.querySelector('#btn-start-session').addEventListener('click', () => this.startSession());
+        const rapidBtn = screen.querySelector('#btn-rapid');
+        if (rapidBtn) rapidBtn.addEventListener('click', () => this.show('rapidIntro'));
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
         return screen;
+    }
+
+    startRapid() {
+        this.session = new Session(this.engine, this.progression);
+        this.session.start({ rapid: true });
+        Sound.play('start');
+        this.show('game');
+    }
+
+    // Écran de départ de la série rapide : la lapine explique, sans pression
+    createRapidIntroScreen() {
+        const screen = this.screenEl();
+        screen.innerHTML = `
+            <div class="text-center">
+                <div class="rabbit-says">
+                    ${this.face('rabbit', 'content')}
+                    <p class="speech">Teste tes réflexes !</p>
+                </div>
+                <h1 class="text-2xl font-bold mb-md">⚡ Série rapide</h1>
+                <p class="text-lg muted">5 calculs à la suite. Réponds à ton rythme : chaque réponse rapide charge l'élan de la fusée et peut rapporter des étoiles bonus.</p>
+            </div>
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-rapid-go">Décollage !</button>
+                <button class="btn-secondary" id="btn-back-universe">Retour</button>
+            </div>
+        `;
+        screen.querySelector('#btn-rapid-go').addEventListener('click', () => this.startRapid());
+        screen.querySelector('#btn-back-universe').addEventListener('click', () => this.show('universe'));
+        return screen;
+    }
+
+    // Jauge « élan de la fusée » : une case allumée par réponse rapide
+    elanGauge(fastFlags) {
+        const n = fastFlags.filter(Boolean).length;
+        return `<div class="elan" id="elan" role="img" aria-label="Élan de la fusée : ${n} sur ${RAPID.length}">
+            <span class="elan-label" aria-hidden="true">⚡</span>
+            ${Array.from({ length: RAPID.length }, (_, i) => `<span class="elan-cell${fastFlags[i] ? ' on' : ''}" data-i="${i}"></span>`).join('')}
+        </div>`;
     }
 
     startSession() {
@@ -162,13 +204,14 @@ class ScreenManager {
                 <div class="game-top-right"><span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
                 <button class="btn-sound" id="btn-sound"></button></div>
             </div>
-            <div class="mascot" id="mascot" data-mood="content">${this.face('fox', 'content')}</div>
+            <div class="mascot" id="mascot" data-mood="content">${this.face(s.rapid ? 'rabbit' : 'fox', 'content')}</div>
+            ${s.rapid ? this.elanGauge(s.results.map(r => r.fast)) : ''}
             ${ex.review ? '<p class="review-tag" id="review-tag">🔁 Un calcul à retenter</p>' : ''}
             ${ex.recall ? '<p class="review-tag" id="recall-tag">🔙 Un petit rappel</p>' : ''}
             <div class="question" id="question">${ex.question}</div>
             <div id="visual-slot"></div>
             ${answerArea}
-            <button class="btn-hint" id="btn-hint">${hintLabel()}</button>
+            <button class="btn-hint" id="btn-hint"${s.rapid ? ' hidden' : ''}>${hintLabel()}</button>
             <div id="feedback" class="feedback-container" aria-live="polite"></div>
         `;
 
@@ -203,6 +246,19 @@ class ScreenManager {
             const fb = screen.querySelector('#feedback');
             this.reactFox(screen, result.correct ? 'bravo' : 'comfort', result.correct ? 'hop' : 'tilt');
             Sound.play(result.correct ? 'good' : 'wrong');
+            if (s.rapid) {
+                // Série rapide : retour très court, enchaînement automatique, pas d'explication (les erreurs reviendront en rappel)
+                if (result.fast) {
+                    screen.querySelector(`.elan-cell[data-i="${s.currentIndex}"]`).classList.add('on');
+                    screen.querySelector('#elan').setAttribute('aria-label', `Élan de la fusée : ${s.results.filter(r => r.fast).length} sur ${RAPID.length}`);
+                    this.later(() => Sound.play('fast'), 180);
+                }
+                fb.innerHTML = result.correct
+                    ? `<div class="feedback-success"><p class="text-lg font-bold">${result.fast ? 'Rapide !' : 'Bravo !'}</p></div>`
+                    : `<div class="feedback-error"><p class="text-lg font-bold">Presque ! C'était ${result.answer}.</p></div>`;
+                this.later(advance, result.correct ? 850 : 1700);
+                return;
+            }
             if (result.correct) {
                 fb.innerHTML = `<div class="feedback-success"><p class="text-lg font-bold">Bravo !</p></div>`;
                 this.later(advance, 1100);
@@ -269,6 +325,7 @@ class ScreenManager {
 
     // ---------- Résultat ----------
     createResultScreen(summary) {
+        if (summary.rapid) return this.createRapidResultScreen(summary);
         const screen = this.screenEl();
         const { correct, total, starsEarned, newPlanets, skill, capped, cleared } = summary;
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
@@ -306,6 +363,44 @@ class ScreenManager {
         return screen;
     }
 
+    createRapidResultScreen(summary) {
+        const screen = this.screenEl();
+        const { correct, total, fast, starsEarned, rewarded, newPlanets } = summary;
+        const mood = correct === total && fast >= total - 1 ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
+        const line = { bravo: 'Décollage réussi ! Plus rapide que mon vaisseau !', content: 'Bien joué, tes réflexes progressent !', comfort: 'Pas grave, la prochaine série sera la bonne !' }[mood];
+        const stars = !rewarded
+            ? '<p class="muted text-sm">Tu as déjà gagné tes étoiles bonus aujourd\'hui : s\'entraîner, c\'est déjà gagner !</p>'
+            : starsEarned > 0
+                ? `<p class="result-stars">${'⭐'.repeat(starsEarned)}</p><p class="muted">+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'} bonus</p>`
+                : '<p class="muted">Pas de bonus cette fois, la prochaine sera la bonne !</p>';
+        const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
+        screen.innerHTML = `
+            <div class="text-center" id="rapid-result">
+                <div class="rabbit-says" id="rabbit-says" data-mood="${mood}">
+                    ${this.face('rabbit', mood)}
+                    <p class="speech">${line}</p>
+                </div>
+                <h1 class="text-2xl font-bold mb-md">⚡ Série rapide</h1>
+                <div class="result-card">
+                    <p class="text-lg">${correct} sur ${total} réussis · ${fast} ${fast > 1 ? 'réponses rapides' : 'réponse rapide'}</p>
+                    ${this.elanGauge(Array.from({ length: total }, (_, i) => i < fast))}
+                    ${stars}
+                    ${planets}
+                </div>
+            </div>
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-again">Encore !</button>
+                <button class="btn-secondary" id="btn-universe">Mon univers</button>
+            </div>
+        `;
+        let at = 150;
+        if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 2 ? 'stars3' : 'stars'), at); at += 1100; }
+        if (newPlanets.length) this.later(() => Sound.play('planet'), at);
+        screen.querySelector('#btn-again').addEventListener('click', () => this.startRapid());
+        screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
+        return screen;
+    }
+
     // ---------- Espace parent ----------
     createParentScreen() {
         const screen = this.screenEl('parent-screen');
@@ -326,7 +421,7 @@ class ScreenManager {
             </div>`;
         }).join('');
         const recent = history.slice(-5).reverse().map(h =>
-            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill} · ${h.abandoned ? `abandon (question ${h.at_question}/${h.total})` : `${h.correct}/${h.total}`}</li>`).join('');
+            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${h.rapid ? 'Série rapide ⚡' : (SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill)} · ${h.abandoned ? `abandon (question ${h.at_question}/${h.total})` : `${h.correct}/${h.total}`}</li>`).join('');
 
         const pending = this.progression.getPendingErrors();
         const toReview = pending.length

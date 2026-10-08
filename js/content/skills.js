@@ -78,6 +78,11 @@ const HINTS = { freePerSession: 2, maxStarsOverQuota: 2 };
 // compétence du jour) jusqu'à `clearAfter` réussites consécutives sans coup de pouce.
 const REVIEW = { maxPerSession: 2, clearAfter: 2, maxStored: 30 };
 
+// Série rapide ⚡ : 5 calculs enchaînés sur des compétences déjà en bonne voie (niveau ≥ minLevel).
+// Aucune pénalité : seul un bonus d'étoiles récompense la rapidité (réflexion ≤ fastMs).
+// Seules les `maxRewardedPerDay` premières séries de la journée rapportent des étoiles (pas de « farm »).
+const RAPID = { length: 5, minLevel: 2, fastMs: 5000, maxRewardedPerDay: 2 };
+
 // Mélange des notions : jusqu'à `recallPerSession` questions sur 5 (40 %) reprennent des compétences déjà
 // pratiquées (autres que la compétence du jour). Les calculs à revoir (REVIEW) occupent ces places en priorité.
 const MIX = { recallPerSession: 2 };

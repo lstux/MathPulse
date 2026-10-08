@@ -48,7 +48,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Chantier | Détail | Taille |
 |---|---|---|
 | Contenu | ✅ **Fait** (8 oct.) : soustraction simple (a − b, reste ≥ 1, animation de retrait, débloquée après Additions niveau 2) et ×10 (paquets de 10, débloqué après ×2 niveau 2) ; à ajuster au niveau réel de l'enfant testeur (Q9) | — |
-| Mini-jeu « série rapide » | 5 calculs enchaînés, sans pression visible (spec §9, §27) | M |
+| Mini-jeu « série rapide » | ✅ **Fait** (8 oct.) : 5 calculs enchaînés sur compétences niveau ≥ 2, lapine, jauge « élan de la fusée » qui se remplit (jamais ne se vide), bonus jusqu'à 2⭐ (5/5 + ≥ 4 réponses ≤ 5 s), 2 séries récompensées par jour, sans coup de pouce | — |
 | Identité visuelle | Fusée, renard et planètes en SVG, états du renard (content, encourageant) (Q10) | L |
 | Accessibilité | Passage axe/Lighthouse mesuré, navigation clavier complète, annonces lecteur d'écran, test avec animations réduites | M |
 | Appareils réels | Android Chrome (installation), iPhone/iPad Safari (écran d'accueil), PC ; vérifier la persistance des données (Q12) | M |

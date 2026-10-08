@@ -22,11 +22,12 @@ Tous les effets sonores viennent de **Mixkit** et sont libres d'utilisation (gra
 | `stars.mp3` | `mixkit-correct-answer-reward-952.mp3` | Correct answer reward | Fin de session : 1 ou 2⭐ |
 | `stars3.mp3` | `mixkit-musical-reveal-961.mp3` | Musical reveal | Fin de session : 3⭐ |
 | `planet.mp3` | `mixkit-revealing-bonus-notification-958.mp3` | Revealing bonus notification | Nouvelle planète |
+| `fast.mp3` | `mixkit-positive-interface-beep-221.mp3` | Positive interface beep | Série rapide : réponse rapide |
 | `cleared.mp3` | `mixkit-positive-notification-951.mp3` | Positive notification | Un calcul qui résistait est acquis |
 
 ## Sons disponibles mais non utilisés
 
-`bank/` contient aussi : correct-answer-tone-2870, correct-positive-notification-957, positive-interface-beep-221, game-show-wrong-answer-buzz-950, wrong-electricity-buzz-955, retro-arcade-casino-notification-211, simple-game-countdown-921. Les buzz, le casino et le compte à rebours sont volontairement écartés (trop agressifs ou mettant la pression).
+`bank/` contient aussi : correct-answer-tone-2870, correct-positive-notification-957, game-show-wrong-answer-buzz-950, wrong-electricity-buzz-955, retro-arcade-casino-notification-211, simple-game-countdown-921. Les buzz, le casino et le compte à rebours sont volontairement écartés (trop agressifs ou mettant la pression).
 
 ## Notes techniques
 

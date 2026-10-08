@@ -3,9 +3,9 @@
 // Réglage « sons activés » mémorisé dans les préférences (activé par défaut).
 
 const Sound = {
-    FILES: { good: 'good', wrong: 'wrong', hint: 'hint', start: 'start', stars: 'stars', stars3: 'stars3', planet: 'planet', cleared: 'cleared' },
+    FILES: { good: 'good', wrong: 'wrong', hint: 'hint', start: 'start', stars: 'stars', stars3: 'stars3', planet: 'planet', cleared: 'cleared', fast: 'fast' },
     // Volumes relatifs (0..1) : discrets, et encore plus bas pour l'erreur (doux, comme l'expression du renard)
-    VOLUME: { good: 0.7, wrong: 0.35, hint: 0.6, start: 0.6, stars: 0.7, stars3: 0.7, planet: 0.7, cleared: 0.6 },
+    VOLUME: { good: 0.7, wrong: 0.35, hint: 0.6, start: 0.6, stars: 0.7, stars3: 0.7, planet: 0.7, cleared: 0.6, fast: 0.5 },
     ctx: null,
     buffers: {},
     log: [],            // noms des sons demandés (sert aux tests)

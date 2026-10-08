@@ -442,3 +442,58 @@ test('déblocage: soustractions après additions niveau 2, ×10 après ×2 nivea
     for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
     assert.ok(engine.isUnlocked('multiply-10'));
 });
+
+test('série rapide: indisponible tant qu\'aucune compétence n\'est au niveau 2, puis 5 calculs numériques éligibles', () => {
+    const { engine, progression } = setup();
+    assert.ok(!engine.rapidAvailable());
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    assert.ok(engine.rapidAvailable());
+    progression.recordAnswer('addition-simple', true, 2000);   // niveau 1 seulement : exclue
+    for (let n = 0; n < 50; n++) {
+        const ex = engine.generateRapid();
+        assert.strictEqual(ex.length, 5);
+        assert.ok(ex.every(e => e.skill === 'multiply-2' && e.type === 'numeric' && !e.choices));
+    }
+});
+
+test('série rapide: étoiles bonus (5/5 + ≥ 4 rapides), sans coup de pouce, erreurs mémorisées', () => {
+    assert.strictEqual(Session.rapidStars(5, 5, 5), 2);
+    assert.strictEqual(Session.rapidStars(5, 5, 4), 2);
+    assert.strictEqual(Session.rapidStars(5, 5, 3), 1);
+    assert.strictEqual(Session.rapidStars(4, 5, 4), 1);
+    assert.strictEqual(Session.rapidStars(3, 5, 2), 0);
+    const { engine, progression } = setup();
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    const s = new Session(engine, progression);
+    s.start({ rapid: true });
+    assert.strictEqual(s.skill, 'rapid');
+    s.exercises.forEach((ex, i) => {
+        s.beginQuestion();
+        s.questionStart = Date.now() - 1000;
+        s.noteInput(s.questionStart + 800);
+        const r = s.submitAnswer(i === 0 ? ex.answer + 1 : ex.answer);
+        assert.strictEqual(r.fast, i !== 0);
+        s.next();
+    });
+    const sum = s.complete();
+    assert.strictEqual(sum.rapid, true);
+    assert.strictEqual(sum.correct, 4);
+    assert.strictEqual(sum.fast, 4);
+    assert.strictEqual(sum.starsEarned, 1, '4 sur 5 : pas le bonus 5/5, mais 4 réponses rapides');
+    assert.strictEqual(progression.getPendingErrors().length, 1, 'l\'erreur de la série revient dans les rappels');
+});
+
+test('série rapide: seules les 2 premières séries du jour rapportent des étoiles', () => {
+    const { engine, progression } = setup();
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    const stars = [];
+    for (let n = 0; n < 4; n++) {
+        const s = new Session(engine, progression);
+        s.start({ rapid: true });
+        s.exercises.forEach(ex => { s.beginQuestion(); s.questionStart = Date.now() - 500; s.submitAnswer(ex.answer); s.next(); });
+        const sum = s.complete();
+        stars.push(sum.starsEarned);
+        assert.strictEqual(sum.rewarded, n < RAPID.maxRewardedPerDay);
+    }
+    assert.deepStrictEqual(stars, [2, 2, 0, 0]);
+});

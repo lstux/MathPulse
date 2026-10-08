@@ -118,6 +118,20 @@ with sync_playwright() as p:
     assert stars >= 5, f'étoiles non créditées ({stars})'
     pg.wait_for_timeout(800)
     assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
+    # série rapide : bouton à l'univers, pas de coup de pouce, jauge, résultat avec bonus
+    pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
+    assert pg.locator('#btn-rapid').count() == 1, 'bouton série rapide attendu (compétences au niveau 2)'
+    pg.click('#btn-rapid'); pg.click('#btn-rapid-go'); pg.wait_for_timeout(300)
+    assert pg.locator('#elan').count() == 1 and pg.is_hidden('#btn-hint'), 'jauge visible, pas de coup de pouce'
+    for i in range(5):
+        ans = solve(pg.inner_text('#question'))
+        for d in str(ans): pg.click(f'.key[data-key="{d}"]')
+        pg.click('.key[data-key="ok"]'); pg.wait_for_timeout(250)
+        assert pg.locator('.elan-cell.on').count() == i + 1, f"l'élan doit se charger à chaque réponse rapide ({i + 1})"
+        pg.wait_for_timeout(1000)
+    assert pg.locator('#rapid-result').count() == 1, 'résultat de la série rapide attendu'
+    assert '+2' in pg.inner_text('#rapid-result'), pg.inner_text('#rapid-result')
+    pg.click('#btn-universe')
     # espace parent : version affichée, abandon tracé
     pg.click('#btn-universe') if pg.locator('#btn-universe').count() else None
     pg.evaluate("window.mathpulse.screenManager.show('parent')"); pg.wait_for_timeout(200)

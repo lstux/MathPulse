@@ -48,3 +48,11 @@
 .visual-takeaway { flex-direction: column; align-items: center; }
 .visual-takeaway .block-row { max-width: 14.5rem; justify-content: center; flex-wrap: wrap; }
 .visual-tens .ten-bar { border: 0; background: var(--color-space-purple); color: #fff; }
+
+/* Série rapide : jauge « élan de la fusée » (se remplit, ne se vide jamais) */
+.elan { display: flex; align-items: center; justify-content: center; gap: .35rem; margin: .25rem 0; }
+.elan-label { font-size: 1.1rem; }
+.elan-cell { width: 2.2rem; height: .7rem; border-radius: 999px; background: var(--color-border); }
+.elan-cell.on { background: linear-gradient(90deg, #fbbf24, #f97316); box-shadow: 0 0 8px rgba(249, 115, 22, .55); animation: elanPop .45s var(--easing-out); }
+@keyframes elanPop { 0% { transform: scaleX(.3); opacity: .3; } 60% { transform: scaleX(1.15); } 100% { transform: scaleX(1); opacity: 1; } }
+.game-screen .elan { padding-left: 3.2rem; }

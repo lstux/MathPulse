@@ -15,13 +15,21 @@ class Session {
         this.hintsUsed = 0;
         this.cleared = 0;
         this.completed = false;
+        this.rapid = false;
         this.summary = null;
     }
 
-    start() {
-        this.skill = this.engine.selectSkillForSession();
-        this.exercises = this.engine.generateSession(this.skill);
-        this.progression.markAsked(this.exercises.filter(e => e.review).map(e => e.key));
+    // start({ rapid: true }) : série rapide (5 calculs enchaînés, sans coup de pouce ni calcul à revoir)
+    start(options = {}) {
+        this.rapid = !!options.rapid;
+        if (this.rapid) {
+            this.skill = 'rapid';
+            this.exercises = this.engine.generateRapid();
+        } else {
+            this.skill = this.engine.selectSkillForSession();
+            this.exercises = this.engine.generateSession(this.skill);
+            this.progression.markAsked(this.exercises.filter(e => e.review).map(e => e.key));
+        }
         this.cleared = 0;
         this.currentIndex = 0;
         this.results = [];
@@ -85,11 +93,45 @@ class Session {
         if (countedForMastery) this.progression.recordAnswer(exercise.skill, correct, thinkMs);
         const reviewOutcome = this.progression.noteResult(exercise, correct, !!hint);
         if (reviewOutcome === 'cleared') this.cleared++;
-        return { correct, answer: exercise.answer, countedForMastery, reviewOutcome };
+        const fast = correct && thinkMs <= RAPID.fastMs;
+        this.results[this.results.length - 1].fast = fast;
+        return { correct, answer: exercise.answer, countedForMastery, reviewOutcome, fast };
     }
 
     next() {
         this.currentIndex++;
+    }
+
+    // Étoiles bonus d'une série rapide : 1⭐ pour 5/5, 1⭐ si au moins 4 réponses rapides. Plafonné par jour.
+    static rapidStars(correct, total, fast) {
+        return (correct === total ? 1 : 0) + (fast >= total - 1 ? 1 : 0);
+    }
+
+    completeRapid() {
+        const total = this.results.length;
+        const correct = this.results.filter(r => r.correct).length;
+        const fast = this.results.filter(r => r.fast).length;
+        const today = new Date().toDateString();
+        const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
+        const rewardedToday = history.filter(h => h.rapid && h.rewarded && new Date(h.at).toDateString() === today).length;
+        const rewarded = rewardedToday < RAPID.maxRewardedPerDay;
+        const starsEarned = rewarded ? Session.rapidStars(correct, total, fast) : 0;
+        const before = this.progression.getTotalStars();
+        const after = this.progression.addStars(starsEarned);
+        const newPlanets = PLANETS.filter(p => before < p.unlockAt && after >= p.unlockAt);
+
+        this.summary = {
+            rapid: true, skill: 'rapid', correct, total, fast, starsEarned, rewarded,
+            hintsUsed: 0, capped: false, reviewed: 0, cleared: 0, totalStars: after, newPlanets,
+            avgTime: total ? this.results.reduce((sum, r) => sum + r.think_ms, 0) / total : 0
+        };
+        storage.append(storage.KEYS.SESSION_HISTORY, {
+            at: new Date().toISOString(), skill: 'rapid', rapid: true, rewarded, correct, total, fast, starsEarned,
+            hintsUsed: 0,
+            answers: this.results.map(r => ({ q: r.question, ok: r.correct, think_ms: r.think_ms, total_ms: r.time_ms, fast: !!r.fast }))
+        });
+        this.completed = true;
+        return this.summary;
     }
 
     // Session quittée avant la fin (✕) : on garde une trace pour comprendre où l'enfant décroche
@@ -110,6 +152,7 @@ class Session {
     // Finalise la session une seule fois : crédite les étoiles et archive l'historique
     complete() {
         if (this.completed) return this.summary;
+        if (this.rapid) return this.completeRapid();
         const total = this.results.length;
         const correct = this.results.filter(r => r.correct).length;
         const baseStars = starsForScore(correct);

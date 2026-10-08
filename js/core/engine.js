@@ -14,6 +14,33 @@ class Engine {
         return !req || this.progression.getMasteryLevel(req.skill) >= req.level;
     }
 
+    // ---------- Série rapide ----------
+    rapidSkills() {
+        return SKILL_ORDER.filter(id => this.progression.getMasteryLevel(id) >= RAPID.minLevel);
+    }
+
+    rapidAvailable() {
+        return this.rapidSkills().length > 0;
+    }
+
+    // 5 calculs à saisie numérique, en alternant les compétences éligibles
+    generateRapid() {
+        const pool = this.rapidSkills();
+        if (!pool.length) throw new Error('Aucune compétence éligible à la série rapide');
+        const order = this.shuffle(pool);
+        const exercises = [], seen = new Set();
+        for (let i = 0; i < RAPID.length; i++) {
+            let ex = null;
+            for (let tries = 0; tries < 30; tries++) {
+                ex = this.generateExercise(order[i % order.length], 'numeric');
+                if (!seen.has(ex.key)) break;
+            }
+            seen.add(ex.key);
+            exercises.push(ex);
+        }
+        return exercises;
+    }
+
     selectSkillForSession() {
         const ranked = SKILL_ORDER.filter(id => this.isUnlocked(id)).map((id, order) => {
             const stats = this.progression.getSkillStats(id);
