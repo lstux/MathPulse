@@ -1,0 +1,259 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" preserveAspectRatio="xMidYMax meet" role="img" aria-labelledby="ia-t">
+  <title id="ia-t">Un vaisseau s'écrase dans la forêt ; un renard accourt, stupéfait</title>
+  <!-- Intro animée (une seule lecture). Chargée en ligne par l'application pour que l'animation redémarre à chaque affichage.
+       Même décor que intro.svg, sans la lapine : elle reste cachée dans son vaisseau. Tout est préfixé « ia- » (pas de conflit CSS). -->
+  <style>
+    #ia-scene { animation: ia-shake .6s linear 2.05s 1; }
+    .ia-fall { transform-origin: 192px 312px; animation: ia-fall 1.7s cubic-bezier(.45,.1,.75,1) .4s backwards; }
+    .ia-flame { opacity: 0; animation: ia-flame 2.4s ease-out .4s both; }
+    .ia-shadow { animation: ia-fade .6s ease-out 1.8s backwards; }
+    .ia-dust ellipse { opacity: 0; transform-box: fill-box; transform-origin: 50% 80%; animation: ia-dust 1.1s ease-out 2.1s both; }
+    .ia-dust ellipse:nth-child(2) { animation-delay: 2.18s; } .ia-dust ellipse:nth-child(3) { animation-delay: 2.26s; }
+    .ia-smoke { animation: ia-fade 1s ease-out 2.4s backwards, ia-float 3s ease-in-out 3.4s infinite alternate; }
+    .ia-sparks { animation: ia-fade .1s linear 2.2s backwards, ia-flicker .5s steps(2, end) 2.4s infinite; }
+    .ia-crack { animation: ia-fade .1s linear 2.1s backwards; }
+    .ia-foxin { animation: ia-foxin 1.3s ease-out 3.3s backwards; }
+    .ia-foxbob { animation: ia-bob .45s ease-in-out 3.3s 3 backwards, ia-jump .4s ease-out 4.75s 1 backwards; }
+    .ia-pop { transform-box: fill-box; transform-origin: 50% 90%; animation: ia-pop .4s cubic-bezier(.3,1.5,.6,1) backwards; }
+    @keyframes ia-fall { 0% { transform: translate(240px,-540px) rotate(-30deg) scale(.45); } 80% { transform: translate(6px,-10px) rotate(7deg) scale(1.03); } 100% { transform: none; } }
+    @keyframes ia-flame { 0% { opacity: 0; } 12% { opacity: 1; } 78% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes ia-shake { 0%,100% { transform: translate(0,0); } 12% { transform: translate(-7px,5px); } 28% { transform: translate(6px,-4px); } 44% { transform: translate(-5px,3px); } 62% { transform: translate(3px,-2px); } 80% { transform: translate(-2px,1px); } }
+    @keyframes ia-dust { 0% { opacity: .85; transform: scale(.25); } 100% { opacity: 0; transform: scale(2.4) translateY(-10px); } }
+    @keyframes ia-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes ia-float { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+    @keyframes ia-flicker { 0% { opacity: 1; } 100% { opacity: .15; } }
+    @keyframes ia-foxin { from { transform: translateX(-230px); } to { transform: none; } }
+    @keyframes ia-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes ia-jump { 0% { transform: translateY(0); } 45% { transform: translateY(-16px); } 100% { transform: translateY(0); } }
+    @keyframes ia-pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    @media (prefers-reduced-motion: reduce) { #ia-scene, #ia-scene * { animation: none !important; } .ia-flame, .ia-dust ellipse { opacity: 0 !important; } #ia-marks .ia-pop { transform: none; } }
+  </style>
+  <defs>
+    <linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="400">
+      <stop offset="0" stop-color="#0e0d2b"/>
+      <stop offset=".55" stop-color="#2b2370"/>
+      <stop offset=".85" stop-color="#6a4fc0"/>
+      <stop offset="1" stop-color="#d0689c"/>
+    </linearGradient>
+    <linearGradient id="meadow" gradientUnits="userSpaceOnUse" x1="0" y1="350" x2="0" y2="440">
+      <stop offset="0" stop-color="#3b8a5f"/>
+      <stop offset="1" stop-color="#1d4a3b"/>
+    </linearGradient>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eef0ff"/>
+      <stop offset="1" stop-color="#a3abcf"/>
+    </linearGradient>
+    <linearGradient id="hullLow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8f97b8"/>
+      <stop offset="1" stop-color="#565d84"/>
+    </linearGradient>
+    <radialGradient id="moonGlow"><stop offset="0" stop-color="#fdf1c4" stop-opacity=".35"/><stop offset="1" stop-color="#fdf1c4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glowYellow"><stop offset="0" stop-color="#fff3a0" stop-opacity=".8"/><stop offset="1" stop-color="#fff3a0" stop-opacity="0"/></radialGradient>
+    <mask id="crescent">
+      <rect width="360" height="520" fill="#fff"/>
+      <circle cx="76" cy="58" r="20" fill="#000"/>
+    </mask>
+    <path id="sparkle" d="M0-6 L1.6-1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6-1.6Z"/>
+    <g id="pine">
+      <rect x="-3" y="-10" width="6" height="10"/>
+      <path d="M0-100 L16-62 L-16-62Z M0-80 L21-36 L-21-36Z M0-58 L26-8 L-26-8Z"/>
+    </g>
+    <linearGradient id="flameGrad" gradientUnits="userSpaceOnUse" x1="200" y1="300" x2="320" y2="150">
+      <stop offset="0" stop-color="#fff3a0" stop-opacity=".95"/><stop offset=".4" stop-color="#ff9a3c" stop-opacity=".7"/><stop offset="1" stop-color="#ff5a1f" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g id="ia-scene">
+  <!-- Ciel -->
+  <rect width="360" height="520" fill="url(#sky)"/>
+  <g fill="#fff6d6">
+    <circle cx="24" cy="28" r="1.2" opacity=".9"/><circle cx="52" cy="110" r="1" opacity=".7"/>
+    <circle cx="96" cy="40" r="1.4" opacity=".95"/><circle cx="120" cy="88" r="1" opacity=".6"/>
+    <circle cx="150" cy="22" r="1.2" opacity=".8"/><circle cx="176" cy="66" r="1" opacity=".7"/>
+    <circle cx="205" cy="36" r="1.6"/><circle cx="238" cy="98" r="1" opacity=".6"/>
+    <circle cx="262" cy="52" r="1.2" opacity=".85"/><circle cx="300" cy="24" r="1" opacity=".7"/>
+    <circle cx="326" cy="92" r="1.3" opacity=".9"/><circle cx="344" cy="48" r="1" opacity=".7"/>
+    <circle cx="18" cy="150" r="1" opacity=".6"/><circle cx="88" cy="160" r="1.2" opacity=".7"/>
+    <circle cx="140" cy="140" r="1" opacity=".5"/><circle cx="318" cy="150" r="1" opacity=".6"/>
+    <circle cx="352" cy="120" r="1.2" opacity=".8"/><circle cx="40" cy="76" r="1" opacity=".6"/>
+    <circle cx="190" cy="124" r="1" opacity=".5"/><circle cx="282" cy="132" r="1" opacity=".55"/>
+    <use href="#sparkle" transform="translate(116 58)" opacity=".9"/>
+    <use href="#sparkle" transform="translate(240 72) scale(.8)" opacity=".8"/>
+    <use href="#sparkle" transform="translate(326 64) scale(.6)" opacity=".7"/>
+  </g>
+  <circle cx="66" cy="66" r="44" fill="url(#moonGlow)"/>
+  <circle cx="66" cy="66" r="22" fill="#fdf1c4" mask="url(#crescent)"/>
+
+  <g id="ia-landscape" transform="translate(0 80)">
+  <g id="landscape" transform="translate(0 80)">
+  <!-- Collines et forêt lointaine -->
+  <path d="M0 262 C60 232 120 252 180 242 S300 226 360 250 L360 440 L0 440Z" fill="#2a2a6b" opacity=".95"/>
+  <g fill="#1c3a55">
+    <use href="#pine" transform="translate(14 296) scale(.7)"/><use href="#pine" transform="translate(52 290) scale(.85)"/>
+    <use href="#pine" transform="translate(96 298) scale(.65)"/><use href="#pine" transform="translate(136 292) scale(.8)"/>
+    <use href="#pine" transform="translate(300 292) scale(.85)"/><use href="#pine" transform="translate(338 298) scale(.7)"/>
+  </g>
+  <path d="M0 322 C70 304 150 316 220 310 S330 300 360 308 L360 440 L0 440Z" fill="#2a5f4d"/>
+  <g fill="#1f5a4a">
+    <use href="#pine" transform="translate(74 330) scale(1.05)"/><use href="#pine" transform="translate(112 326) scale(.8)"/>
+    <use href="#pine" transform="translate(318 328) scale(1.1)"/>
+  </g>
+  <!-- Grands sapins qui encadrent la scène -->
+  <g fill="#0f2a22">
+    <use href="#pine" transform="translate(6 430) scale(2.1)"/>
+    <use href="#pine" transform="translate(356 430) scale(1.9)"/>
+  </g>
+
+  <ellipse class="ia-shadow" cx="192" cy="333" rx="66" ry="7" fill="#0b1a14" opacity=".4"/>
+  <g class="ia-fall">
+    <g class="ia-flame"><path d="M205 296 L330 140 L352 176 L222 326Z" fill="url(#flameGrad)"/><path d="M196 304 L262 214" stroke="#fff3a0" stroke-width="5" stroke-linecap="round" opacity=".8"/></g>
+  <g transform="translate(192 312) rotate(-8) scale(1.0)">
+    <g stroke="#454b6e" stroke-width="5" stroke-linecap="round"><path d="M-40 12 L-46 24"/><path d="M40 12 L50 22"/></g>
+    <ellipse cx="0" cy="7" rx="62" ry="18" fill="url(#hullLow)"/>
+    <path d="M-30-4 C-30-40 30-40 30-4Z" fill="#9be7ff" fill-opacity=".85" stroke="#d6f6ff" stroke-width="2"/>
+    <path d="M-20-12 C-18-24 -8-30 2-30" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+    <ellipse cx="0" cy="0" rx="62" ry="17" fill="url(#hull)"/>
+    <circle cx="-44" cy="2" r="3.5" fill="#ff8fc0"/><circle cx="-22" cy="5" r="3.5" fill="#7a809f"/>
+    <circle cx="0" cy="6" r="3.5" fill="#fbbf24"/><circle cx="22" cy="5" r="3.5" fill="#7a809f"/>
+    <circle cx="44" cy="2" r="3.5" fill="#5eead4"/>
+    <path class="ia-crack" d="M-34-12 L-28-5 L-35-1 L-29 7" fill="none" stroke="#454b6e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g class="ia-sparks" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><path d="M-44-16 L-50-22"/><path d="M-47-6 L-55-8"/><path d="M-36-20 L-35-28"/></g>
+    <g class="ia-smoke" fill="#8a86b8"><circle cx="-26" cy="-28" r="6" opacity=".55"/><circle cx="-30" cy="-42" r="8" opacity=".4"/><circle cx="-24" cy="-58" r="10" opacity=".28"/></g>
+  </g>
+
+  </g>
+  <g class="ia-dust" fill="#cfc6e8">
+    <ellipse cx="150" cy="338" rx="22" ry="8"/><ellipse cx="236" cy="338" rx="26" ry="9"/><ellipse cx="192" cy="344" rx="30" ry="10"/>
+  </g>
+  <!-- Prairie -->
+  <path d="M0 358 C70 346 150 360 210 356 S320 346 360 352 L360 440 L0 440Z" fill="url(#meadow)"/>
+  <g stroke="#4aa56f" stroke-width="2" stroke-linecap="round" fill="none">
+    <path d="M30 432 q-2-10-5-14 M30 432 q0-12 1-17 M30 432 q3-9 6-12"/>
+    <path d="M150 428 q-2-10-5-14 M150 428 q0-12 1-17 M150 428 q3-9 6-12"/>
+    <path d="M232 434 q-2-10-5-14 M232 434 q0-12 1-17 M232 434 q3-9 6-12"/>
+    <path d="M334 430 q-2-10-5-14 M334 430 q0-12 1-17 M334 430 q3-9 6-12"/>
+  </g>
+  <g><circle cx="190" cy="418" r="3" fill="#fff"/><circle cx="190" cy="418" r="1.2" fill="#fbbf24"/>
+     <circle cx="252" cy="394" r="3" fill="#ffb8d6"/><circle cx="252" cy="394" r="1.2" fill="#fbbf24"/>
+     <circle cx="46" cy="422" r="3" fill="#ffb8d6"/><circle cx="46" cy="422" r="1.2" fill="#fbbf24"/></g>
+  <g>
+    <circle cx="150" cy="372" r="7" fill="url(#glowYellow)"/><circle cx="150" cy="372" r="1.8" fill="#fff9c4"/>
+    <circle cx="232" cy="384" r="7" fill="url(#glowYellow)"/><circle cx="232" cy="384" r="1.8" fill="#fff9c4"/>
+    <circle cx="182" cy="398" r="7" fill="url(#glowYellow)"/><circle cx="182" cy="398" r="1.8" fill="#fff9c4"/>
+    <circle cx="62" cy="380" r="7" fill="url(#glowYellow)"/><circle cx="62" cy="380" r="1.8" fill="#fff9c4"/>
+    <circle cx="336" cy="372" r="7" fill="url(#glowYellow)"/><circle cx="336" cy="372" r="1.8" fill="#fff9c4"/>
+  </g>
+
+  </g>
+
+  </g>
+  <g class="ia-foxin"><g class="ia-foxbob">
+  <g transform="translate(13.6 209) scale(.36)">
+    <defs>
+    <path id="foxf-tail-shape" d="M190 520 C120 540 40 500 36 410 C34 350 70 316 104 316 C84 350 96 396 140 430 C166 450 188 456 204 462Z"/>
+    <clipPath id="foxf-tail-clip"><use href="#foxf-tail-shape"/></clipPath>
+    <g id="foxf-shoe">
+      <path d="M192 688 H238 L240 716 C240 730 232 738 218 738 H178 C164 738 160 728 168 720 C182 708 190 704 192 688Z" fill="#f4f6ff"/>
+      <path d="M166 728 H240 V740 C240 744 236 747 232 747 H172 C164 747 160 738 166 728Z" fill="#aab2d4"/>
+      <path d="M176 716 C190 712 204 714 214 722" fill="none" stroke="#f2b134" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <ellipse id="foxf-shadow" cx="240" cy="745" rx="106" ry="10" fill="#1a1a2e" opacity=".16"/>
+
+  <!-- queue touffue, bout crème -->
+  <g id="foxf-tail">
+    <use href="#foxf-tail-shape" fill="#ff6212"/>
+    <path d="M0 300 H140 V372 L0 424Z" fill="#fde8cf" clip-path="url(#foxf-tail-clip)"/>
+  </g>
+
+  <!-- jambes et baskets -->
+  <g id="foxf-legs">
+    <path d="M180 496 H240 L232 690 H196Z" fill="#2b3270"/>
+    <path d="M300 496 H240 L248 690 H284Z" fill="#2b3270"/>
+    <rect x="193" y="668" width="41" height="22" rx="6" fill="#444fa0"/>
+    <rect x="246" y="668" width="41" height="22" rx="6" fill="#444fa0"/>
+    <use href="#foxf-shoe"/>
+    <use href="#foxf-shoe" transform="translate(480 0) scale(-1 1)"/>
+  </g>
+
+  <!-- bras gauche : détendu -->
+  <g id="foxf-arm-l">
+    <path d="M182 356 C162 398 156 446 160 492" fill="none" stroke="#4655c9" stroke-width="26" stroke-linecap="round"/>
+    <ellipse cx="160" cy="492" rx="15" ry="7" fill="#3340a8"/>
+    <ellipse cx="160" cy="514" rx="12" ry="18" fill="#ff6212"/>
+    <ellipse cx="173" cy="504" rx="4.5" ry="10" fill="#ff6212" transform="rotate(-18 173 504)"/>
+  </g>
+
+  <!-- cou, torse (sweat), sangles du sac à dos -->
+  <g id="foxf-torso">
+    <path d="M222 296 H258 V346 H222Z" fill="#ff6212"/>
+    <path d="M176 340 C198 326 282 326 304 340 L308 402 C310 440 302 472 300 508 L180 508 C178 472 170 440 172 402Z" fill="#4655c9"/>
+    <path d="M180 496 H300 V508 H180Z" fill="#3340a8"/>
+    <path d="M210 326 L270 326 L240 372Z" fill="#fde8cf"/>
+    <path d="M204 328 L240 382 L276 328" fill="none" stroke="#3340a8" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+    <g fill="none" stroke="#dfe3ff" stroke-width="4" stroke-linecap="round"><path d="M228 384 L226 420"/><path d="M252 384 L254 420"/></g>
+    <g fill="none" stroke="#f2b134" stroke-width="15" stroke-linecap="round"><path d="M200 340 C196 380 196 420 199 452"/><path d="M280 340 C284 380 284 420 281 452"/></g>
+    <path d="M200 396 H280" fill="none" stroke="#d99a1f" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- bras droit : main sur la sangle -->
+  <g id="foxf-arm-r">
+    <path d="M298 358 C322 386 332 414 324 432 C318 444 308 446 300 442" fill="none" stroke="#4655c9" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="296" cy="438" rx="13" ry="11" fill="#ff6212"/>
+    <ellipse cx="289" cy="427" rx="4.5" ry="9" fill="#ff6212" transform="rotate(14 289 427)"/>
+  </g>
+
+  <g id="foxf-head" transform="translate(132.5 98) scale(.42)">
+    <defs>
+    <path id="foxf-head-shape" d="M92 22 C90 70 90 110 84 160 C74 250 58 322 40 372 C84 398 134 424 192 436 L256 446 L320 436 C378 424 428 398 472 372 C454 322 438 250 428 160 C422 110 422 70 420 22 L312 132 C292 118 274 112 256 112 C238 112 220 118 200 132Z"/>
+    <clipPath id="foxf-clip"><use href="#foxf-head-shape"/></clipPath>
+  </defs>
+
+  <g id="foxf-head">
+    <use href="#foxf-head-shape" fill="#ff6212"/>
+    <!-- intérieur des oreilles (le long de l'axe de l'oreille) -->
+    <g id="foxf-ear-inner" fill="#ff9211">
+      <ellipse cx="126" cy="98" rx="21" ry="50" transform="rotate(-24 126 98)"/>
+      <ellipse cx="386" cy="98" rx="21" ry="50" transform="rotate(24 386 98)"/>
+    </g>
+    <!-- bouts d'oreilles (découpés dans la forme de la tête) -->
+    <g id="foxf-ear-tips" clip-path="url(#foxf-clip)" fill="#575b5e">
+      <path d="M40 0 H200 L166 52 L70 84Z"/>
+      <path d="M472 0 H312 L346 52 L442 84Z"/>
+    </g>
+  </g>
+
+  <!-- joues grises + traits blancs -->
+  <g id="foxf-cheeks">
+    <path d="M20 370 C90 358 160 372 232 408 L232 484 C150 468 70 430 20 370Z" fill="#dedede"/>
+    <path d="M492 370 C422 358 352 372 280 408 L280 484 C362 468 442 430 492 370Z" fill="#dedede"/>
+    <g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".9">
+      <path d="M64 394 C98 390 134 398 160 412"/><path d="M92 424 C120 422 146 430 168 444"/>
+      <path d="M448 394 C414 390 378 398 352 412"/><path d="M420 424 C392 422 366 430 344 444"/>
+    </g>
+  </g>
+
+  <!-- museau -->
+  <path id="foxf-muzzle" d="M200 392 C200 440 212 480 234 502 C246 514 266 514 278 502 C300 480 312 440 312 392 C312 372 292 364 256 364 C220 364 200 372 200 392Z" fill="#fde8cf"/>
+
+  <g id="foxf-eyes" fill="#2d2927">
+    <ellipse cx="178" cy="282" rx="24" ry="31"/><ellipse cx="334" cy="282" rx="24" ry="31"/>
+    <g fill="#fff"><ellipse cx="169" cy="268" rx="8.5" ry="11"/><circle cx="191" cy="300" r="4"/>
+       <ellipse cx="325" cy="268" rx="8.5" ry="11"/><circle cx="347" cy="300" r="4"/></g>
+  </g>
+
+  <path id="foxf-nose" d="M218 398 C218 384 232 378 256 378 C280 378 294 384 294 398 C294 416 274 432 256 436 C238 432 218 416 218 398Z" fill="#2d2927"/>
+  <g id="foxf-mouth" fill="none" stroke="#4a4747" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 436 L256 458"/>
+    <path d="M234 458 C242 471 254 469 256 458 C258 469 270 471 278 458"/>
+  </g>
+  </g>
+  </g>
+  </g></g>
+  <g id="ia-marks">
+    <g class="ia-pop" style="animation-delay:4.9s"><circle cx="62" cy="262" r="17" fill="#fff"/><text x="62" y="273" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="30" font-weight="900" fill="#1a1a2e">?</text></g>
+    <g class="ia-pop" style="animation-delay:5.25s"><circle cx="104" cy="232" r="17" fill="#fff"/><text x="104" y="243" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="30" font-weight="900" fill="#1a1a2e">!</text></g>
+    <g class="ia-pop" style="animation-delay:5.6s"><circle cx="146" cy="262" r="17" fill="#fff"/><text x="146" y="273" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="30" font-weight="900" fill="#1a1a2e">?</text></g>
+  </g>
+  </g>
+</svg>

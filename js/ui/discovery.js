@@ -29,7 +29,7 @@ const Discovery = {
         }
     },
 
-    create(skillId, onStart) {
+    create(skillId, onStart, label = "C'est parti !") {
         const c = this.content[skillId];
         const screen = document.createElement('div');
         screen.className = 'screen active flex flex-col flex-center gap-lg p-lg';
@@ -43,7 +43,7 @@ const Discovery = {
                 <p class="text-lg font-bold mb-md">${c.text}</p>
                 <p class="formula">${c.formula}</p>
             </div>
-            <button class="btn-primary btn-large" id="btn-start-game">C'est parti !</button>
+            <button class="btn-primary btn-large" id="btn-start-game">${label}</button>
         `;
         screen.querySelector('#btn-start-game').addEventListener('click', onStart);
         return screen;

@@ -37,6 +37,14 @@ with sync_playwright() as p:
     pg.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
     pg.goto(URL + ('&' if '?' in URL else '?') + 'sw'); pg.wait_for_timeout(500)
 
+    # premier lancement : intro animée (écran « toucher pour commencer », puis scène, puis accueil)
+    assert pg.locator('#btn-intro-start').count() == 1, 'intro attendue au premier lancement'
+    pg.click('#btn-intro-start'); pg.wait_for_selector('#ia-scene', timeout=4000)
+    pg.wait_for_timeout(300); assert pg.locator('.ia-fall').count() == 1
+    pg.click('#btn-skip-intro'); assert pg.inner_text('h1') == 'MathPulse'
+    pg.click('#btn-intro'); pg.wait_for_selector('#ia-scene', timeout=4000)   # « Revoir l'intro » : sans écran de lancement
+    assert pg.locator('#btn-intro-start').count() == 0
+    pg.click('#btn-skip-intro')
     pg.click('#btn-play'); pg.click('#btn-start-session')
     pg.click('#btn-start-game')
     # coups de pouce : 2 gratuits annoncés, le décompte baisse, le dernier annonce le plafond
@@ -121,7 +129,9 @@ with sync_playwright() as p:
     # série rapide : bouton à l'univers, pas de coup de pouce, jauge, résultat avec bonus
     pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
     assert pg.locator('#btn-rapid').count() == 1, 'bouton série rapide attendu (compétences au niveau 2)'
-    pg.click('#btn-rapid'); pg.click('#btn-rapid-go'); pg.wait_for_timeout(300)
+    pg.click('#btn-rapid'); pg.click('#btn-rapid-go')
+    assert pg.locator('#countdown').count() == 1, 'décompte attendu avant la série'
+    pg.wait_for_selector('#elan', timeout=6000); pg.wait_for_timeout(300)
     assert pg.locator('#elan').count() == 1 and pg.is_hidden('#btn-hint'), 'jauge visible, pas de coup de pouce'
     for i in range(5):
         ans = solve(pg.inner_text('#question'))
@@ -136,6 +146,12 @@ with sync_playwright() as p:
     pg.click('#btn-universe') if pg.locator('#btn-universe').count() else None
     pg.evaluate("window.mathpulse.screenManager.show('parent')"); pg.wait_for_timeout(200)
     assert 'Version' in pg.inner_text('#app-version')
+    # revoir une explication depuis l'espace parent (sans toucher à la progression)
+    stars_before = pg.evaluate('window.mathpulse.progression.getTotalStars()')
+    pg.click('[data-replay="subtract-simple"]'); assert 'Soustraire' in pg.inner_text('h1')
+    assert pg.inner_text('#btn-start-game') == 'Retour'; pg.click('#btn-start-game')
+    assert 'Version' in pg.inner_text('#app-version')
+    assert pg.evaluate('window.mathpulse.progression.getTotalStars()') == stars_before
     assert 'réflexion' in pg.inner_text('.skill-card >> nth=0') or 'Pas encore' in pg.inner_text('.skill-card >> nth=0')
     ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(600)
     assert pg.inner_text('h1') == 'MathPulse', 'rechargement hors ligne en échec'

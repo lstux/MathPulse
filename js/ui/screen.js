@@ -24,10 +24,14 @@ class ScreenManager {
         }
 
         const builders = {
+            intro: () => this.createIntroScreen(data),
             home: () => this.createHomeScreen(),
             universe: () => this.createUniverseScreen(),
             rapidIntro: () => this.createRapidIntroScreen(),
-            discovery: () => Discovery.create(data.skillId, () => this.show('game')),
+            rapidCountdown: () => this.createRapidCountdownScreen(),
+            discovery: () => data.replay
+                ? Discovery.create(data.skillId, () => this.show('parent'), 'Retour')
+                : Discovery.create(data.skillId, () => this.show('game')),
             game: () => this.createGameScreen(),
             result: () => this.createResultScreen(data.summary),
             parent: () => this.createParentScreen()
@@ -43,6 +47,51 @@ class ScreenManager {
         const el = document.createElement('main');
         el.className = `screen active flex flex-col flex-center gap-lg p-lg ${extraClass}`;
         return el;
+    }
+
+    // ---------- Intro animée (premier lancement, ou « Revoir l'intro » depuis l'accueil) ----------
+    introSeen() {
+        return !!(storage.get(storage.KEYS.USER_PREFS) || {}).introSeen;
+    }
+
+    markIntroSeen() {
+        const prefs = storage.get(storage.KEYS.USER_PREFS) || {};
+        if (!prefs.introSeen) storage.set(storage.KEYS.USER_PREFS, { ...prefs, introSeen: true });
+    }
+
+    createIntroScreen(data = {}) {
+        const screen = document.createElement('main');
+        screen.className = 'screen active intro-screen';
+        const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.markIntroSeen();
+        const finish = () => this.show('home');
+        screen.innerHTML = `
+            <div class="intro-art" id="intro-art" aria-live="polite"></div>
+            <button class="btn-skip" id="btn-skip-intro">Passer</button>
+            <button class="btn-primary btn-large intro-next" id="btn-intro-next" hidden>Continuer</button>
+            ${data.replay ? '' : '<button class="intro-cover" id="btn-intro-start"><span class="intro-cover-icon" aria-hidden="true">🚀</span><span class="text-xl font-bold">Touche pour commencer</span></button>'}
+        `;
+        const art = screen.querySelector('#intro-art');
+        const next = screen.querySelector('#btn-intro-next');
+        const showNext = () => { next.hidden = false; next.classList.add('visible'); };
+
+        // Le décor est chargé en ligne (et non en <img>) : l'animation redémarre à chaque affichage
+        const play = () => {
+            fetch('assets/story/intro-anim.svg').then(r => r.text()).then(svg => {
+                if (this.currentScreen !== 'intro') return;
+                art.innerHTML = svg;
+                if (reduced) return showNext();
+                this.later(() => Sound.play('crash'), 2050);
+                this.later(showNext, 6600);
+            }).catch(showNext);
+        };
+        const cover = screen.querySelector('#btn-intro-start');
+        if (cover) cover.addEventListener('click', () => { cover.remove(); play(); });
+        else play();
+
+        screen.querySelector('#btn-skip-intro').addEventListener('click', finish);
+        next.addEventListener('click', finish);
+        return screen;
     }
 
     // Tête d'un personnage (fox | rabbit) dans une expression : content | bravo | think | comfort
@@ -92,11 +141,13 @@ class ScreenManager {
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-play">Jouer</button>
                 <button class="btn-secondary" id="btn-parent">Espace parent</button>
+                <button class="btn-secondary" id="btn-intro">🎬 Revoir l'intro</button>
             </div>
             <p class="text-sm muted">⭐ ${this.progression.getTotalStars()}</p>
         `;
         screen.querySelector('#btn-play').addEventListener('click', () => this.show('universe'));
         screen.querySelector('#btn-parent').addEventListener('click', () => this.show('parent'));
+        screen.querySelector('#btn-intro').addEventListener('click', () => this.show('intro', { replay: true }));
         return screen;
     }
 
@@ -121,8 +172,25 @@ class ScreenManager {
     startRapid() {
         this.session = new Session(this.engine, this.progression);
         this.session.start({ rapid: true });
-        Sound.play('start');
         this.show('game');
+    }
+
+    // Décompte 3 · 2 · 1 · partez ! synchronisé avec le son (bips à 0, 1 et 2 s, son final à 3 s)
+    createRapidCountdownScreen() {
+        const screen = this.screenEl('countdown-screen');
+        screen.innerHTML = `
+            <p class="text-lg muted">Prépare-toi…</p>
+            <div class="countdown" id="countdown" role="status" aria-live="assertive">3</div>
+        `;
+        const el = screen.querySelector('#countdown');
+        const step = (txt, cls) => { el.textContent = txt; el.className = 'countdown ' + (cls || ''); void el.offsetWidth; el.classList.add('beat'); };
+        Sound.play('countdown');
+        el.classList.add('beat');
+        this.later(() => step('2'), 1000);
+        this.later(() => step('1'), 2000);
+        this.later(() => step('Partez !', 'go'), 3000);
+        this.later(() => this.startRapid(), 3400);
+        return screen;
     }
 
     // Écran de départ de la série rapide : la lapine explique, sans pression
@@ -142,7 +210,7 @@ class ScreenManager {
                 <button class="btn-secondary" id="btn-back-universe">Retour</button>
             </div>
         `;
-        screen.querySelector('#btn-rapid-go').addEventListener('click', () => this.startRapid());
+        screen.querySelector('#btn-rapid-go').addEventListener('click', () => this.show('rapidCountdown'));
         screen.querySelector('#btn-back-universe').addEventListener('click', () => this.show('universe'));
         return screen;
     }
@@ -396,7 +464,7 @@ class ScreenManager {
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 2 ? 'stars3' : 'stars'), at); at += 1100; }
         if (newPlanets.length) this.later(() => Sound.play('planet'), at);
-        screen.querySelector('#btn-again').addEventListener('click', () => this.startRapid());
+        screen.querySelector('#btn-again').addEventListener('click', () => this.show('rapidCountdown'));
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
     }
@@ -437,6 +505,10 @@ class ScreenManager {
                 ${toReview}
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
+                <h2 class="text-lg font-bold mb-md">Revoir les explications</h2>
+                <div class="replay-list mb-lg">
+                    ${SKILL_ORDER.map(id => `<button class="btn-secondary" data-replay="${id}">${SKILLS[id].name}</button>`).join('')}
+                </div>
                 <p class="muted text-sm mb-md" id="app-version">Version ${APP_VERSION} (${APP_BUILD})</p>
                 <div class="flex flex-col gap-md">
                     <button class="btn-secondary" id="btn-sound-parent"></button>
@@ -448,6 +520,7 @@ class ScreenManager {
         `;
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
         this.bindSoundButton(screen.querySelector('#btn-sound-parent'), true);
+        screen.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => this.show('discovery', { skillId: b.dataset.replay, replay: true })));
         screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
         screen.querySelector('#btn-reset').addEventListener('click', () => {
             if (confirm('Effacer toute la progression de cet appareil ? Cette action est définitive.')) {

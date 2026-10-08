@@ -17,7 +17,7 @@ class MathPulse {
             this.progression.load();
             this.engine = new Engine(this.progression);
             this.screenManager = new ScreenManager(this.appContainer, this.engine, this.progression);
-            this.screenManager.show('home');
+            this.screenManager.show(this.screenManager.introSeen() ? 'home' : 'intro');
         } catch (error) {
             console.error('Échec du démarrage de MathPulse:', error);
             this.showError();

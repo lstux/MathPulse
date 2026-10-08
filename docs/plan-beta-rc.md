@@ -50,6 +50,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Contenu | ✅ **Fait** (8 oct.) : soustraction simple (a − b, reste ≥ 1, animation de retrait, débloquée après Additions niveau 2) et ×10 (paquets de 10, débloqué après ×2 niveau 2) ; à ajuster au niveau réel de l'enfant testeur (Q9) | — |
 | Mini-jeu « série rapide » | ✅ **Fait** (8 oct.) : 5 calculs enchaînés sur compétences niveau ≥ 2, lapine, jauge « élan de la fusée » qui se remplit (jamais ne se vide), bonus jusqu'à 2⭐ (5/5 + ≥ 4 réponses ≤ 5 s), 2 séries récompensées par jour, sans coup de pouce | — |
 | Identité visuelle | Fusée, renard et planètes en SVG, états du renard (content, encourageant) (Q10) | L |
+| Intro, décompte, replay | ✅ **Fait** (8 oct.) : intro animée au premier lancement (vaisseau qui s'écrase, renard et « ?!? », lapine encore cachée), « Revoir l'intro » sur l'accueil ; décompte 3-2-1 sonore avant la série rapide ; « Revoir les explications » dans l'espace parent | — |
 | Accessibilité | Passage axe/Lighthouse mesuré, navigation clavier complète, annonces lecteur d'écran, test avec animations réduites | M |
 | Appareils réels | Android Chrome (installation), iPhone/iPad Safari (écran d'accueil), PC ; vérifier la persistance des données (Q12) | M |
 | Mise à jour de la PWA | Message « nouvelle version disponible » quand le service worker se met à jour | S |

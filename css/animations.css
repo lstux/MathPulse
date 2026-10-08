@@ -56,3 +56,11 @@
 .elan-cell.on { background: linear-gradient(90deg, #fbbf24, #f97316); box-shadow: 0 0 8px rgba(249, 115, 22, .55); animation: elanPop .45s var(--easing-out); }
 @keyframes elanPop { 0% { transform: scaleX(.3); opacity: .3; } 60% { transform: scaleX(1.15); } 100% { transform: scaleX(1); opacity: 1; } }
 .game-screen .elan { padding-left: 3.2rem; }
+
+/* Décompte de la série rapide */
+.countdown-screen { text-align: center; }
+.countdown { font-size: 7rem; font-weight: 900; line-height: 1; color: var(--color-primary); min-height: 8rem; display: flex; align-items: center; justify-content: center; }
+.countdown.go { font-size: 3.2rem; color: #f97316; }
+.countdown.beat { animation: countBeat .9s var(--easing-out); }
+@keyframes countBeat { 0% { transform: scale(1.8); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 100% { transform: scale(.92); opacity: 1; } }
+.replay-list { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
