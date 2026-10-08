@@ -36,3 +36,15 @@
 .rabbit-says .face { animation: rabbitIn .7s var(--easing-out) backwards; }
 .rabbit-says .speech { animation: fadeIn .5s ease .35s backwards; }
 @keyframes rabbitIn { 0% { transform: translateX(-40px) scale(.7); opacity: 0; } 65% { transform: translateX(6px) scale(1.05); opacity: 1; } 100% { transform: translateX(0) scale(1); } }
+
+/* Soustraction : les blocs enlevés s'estompent après leur apparition */
+.block.removed { animation: blockAppear var(--duration-base) var(--easing-out) backwards, blockCross .5s ease var(--cross-delay, 1s) forwards; }
+@keyframes blockCross { to { background: transparent; box-shadow: none; outline: 2px dashed currentColor; outline-offset: -2px; opacity: .45; transform: scale(.85); } }
+
+/* ×10 : paquets de 10 */
+.visual-tens { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 20rem; }
+.ten-bar { display: inline-flex; align-items: center; justify-content: center; min-width: 3.2rem; padding: .35rem .5rem; border-radius: var(--radius-sm); background: var(--color-space-purple); color: #fff; font-weight: 800; box-shadow: var(--shadow-md); }
+
+.visual-takeaway { flex-direction: column; align-items: center; }
+.visual-takeaway .block-row { max-width: 14.5rem; justify-content: center; flex-wrap: wrap; }
+.visual-tens .ten-bar { border: 0; background: var(--color-space-purple); color: #fff; }

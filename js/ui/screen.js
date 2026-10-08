@@ -312,7 +312,12 @@ class ScreenManager {
         const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
         const cards = SKILL_ORDER.map(id => {
             const st = this.progression.getSkillStats(id);
-            if (!st) return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">Pas encore pratiquée</p></div>`;
+            if (!st) {
+                const req = SKILLS[id].requires;
+                const note = this.engine.isUnlocked(id) ? 'Pas encore pratiquée'
+                    : `🔒 Se débloque avec ${SKILLS[req.skill].name} niveau ${req.level} (${this.stars(req.level)})`;
+                return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">${note}</p></div>`;
+            }
             const w = this.progression.windowStats(st);
             const acc = Math.round(w.accuracy);
             return `<div class="skill-card">

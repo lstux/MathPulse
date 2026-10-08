@@ -20,8 +20,10 @@ else:
     URL = 'http://127.0.0.1:8765/index.html'
 
 def solve(q):
-    m = re.match(r'(\d+) ([+×]) (\d+) = \?', q)
-    if m: a, b = int(m[1]), int(m[3]); return a + b if m[2] == '+' else a * b
+    m = re.match(r'(\d+) ([+×−]) (\d+) = \?', q)
+    if m: a, b = int(m[1]), int(m[3]); return a + b if m[2] == '+' else a - b if m[2] == '−' else a * b
+    m = re.match(r'(\d+) − \? = (\d+)', q)
+    if m: return int(m[1]) - int(m[2])
     m = re.match(r'(\d+) \+ \? = (\d+)', q)
     if m: return int(m[2]) - int(m[1])
     m = re.match(r'\? × (\d+) = (\d+)', q); return int(m[2]) // int(m[1])

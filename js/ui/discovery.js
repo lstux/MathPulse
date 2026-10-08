@@ -7,6 +7,16 @@ const Discovery = {
             visual: () => Animations.blocks(5, 3),
             text: '5 et 3 font 8 ensemble', formula: '5 + 3 = 8'
         },
+        'subtract-simple': {
+            title: 'Soustraire, c\'est enlever !',
+            visual: () => Animations.takeAway(8, 3),
+            text: '8, on enlève 3 : il en reste 5', formula: '8 − 3 = 5'
+        },
+        'multiply-10': {
+            title: 'Un paquet de 10, deux paquets de 10...',
+            visual: () => Animations.tens(3),
+            text: '3 paquets de 10, ça fait 30 : on ajoute un zéro !', formula: '3 × 10 = 30'
+        },
         'multiply-2': {
             title: 'Doubler, c\'est avoir deux fois pareil !',
             visual: () => Animations.groups(2, 3),

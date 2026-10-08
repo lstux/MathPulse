@@ -15,6 +15,15 @@ const SKILLS = {
         // 5 questions par session : types d'exercice dans l'ordre
         plan: ['numeric', 'numeric', 'numeric', 'missing', 'missing']
     },
+    'subtract-simple': {
+        id: 'subtract-simple',
+        name: 'Soustractions',
+        title: 'Les soustractions',
+        operation: '−',
+        animation: 'takeaway',
+        requires: { skill: 'addition-simple', level: 2 },   // se débloque quand les additions sont en bonne voie
+        plan: ['numeric', 'numeric', 'numeric', 'missing', 'missing']
+    },
     'multiply-2': {
         id: 'multiply-2',
         name: '×2 (doubler)',
@@ -22,6 +31,15 @@ const SKILLS = {
         operation: '×',
         animation: 'groups',
         plan: ['numeric', 'numeric', 'numeric', 'missing', 'missing']
+    },
+    'multiply-10': {
+        id: 'multiply-10',
+        name: '×10 (un zéro de plus)',
+        title: 'Les paquets de 10',
+        operation: '×',
+        animation: 'tens',
+        requires: { skill: 'multiply-2', level: 2 },
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
     },
     'multiply-5': {
         id: 'multiply-5',
@@ -33,7 +51,7 @@ const SKILLS = {
     }
 };
 
-const SKILL_ORDER = ['addition-simple', 'multiply-2', 'multiply-5'];
+const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-5', 'multiply-10'];
 
 // Seuils de maîtrise (niveau 1 = vu, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
 const MASTERY = {

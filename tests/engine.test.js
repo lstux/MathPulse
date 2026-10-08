@@ -15,9 +15,9 @@ test('engine: toutes les sessions ont 5 exercices corrects (500 tirages / compé
             assert.strictEqual(session.length, 5);
             for (const ex of session) {
                 const [a, b] = ex.operands;
-                const total = ex.operation === '+' ? a + b : a * b;
+                const total = ex.operation === '+' ? a + b : ex.operation === '−' ? a - b : a * b;
                 assert.strictEqual(ex.total, total);
-                if (ex.type === 'missing') assert.strictEqual(ex.answer, ex.operation === '+' ? b : a);
+                if (ex.type === 'missing') assert.strictEqual(ex.answer, ex.operation === '×' ? a : b);
                 else assert.strictEqual(ex.answer, total);
             }
         }
@@ -411,4 +411,34 @@ test('journal: une ligne par question dans l\'historique, abandon tracé une seu
     assert.strictEqual(hist.filter(h => h.abandoned).length, 1);
     assert.strictEqual(hist.slice(-1)[0].answered, 1);
     assert.strictEqual(hist.slice(-1)[0].at_question, 2);
+});
+
+test('soustraction: résultat toujours ≥ 1, jamais négatif, question et explication', () => {
+    const { engine } = setup();
+    for (let n = 0; n < 500; n++) for (const ex of engine.generateSession('subtract-simple')) {
+        const [a, b] = ex.operands;
+        assert.ok(a >= 3 && a <= 18 && b >= 1 && b <= 9 && a - b >= 1, `${a} − ${b}`);
+        assert.strictEqual(ex.total, a - b);
+        assert.ok(ex.type === 'missing' ? ex.question === `${a} − ? = ${a - b}` : ex.question === `${a} − ${b} = ?`, ex.question);
+    }
+    assert.match(engine.getExplanation({ operation: '−', operands: [8, 3], total: 5 }), /enlève 3 de 8, il en reste 5/);
+});
+
+test('×10: réponses jusqu\'à 100, explication « un zéro de plus »', () => {
+    const { engine } = setup();
+    const seen = new Set();
+    for (let n = 0; n < 500; n++) for (const ex of engine.generateSession('multiply-10')) { assert.strictEqual(ex.operands[1], 10); seen.add(ex.total); }
+    assert.ok(seen.has(100) && seen.has(10));
+    assert.match(engine.getExplanation({ operation: '×', operands: [7, 10], total: 70 }), /ajouter un zéro : 7 × 10 = 70/);
+});
+
+test('déblocage: soustractions après additions niveau 2, ×10 après ×2 niveau 2', () => {
+    const { engine, progression } = setup();
+    assert.ok(!engine.isUnlocked('subtract-simple') && !engine.isUnlocked('multiply-10'));
+    for (let i = 0; i < 5; i++) engine.selectSkillForSession(), assert.ok(!['subtract-simple', 'multiply-10'].includes(engine.selectSkillForSession()));
+    for (let i = 0; i < 4; i++) progression.recordAnswer('addition-simple', true, 2000);
+    assert.ok(engine.isUnlocked('subtract-simple') && !engine.isUnlocked('multiply-10'));
+    assert.strictEqual(engine.selectSkillForSession(), 'subtract-simple', 'nouvelle compétence (niveau 0) prioritaire');
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    assert.ok(engine.isUnlocked('multiply-10'));
 });

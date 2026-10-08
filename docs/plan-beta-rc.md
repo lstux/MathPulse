@@ -47,7 +47,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 
 | Chantier | Détail | Taille |
 |---|---|---|
-| Contenu | Soustraction simple (animation de retrait) et ×10, ajustés au niveau réel de l'enfant testeur (Q9) | M |
+| Contenu | ✅ **Fait** (8 oct.) : soustraction simple (a − b, reste ≥ 1, animation de retrait, débloquée après Additions niveau 2) et ×10 (paquets de 10, débloqué après ×2 niveau 2) ; à ajuster au niveau réel de l'enfant testeur (Q9) | — |
 | Mini-jeu « série rapide » | 5 calculs enchaînés, sans pression visible (spec §9, §27) | M |
 | Identité visuelle | Fusée, renard et planètes en SVG, états du renard (content, encourageant) (Q10) | L |
 | Accessibilité | Passage axe/Lighthouse mesuré, navigation clavier complète, annonces lecteur d'écran, test avec animations réduites | M |

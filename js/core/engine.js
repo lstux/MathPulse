@@ -8,8 +8,14 @@ class Engine {
 
     // ---------- Choix de la compétence ----------
     // Priorité : maîtrise la plus basse, puis pratiquée il y a le plus longtemps, puis ordre du catalogue.
+    // Une compétence est disponible quand son prérequis (autre compétence, niveau de maîtrise) est atteint
+    isUnlocked(id) {
+        const req = SKILLS[id] && SKILLS[id].requires;
+        return !req || this.progression.getMasteryLevel(req.skill) >= req.level;
+    }
+
     selectSkillForSession() {
-        const ranked = SKILL_ORDER.map((id, order) => {
+        const ranked = SKILL_ORDER.filter(id => this.isUnlocked(id)).map((id, order) => {
             const stats = this.progression.getSkillStats(id);
             return {
                 id, order,
@@ -86,6 +92,8 @@ class Engine {
             case 'addition-simple': a = this.randInt(1, 9); b = this.randInt(1, 9); break;
             case 'multiply-2': a = this.randInt(1, 10); b = 2; break;
             case 'multiply-5': a = this.randInt(1, 10); b = 5; break;
+            case 'multiply-10': a = this.randInt(1, 10); b = 10; break;
+            case 'subtract-simple': a = this.randInt(3, 18); b = this.randInt(1, Math.min(9, a - 1)); break;   // reste toujours ≥ 1
             default: throw new Error(`Compétence inconnue : ${skillId}`);
         }
         return this.buildExercise(skillId, type, a, b);
@@ -93,7 +101,7 @@ class Engine {
 
     buildExercise(skillId, type, a, b) {
         const op = SKILLS[skillId].operation;
-        const total = op === '+' ? a + b : a * b;
+        const total = op === '+' ? a + b : op === '−' ? a - b : a * b;
         const ex = {
             skill: skillId, type, operation: op,
             operands: [a, b], total,
@@ -102,15 +110,15 @@ class Engine {
         };
 
         if (type === 'missing') {
-            // le nombre manquant est le premier opérande en ×, le second en +
-            const hidden = op === '+' ? b : a;
+            // le nombre manquant est le premier opérande en ×, le second en + et en −
+            const hidden = op === '×' ? a : b;
             ex.answer = hidden;
-            ex.question = op === '+' ? `${a} + ? = ${total}` : `? × ${b} = ${total}`;
+            ex.question = op === '×' ? `? × ${b} = ${total}` : `${a} ${op} ? = ${total}`;
             ex.choices = this.makeChoices(hidden, [-3, -2, -1, 1, 2, 3]);
         } else if (type === 'multiple') {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;
-            ex.choices = this.makeChoices(total, op === '×' ? [-10, -5, 5, 10, -1, 1, 2] : [-2, -1, 1, 2, 3]);
+            ex.choices = this.makeChoices(total, op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-10, -5, 5, 10, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
         } else {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;
@@ -138,6 +146,8 @@ class Engine {
         const [a, b] = exercise.operands;
         const t = exercise.total;
         if (exercise.operation === '+') return `${a} et ${b} font ${t} ensemble.`;
+        if (exercise.operation === '−') return `Si on enlève ${b} de ${a}, il en reste ${t}.`;
+        if (b === 10) return `Multiplier par 10, c'est ajouter un zéro : ${a} × 10 = ${t}.`;
         if (b === 2) return `Le double de ${a}, c'est ${a} + ${a} = ${t}.`;
         return `${a} groupes de ${b} font ${t}.`;
     }
