@@ -314,3 +314,27 @@ test('erreurs: stockage plafonné (les plus anciennes sont oubliées)', () => {
     assert.strictEqual(progression.getPendingErrors().length, REVIEW.maxStored);
     assert.ok(!progression.data.errors['×:1:5'], 'la plus ancienne a été oubliée');
 });
+
+test('maîtrise: fenêtre glissante de 20 réponses (la maîtrise redescend après une mauvaise série)', () => {
+    const { progression } = setup();
+    for (let i = 0; i < 10; i++) progression.recordAnswer('multiply-2', true, 1500);
+    assert.strictEqual(progression.getMasteryLevel('multiply-2'), 3);
+    for (let i = 0; i < 12; i++) progression.recordAnswer('multiply-2', false, 4000);
+    assert.strictEqual(progression.getMasteryLevel('multiply-2'), 1, '12 erreurs sur les 20 dernières → niveau 1');
+    const st = progression.getSkillStats('multiply-2');
+    assert.strictEqual(st.recent.length, MASTERY.window);
+    assert.strictEqual(st.seen, 22, 'les totaux gardent tout l\'historique');
+    for (let i = 0; i < 20; i++) progression.recordAnswer('multiply-2', true, 1500);
+    assert.strictEqual(progression.getMasteryLevel('multiply-2'), 3, 'les anciennes erreurs sortent de la fenêtre');
+});
+
+test('maîtrise: anciennes données (sans fenêtre) reconstituées au chargement', () => {
+    const { progression } = setup();
+    storage.set(storage.KEYS.PROGRESSION, { version: 1, totalStars: 5, discovered: {}, errors: {},
+        skills: { 'multiply-2': { seen: 40, correct: 38, wrong: 2, avg_time_ms: 2000, mastery_level: 3, last_practiced: null } } });
+    progression.load();
+    const st = progression.getSkillStats('multiply-2');
+    assert.strictEqual(st.recent.length, 20);
+    assert.strictEqual(progression.windowStats(st).correct, 19);
+    assert.strictEqual(progression.computeMastery(st), 3);
+});

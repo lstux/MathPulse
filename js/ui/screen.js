@@ -311,10 +311,11 @@ class ScreenManager {
         const cards = SKILL_ORDER.map(id => {
             const st = this.progression.getSkillStats(id);
             if (!st) return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">Pas encore pratiquée</p></div>`;
-            const acc = Math.round((st.correct / st.seen) * 100);
+            const w = this.progression.windowStats(st);
+            const acc = Math.round(w.accuracy);
             return `<div class="skill-card">
                 <div class="skill-head"><h3>${SKILLS[id].name}</h3><span aria-label="Maîtrise ${st.mastery_level} sur 3">${this.stars(st.mastery_level)}</span></div>
-                <p class="muted text-sm">${acc} % de réussite · ${st.seen} questions · ${(st.avg_time_ms / 1000).toFixed(1)} s en moyenne</p>
+                <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s en moyenne</p>
             </div>`;
         }).join('');
         const recent = history.slice(-5).reverse().map(h =>

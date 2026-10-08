@@ -35,7 +35,8 @@ const SKILL_ORDER = ['addition-simple', 'multiply-2', 'multiply-5'];
 const MASTERY = {
     level2: { minSeen: 3, minAccuracy: 70 },
     level3: { minSeen: 5, minAccuracy: 90, maxAvgMs: 3000 },
-    maxCountedMs: 15000   // un temps de réponse est plafonné (enfant parti en pause)
+    maxCountedMs: 15000,  // un temps de réponse est plafonné (enfant parti en pause)
+    window: 20            // la maîtrise se calcule sur les 20 dernières réponses de la compétence (elle peut remonter ET redescendre)
 };
 
 // Récompenses de session : étoiles gagnées selon le nombre de bonnes réponses

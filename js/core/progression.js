@@ -12,11 +12,16 @@ class Progression {
         const saved = storage.get(storage.KEYS.PROGRESSION) || {};
         this.data = {
             version: 1,   // version du format des données (pour les futures migrations)
-            skills: saved.skills || {},
+            skills: this.migrateSkills(saved.skills || {}),
             totalStars: Number.isFinite(saved.totalStars) ? saved.totalStars : 0,
             discovered: saved.discovered || {},
             errors: saved.errors || {}   // calculs à revoir, indexés par exercise.key
         };
+    }
+
+    migrateSkills(skills) {
+        Object.values(skills).forEach(sk => this.ensureRecent(sk));
+        return skills;
     }
 
     save() {
@@ -27,27 +32,53 @@ class Progression {
         if (!this.data.skills[skillId]) {
             this.data.skills[skillId] = {
                 seen: 0, correct: 0, wrong: 0,
-                avg_time_ms: 0, mastery_level: 1, last_practiced: null
+                avg_time_ms: 0, mastery_level: 1, last_practiced: null, recent: []
             };
         }
         const skill = this.data.skills[skillId];
+        this.ensureRecent(skill);
         const t = Math.min(Math.max(0, timeMs), MASTERY.maxCountedMs);
 
+        // Totaux sur toute la vie de la compétence (historique, espace parent)
         skill.seen++;
         if (correct) skill.correct++; else skill.wrong++;
         skill.avg_time_ms = (skill.avg_time_ms * (skill.seen - 1) + t) / skill.seen;
         skill.last_practiced = new Date().toISOString();
+
+        // Fenêtre glissante : c'est elle qui décide de la maîtrise
+        skill.recent.push({ c: correct ? 1 : 0, t });
+        if (skill.recent.length > MASTERY.window) skill.recent.splice(0, skill.recent.length - MASTERY.window);
         skill.mastery_level = this.computeMastery(skill);
 
         this.save();
         return skill;
     }
 
+    // Données d'avant la fenêtre glissante : on la reconstitue à partir des totaux (proportions, temps moyen)
+    ensureRecent(skill) {
+        if (Array.isArray(skill.recent)) return;
+        const n = Math.min(skill.seen || 0, MASTERY.window);
+        const right = skill.seen ? Math.round(n * skill.correct / skill.seen) : 0;
+        skill.recent = Array.from({ length: n }, (_, i) => ({ c: i < right ? 1 : 0, t: skill.avg_time_ms || 0 }));
+    }
+
+    // Réussite et temps moyen sur les dernières réponses
+    windowStats(skill) {
+        this.ensureRecent(skill);
+        const n = skill.recent.length;
+        const correct = skill.recent.reduce((sum, r) => sum + r.c, 0);
+        return {
+            n, correct,
+            accuracy: n ? (correct / n) * 100 : 0,
+            avgMs: n ? skill.recent.reduce((sum, r) => sum + r.t, 0) / n : 0
+        };
+    }
+
     computeMastery(skill) {
-        const accuracy = skill.seen > 0 ? (skill.correct / skill.seen) * 100 : 0;
+        const w = this.windowStats(skill);
         const l3 = MASTERY.level3, l2 = MASTERY.level2;
-        if (skill.seen >= l3.minSeen && accuracy >= l3.minAccuracy && skill.avg_time_ms <= l3.maxAvgMs) return 3;
-        if (skill.seen >= l2.minSeen && accuracy >= l2.minAccuracy) return 2;
+        if (w.n >= l3.minSeen && w.accuracy >= l3.minAccuracy && w.avgMs <= l3.maxAvgMs) return 3;
+        if (w.n >= l2.minSeen && w.accuracy >= l2.minAccuracy) return 2;
         return 1;
     }
 
