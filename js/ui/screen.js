@@ -1,5 +1,9 @@
 // MathPulse - Gestionnaire d'écrans : home, universe, discovery, game, result, parent
 
+// Intro animée : durée de l'animation, puis délai avant le passage automatique à l'accueil
+const INTRO_DURATION_MS = 7200;
+const INTRO_AUTO_SKIP_MS = 5000;
+
 class ScreenManager {
     constructor(appContainer, engine, progression) {
         this.appContainer = appContainer;
@@ -68,29 +72,32 @@ class ScreenManager {
         screen.innerHTML = `
             <div class="intro-art" id="intro-art" aria-live="polite"></div>
             <button class="btn-skip" id="btn-skip-intro">Passer</button>
-            <button class="btn-primary btn-large intro-next" id="btn-intro-next" hidden>Continuer</button>
             ${data.replay ? '' : '<button class="intro-cover" id="btn-intro-start"><span class="intro-cover-icon" aria-hidden="true">🚀</span><span class="text-xl font-bold">Touche pour commencer</span></button>'}
         `;
         const art = screen.querySelector('#intro-art');
-        const next = screen.querySelector('#btn-intro-next');
-        const showNext = () => { next.hidden = false; next.classList.add('visible'); };
+        const skip = screen.querySelector('#btn-skip-intro');
+        // Fin de l'animation : le bouton devient « Continuer › » (discret, avec une jauge de 5 s) puis on passe à l'accueil tout seul
+        const ending = () => {
+            skip.textContent = 'Continuer ›';
+            skip.classList.add('counting');
+            this.later(finish, INTRO_AUTO_SKIP_MS);
+        };
 
         // Le décor est chargé en ligne (et non en <img>) : l'animation redémarre à chaque affichage
         const play = () => {
             fetch('assets/story/intro-anim.svg').then(r => r.text()).then(svg => {
                 if (this.currentScreen !== 'intro') return;
                 art.innerHTML = svg;
-                if (reduced) return showNext();
+                if (reduced) return ending();
                 this.later(() => Sound.play('crash'), 2050);
-                this.later(showNext, 6600);
-            }).catch(showNext);
+                this.later(ending, INTRO_DURATION_MS);
+            }).catch(ending);
         };
         const cover = screen.querySelector('#btn-intro-start');
         if (cover) cover.addEventListener('click', () => { cover.remove(); play(); });
         else play();
 
-        screen.querySelector('#btn-skip-intro').addEventListener('click', finish);
-        next.addEventListener('click', finish);
+        skip.addEventListener('click', finish);
         return screen;
     }
 
