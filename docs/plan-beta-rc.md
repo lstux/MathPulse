@@ -1,6 +1,6 @@
 # MathPulse — Plan vers la bêta puis la release candidate
 
-_Rédigé le 6 octobre 2026. Les dates sont indicatives et supposent quelques soirées de travail par semaine ; elles se décalent si le rythme change. Les questions Q1 à Q13 renvoient à [`revue-mvp.md`](revue-mvp.md)._
+_Rédigé le 6 octobre 2026 (mis à jour le 8). Contenu au-delà de la 1.0 : voir [`parcours-etendu.md`](parcours-etendu.md) (tables ×3 à ×9, divisions, grands nombres). Les dates sont indicatives et supposent quelques soirées de travail par semaine ; elles se décalent si le rythme change. Les questions Q1 à Q13 renvoient à [`revue-mvp.md`](revue-mvp.md)._
 
 ## Vue d'ensemble
 
