@@ -50,6 +50,7 @@ jobs:
           mkdir _site
           cp -r index.html manifest.json sw.js css js assets _site/
           sed -i "s/mathpulse-v[0-9]*/mathpulse-${GITHUB_SHA::7}/" _site/sw.js
+          sed -i "s/const APP_BUILD = 'dev'/const APP_BUILD = '${GITHUB_SHA::7}'/" _site/js/content/skills.js
           grep -n "CACHE_VERSION =" _site/sw.js
       - uses: actions/upload-pages-artifact@v3
         with:

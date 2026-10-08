@@ -368,3 +368,47 @@ test('mélange: les calculs à revoir passent avant les rappels', () => {
     assert.strictEqual(session[1].review, true, 'le calcul raté prend la première place de rappel (question 2)');
     assert.strictEqual(session[3].recall, true);
 });
+
+test('temps: la maîtrise utilise le temps de réflexion (premier chiffre), le total reste dans le journal', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start();
+    s.beginQuestion();
+    s.questionStart = Date.now() - 6000;           // 6 s au total...
+    s.noteInput(s.questionStart + 1800);           // ...dont 1,8 s avant le premier chiffre
+    s.noteInput(s.questionStart + 4000);           // un second chiffre ne change rien
+    const ex = s.getCurrentExercise();
+    s.submitAnswer(ex.answer);
+    const r = s.results[0];
+    assert.strictEqual(r.think_ms, 1800);
+    assert.ok(r.time_ms >= 6000);
+    assert.strictEqual(progression.getSkillStats(ex.skill).recent[0].t, 1800);
+});
+
+test('temps: réponse à choix → temps de réflexion = temps total', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start(); s.beginQuestion();
+    s.questionStart = Date.now() - 2500;
+    s.submitAnswer(s.getCurrentExercise().answer);
+    assert.ok(Math.abs(s.results[0].think_ms - s.results[0].time_ms) < 5);
+});
+
+test('journal: une ligne par question dans l\'historique, abandon tracé une seule fois', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start();
+    s.exercises.forEach(() => { s.beginQuestion(); s.submitAnswer(s.getCurrentExercise().answer); s.next(); });
+    s.complete();
+    const last = storage.get(storage.KEYS.SESSION_HISTORY).slice(-1)[0];
+    assert.strictEqual(last.answers.length, 5);
+    assert.ok(last.answers.every(a => typeof a.think_ms === 'number' && typeof a.total_ms === 'number' && a.ok === true));
+
+    const s2 = new Session(engine, progression);
+    s2.start(); s2.beginQuestion(); s2.submitAnswer(s2.getCurrentExercise().answer); s2.next();
+    s2.abandon(); s2.abandon();
+    const hist = storage.get(storage.KEYS.SESSION_HISTORY);
+    assert.strictEqual(hist.filter(h => h.abandoned).length, 1);
+    assert.strictEqual(hist.slice(-1)[0].answered, 1);
+    assert.strictEqual(hist.slice(-1)[0].at_question, 2);
+});

@@ -226,6 +226,7 @@ class ScreenManager {
             const display = screen.querySelector('#answer-display');
             const press = key => {
                 if (answered) return;
+                if (/^\d$/.test(key)) s.noteInput();
                 if (key === 'ok') return submit(typed);
                 if (key === 'del') typed = typed.slice(0, -1);
                 else if (typed.length < 3) typed = (typed + key).replace(/^0+(?=\d)/, '');
@@ -261,7 +262,7 @@ class ScreenManager {
             screen.querySelector('#visual-slot').innerHTML = Animations.forExercise(ex);
             e.currentTarget.hidden = true;
         });
-        screen.querySelector('#btn-quit').addEventListener('click', () => this.show('universe'));
+        screen.querySelector('#btn-quit').addEventListener('click', () => { s.abandon(); this.show('universe'); });
         this.bindSoundButton(screen.querySelector('#btn-sound'));
         return screen;
     }
@@ -316,11 +317,11 @@ class ScreenManager {
             const acc = Math.round(w.accuracy);
             return `<div class="skill-card">
                 <div class="skill-head"><h3>${SKILLS[id].name}</h3><span aria-label="Maîtrise ${st.mastery_level} sur 3">${this.stars(st.mastery_level)}</span></div>
-                <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s en moyenne</p>
+                <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s de réflexion en moyenne</p>
             </div>`;
         }).join('');
         const recent = history.slice(-5).reverse().map(h =>
-            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill} · ${h.correct}/${h.total}</li>`).join('');
+            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill} · ${h.abandoned ? `abandon (question ${h.at_question}/${h.total})` : `${h.correct}/${h.total}`}</li>`).join('');
 
         const pending = this.progression.getPendingErrors();
         const toReview = pending.length
@@ -336,6 +337,7 @@ class ScreenManager {
                 ${toReview}
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
+                <p class="muted text-sm mb-md" id="app-version">Version ${APP_VERSION} (${APP_BUILD})</p>
                 <div class="flex flex-col gap-md">
                     <button class="btn-secondary" id="btn-sound-parent"></button>
                     <button class="btn-secondary" id="btn-export">Exporter les données</button>

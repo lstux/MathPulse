@@ -9,6 +9,8 @@ class Session {
         this.currentIndex = 0;
         this.results = [];
         this.questionStart = null;
+        this.firstInputAt = null;     // premier chiffre tapé / première réponse choisie (fin de la réflexion)
+        this.abandoned = false;
         this.questionHint = null;     // {free: bool} si un coup de pouce a été pris sur la question courante
         this.hintsUsed = 0;
         this.cleared = 0;
@@ -26,6 +28,7 @@ class Session {
         this.hintsUsed = 0;
         this.questionHint = null;
         this.completed = false;
+        this.abandoned = false;
         this.summary = null;
     }
 
@@ -36,7 +39,13 @@ class Session {
     // À appeler quand la question est réellement affichée (le chrono ne tourne pas pendant la découverte)
     beginQuestion() {
         this.questionStart = Date.now();
+        this.firstInputAt = null;
         this.questionHint = null;
+    }
+
+    // À appeler au premier chiffre tapé : la réflexion est finie, la suite n'est que de la saisie
+    noteInput(now = Date.now()) {
+        if (this.questionStart && this.firstInputAt === null) this.firstInputAt = now;
     }
 
     // ---------- Coups de pouce ----------
@@ -59,17 +68,21 @@ class Session {
 
     submitAnswer(answer) {
         const exercise = this.getCurrentExercise();
-        const timeMs = this.questionStart ? Date.now() - this.questionStart : 0;
+        const now = Date.now();
+        const timeMs = this.questionStart ? now - this.questionStart : 0;
+        // Maîtrise : temps de réflexion (jusqu'au premier chiffre tapé), pas la dextérité sur le pavé
+        const thinkMs = this.questionStart && this.firstInputAt !== null ? this.firstInputAt - this.questionStart : timeMs;
         const correct = this.engine.validateAnswer(exercise, answer);
         const hint = this.questionHint;
         // Une réponse aidée hors quota ne compte pas dans la maîtrise
         const countedForMastery = !(hint && !hint.free);
         this.results.push({
             key: exercise.key, question: exercise.question, answer: String(answer),
-            correct, time_ms: timeMs, hinted: !!hint, countedForMastery
+            correct, time_ms: timeMs, think_ms: thinkMs, hinted: !!hint, countedForMastery,
+            review: !!exercise.review, recall: !!exercise.recall
         });
         // La maîtrise va à la compétence de l'exercice (un calcul à revoir peut venir d'une autre compétence)
-        if (countedForMastery) this.progression.recordAnswer(exercise.skill, correct, timeMs);
+        if (countedForMastery) this.progression.recordAnswer(exercise.skill, correct, thinkMs);
         const reviewOutcome = this.progression.noteResult(exercise, correct, !!hint);
         if (reviewOutcome === 'cleared') this.cleared++;
         return { correct, answer: exercise.answer, countedForMastery, reviewOutcome };
@@ -77,6 +90,17 @@ class Session {
 
     next() {
         this.currentIndex++;
+    }
+
+    // Session quittée avant la fin (✕) : on garde une trace pour comprendre où l'enfant décroche
+    abandon() {
+        if (this.completed || this.abandoned || !this.skill) return;
+        this.abandoned = true;
+        storage.append(storage.KEYS.SESSION_HISTORY, {
+            at: new Date().toISOString(), skill: this.skill, abandoned: true,
+            answered: this.results.length, total: this.exercises.length, hintsUsed: this.hintsUsed,
+            at_question: this.currentIndex + 1
+        });
     }
 
     isComplete() {
@@ -103,7 +127,10 @@ class Session {
             avgTime: total ? this.results.reduce((s, r) => s + r.time_ms, 0) / total : 0
         };
         storage.append(storage.KEYS.SESSION_HISTORY, {
-            at: new Date().toISOString(), skill: this.skill, correct, total, starsEarned, hintsUsed: this.hintsUsed
+            at: new Date().toISOString(), skill: this.skill, correct, total, starsEarned, hintsUsed: this.hintsUsed,
+            // journal d'usage : une ligne par question (temps de réflexion et temps total, aide, revue/rappel)
+            answers: this.results.map(r => ({ q: r.question, ok: r.correct, think_ms: r.think_ms, total_ms: r.time_ms,
+                hinted: r.hinted, review: r.review, recall: r.recall }))
         });
         this.completed = true;
         return this.summary;

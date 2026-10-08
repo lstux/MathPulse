@@ -116,6 +116,11 @@ with sync_playwright() as p:
     assert stars >= 5, f'étoiles non créditées ({stars})'
     pg.wait_for_timeout(800)
     assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
+    # espace parent : version affichée, abandon tracé
+    pg.click('#btn-universe') if pg.locator('#btn-universe').count() else None
+    pg.evaluate("window.mathpulse.screenManager.show('parent')"); pg.wait_for_timeout(200)
+    assert 'Version' in pg.inner_text('#app-version')
+    assert 'réflexion' in pg.inner_text('.skill-card >> nth=0') or 'Pas encore' in pg.inner_text('.skill-card >> nth=0')
     ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(600)
     assert pg.inner_text('h1') == 'MathPulse', 'rechargement hors ligne en échec'
     b.close()

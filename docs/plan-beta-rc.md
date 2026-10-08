@@ -28,7 +28,8 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Mélange des notions | ✅ **Fait** (8 oct.) : sessions à 60 % compétence ciblée / 40 % rappels (calculs ratés d'abord, puis autres compétences déjà pratiquées), questions 2 et 4 | — |
 | Maîtrise plus juste | ✅ **Fait** : fenêtre glissante de 20 réponses (Q3, 8 oct., anciennes données migrées) ; coups de pouce (Q1) | — |
 | Pavé numérique | ✅ **Fait** (le 6 oct.) : grandes touches, ⌫, ✓, clavier physique | — |
-| Journal d'usage local | Enregistrer abandons (✕), usage de l'aide, temps par question dans l'historique | S |
+| Journal d'usage local | ✅ **Fait** (8 oct.) : historique par question (réflexion, temps total, aide, revue/rappel), abandons (✕) tracés, version + commit affichés dans l'espace parent | — |
+| Temps de maîtrise | ✅ **Fait** (8 oct.) : le temps compté est celui de réflexion (jusqu'au premier chiffre tapé) ; niveau 3 = moyenne ≤ 5 s (d'après les premiers tests) | — |
 
 **Critères de sortie :**
 - [ ] Tests unitaires et smoke verts en CI sur chaque push.

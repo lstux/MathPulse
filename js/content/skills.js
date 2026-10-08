@@ -1,4 +1,8 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
+
+// Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
+const APP_VERSION = '0.5.0';
+const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
 const SKILLS = {
@@ -34,7 +38,7 @@ const SKILL_ORDER = ['addition-simple', 'multiply-2', 'multiply-5'];
 // Seuils de maîtrise (niveau 1 = vu, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
 const MASTERY = {
     level2: { minSeen: 3, minAccuracy: 70 },
-    level3: { minSeen: 5, minAccuracy: 90, maxAvgMs: 3000 },
+    level3: { minSeen: 5, minAccuracy: 90, maxAvgMs: 5000 },  // temps de réflexion moyen (jusqu'au premier chiffre tapé),
     maxCountedMs: 15000,  // un temps de réponse est plafonné (enfant parti en pause)
     window: 20            // la maîtrise se calcule sur les 20 dernières réponses de la compétence (elle peut remonter ET redescendre)
 };
