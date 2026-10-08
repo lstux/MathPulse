@@ -25,10 +25,13 @@ class Engine {
     generateSession(skillId) {
         const skill = SKILLS[skillId];
         if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
-        // Calculs ratés à revoir : placés aux questions 2 et 4 (la première et la dernière restent « fraîches »)
-        const reviews = this.pickReviews();
+        // 40 % de la session reprend d'anciennes notions : d'abord les calculs ratés à revoir,
+        // puis des rappels d'autres compétences déjà pratiquées. Placés aux questions 2 et 4
+        // (la première et la dernière restent « fraîches »).
+        const recalls = this.pickRecalls(skillId);
         const reviewSlots = new Set();
-        for (let i = skill.plan.length - 2, n = 0; n < reviews.length && i >= 0; i -= 2, n++) reviewSlots.add(i);
+        for (let i = skill.plan.length - 2, n = 0; n < recalls.length && i >= 0; i -= 2, n++) reviewSlots.add(i);
+        const reviews = recalls;
 
         const exercises = [];
         const seen = new Set(reviews.map(r => r.key));
@@ -43,6 +46,28 @@ class Engine {
             exercises.push(ex);
         });
         return exercises;
+    }
+
+    // Emplacements de rappel : calculs ratés d'abord, complétés par d'autres compétences déjà pratiquées
+    pickRecalls(targetId) {
+        const picked = this.pickReviews();
+        const keys = new Set(picked.map(r => r.key));
+        const others = SKILL_ORDER
+            .filter(id => id !== targetId && this.progression.getSkillStats(id))
+            .map(id => ({ id, level: this.progression.getMasteryLevel(id), last: Date.parse(this.progression.getSkillStats(id).last_practiced) || 0 }))
+            .sort((a, b) => a.level - b.level || a.last - b.last);
+        const total = Math.min(MIX.recallPerSession, 2);
+        for (let i = 0; others.length && picked.length < total; i++) {
+            let ex = null;
+            for (let tries = 0; tries < 30; tries++) {
+                ex = this.generateExercise(others[i % others.length].id, 'numeric');
+                if (!keys.has(ex.key)) break;
+            }
+            keys.add(ex.key);
+            ex.recall = true;
+            picked.push(ex);
+        }
+        return picked;
     }
 
     // Reconstruit les exercices correspondant aux erreurs mémorisées (même opération, même type)

@@ -164,6 +164,7 @@ class ScreenManager {
             </div>
             <div class="mascot" id="mascot" data-mood="content">${this.face('fox', 'content')}</div>
             ${ex.review ? '<p class="review-tag" id="review-tag">🔁 Un calcul à retenter</p>' : ''}
+            ${ex.recall ? '<p class="review-tag" id="recall-tag">🔙 Un petit rappel</p>' : ''}
             <div class="question" id="question">${ex.question}</div>
             <div id="visual-slot"></div>
             ${answerArea}

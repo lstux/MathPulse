@@ -284,8 +284,9 @@ test('erreurs: un calcul à revoir compte pour la maîtrise de sa propre compét
     s.start();
     assert.notStrictEqual(s.skill, 'addition-simple');
     s.exercises.forEach(ex => { s.beginQuestion(); s.submitAnswer(ex.answer); s.next(); });
-    assert.strictEqual(progression.getSkillStats('addition-simple').seen, 2, '1 déjà vue + le calcul à revoir');
-    assert.strictEqual(progression.getSkillStats(s.skill).seen, 4);
+    // 5 questions : 3 de la compétence du jour, le calcul à revoir + 1 rappel (mélange 60/40) d'addition
+    assert.strictEqual(progression.getSkillStats('addition-simple').seen, 3, '1 déjà vue + le calcul à revoir + 1 rappel');
+    assert.strictEqual(progression.getSkillStats(s.skill).seen, 3);
 });
 
 test('erreurs: résumé de session (revues, calculs acquis) et persistance', () => {
@@ -337,4 +338,33 @@ test('maîtrise: anciennes données (sans fenêtre) reconstituées au chargement
     assert.strictEqual(st.recent.length, 20);
     assert.strictEqual(progression.windowStats(st).correct, 19);
     assert.strictEqual(progression.computeMastery(st), 3);
+});
+
+test('mélange: rien à rappeler tant qu\'une seule compétence a été pratiquée', () => {
+    const { engine } = setup();
+    for (let i = 0; i < 20; i++) assert.ok(engine.generateSession('addition-simple').every(e => e.skill === 'addition-simple' && !e.recall));
+});
+
+test('mélange: 3 questions du jour + 2 rappels d\'autres compétences, aux questions 2 et 4', () => {
+    const { engine, progression } = setup();
+    progression.recordAnswer('addition-simple', true, 1500);
+    progression.recordAnswer('multiply-2', true, 1500);
+    for (let i = 0; i < 30; i++) {
+        const session = engine.generateSession('multiply-5');
+        assert.strictEqual(session.length, 5);
+        assert.deepStrictEqual(session.map(e => !!e.recall), [false, true, false, true, false]);
+        session.filter(e => e.recall).forEach(e => assert.notStrictEqual(e.skill, 'multiply-5'));
+        assert.strictEqual(new Set(session.map(e => e.key)).size, 5, 'pas de doublon');
+    }
+});
+
+test('mélange: les calculs à revoir passent avant les rappels', () => {
+    const { engine, progression } = setup();
+    progression.recordAnswer('addition-simple', true, 1500);
+    progression.noteResult(engine.buildExercise('multiply-2', 'numeric', 7, 2), false);
+    const session = engine.generateSession('multiply-5');
+    assert.strictEqual(session.filter(e => e.review).length, 1);
+    assert.strictEqual(session.filter(e => e.recall).length, 1);
+    assert.strictEqual(session[1].review, true, 'le calcul raté prend la première place de rappel (question 2)');
+    assert.strictEqual(session[3].recall, true);
 });

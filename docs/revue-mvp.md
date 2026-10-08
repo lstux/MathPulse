@@ -64,6 +64,7 @@ _Recommandation :_ conserver 3 s pour les QCM, 5 s pour la saisie, et décider d
 **Q3 — Maîtrise cumulative ou fenêtre glissante.**
 Aujourd'hui la précision est calculée sur toute la vie de la compétence : une mauvaise première semaine pèse très longtemps et la maîtrise ne redescend jamais.
 _Recommandation :_ fenêtre des 20 dernières réponses (la maîtrise peut monter et redescendre, ce qui alimente aussi le rappel des notions anciennes).
+_Décision / réalisation (8 oct.) :_ ✅ fait, fenêtre de 20 réponses ; les totaux restent conservés pour l'historique.
 
 **Q4 — Accès à l'espace parent.**
 _✅ Décidé le 6 oct. : espace parent non protégé (la réinitialisation garde sa confirmation)._
@@ -85,6 +86,7 @@ _Recommandation :_ un pavé numérique intégré, grandes touches, dans le jeu.
 **Q7 — Rythme de progression.** Avec 0 à 3 étoiles par session et des planètes à 10 / 25 / 50 étoiles, Saturne demande environ 17 à 25 sessions. Est-ce le bon rythme (une session par jour ≈ 3 à 4 semaines) ? _Recommandation :_ ajouter des paliers plus rapprochés au début (5, 12, 25, 40, 60) et régler avec les données de la bêta.
 
 **Q8 — Mélange des notions.** Faut-il, dès la v1, mélanger les compétences dans une même session (spec §13) ? _Recommandation :_ oui, 60 % de la compétence ciblée et 40 % de rappels, dès que la réapparition des erreurs existe.
+_Décision / réalisation (8 oct.) :_ ✅ fait : 3 questions du jour + 2 rappels (calculs ratés d'abord, puis autres compétences déjà pratiquées, les moins maîtrisées en premier).
 
 **Q9 — Niveau réel de l'enfant testeur.** Les additions vont de 1+1 à 9+9 ; la spec vise « jusqu'à 20 ». Quelles compétences manquent pour qu'un CE2 s'y retrouve (soustractions, ×10, compléments à 10) ? _Recommandation :_ ajouter soustraction simple et ×10 pendant la bêta, d'après le niveau constaté.
 

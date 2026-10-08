@@ -79,12 +79,14 @@ with sync_playwright() as p:
         if session < 2: pg.click('#btn-again'); pg.wait_for_timeout(300)
 
     # Réapparition des erreurs : un calcul raté revient (étiqueté) aux deux sessions suivantes, puis est acquis
+    recalls = [0]
     def play_session(wrong_first=False):
         seen = []
         if pg.locator('#btn-start-game').count(): pg.click('#btn-start-game')
         for i in range(5):
             q = pg.inner_text('#question')
             seen.append((q, pg.locator('#review-tag').count() == 1))
+            recalls[0] += pg.locator('#recall-tag').count()
             ans = solve(q)
             wrong = wrong_first and i == 0
             if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')
@@ -113,6 +115,7 @@ with sync_playwright() as p:
     stars = pg.evaluate('window.mathpulse.progression.getTotalStars()')
     assert stars >= 5, f'étoiles non créditées ({stars})'
     pg.wait_for_timeout(800)
+    assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
     ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(600)
     assert pg.inner_text('h1') == 'MathPulse', 'rechargement hors ligne en échec'
     b.close()

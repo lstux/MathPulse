@@ -25,8 +25,8 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Mise en ligne | ✅ Workflow Pages écrit (déploie après les tests) ; reste à activer *Settings → Pages → Source : GitHub Actions*, tester l'adresse réelle sur téléphone, afficher la version dans l'espace parent | S |
 | Intégration continue | ✅ Écrit (`ci-pages.yml` : tests unitaires + smoke à chaque push et PR) ; à valider au premier passage | S |
 | Réapparition des erreurs | ✅ **Fait** (7 oct.) : opérations ratées mémorisées, 2 max réinjectées par session (questions 2 et 4) jusqu'à 2 réussites consécutives ; 8 tests unitaires + parcours navigateur | — |
-| Mélange des notions | Sessions à 60 % compétence ciblée / 40 % rappel de notions déjà vues (Q8) | M |
-| Maîtrise plus juste | Fenêtre glissante de 20 réponses (Q3) ; coups de pouce : ✅ **fait** (Q1) | M (fenêtre glissante restante) |
+| Mélange des notions | ✅ **Fait** (8 oct.) : sessions à 60 % compétence ciblée / 40 % rappels (calculs ratés d'abord, puis autres compétences déjà pratiquées), questions 2 et 4 | — |
+| Maîtrise plus juste | ✅ **Fait** : fenêtre glissante de 20 réponses (Q3, 8 oct., anciennes données migrées) ; coups de pouce (Q1) | — |
 | Pavé numérique | ✅ **Fait** (le 6 oct.) : grandes touches, ⌫, ✓, clavier physique | — |
 | Journal d'usage local | Enregistrer abandons (✕), usage de l'aide, temps par question dans l'historique | S |
 
@@ -113,4 +113,4 @@ Utilisation normale par les enfants testeurs, sans aucune nouvelle fonctionnalit
 
 1. Activer GitHub Pages (*Source : GitHub Actions*) et vérifier l'adresse sur un téléphone.
 2. ✅ Réapparition des erreurs (fait).
-3. Maîtrise sur les 20 dernières réponses, puis mélange des notions.
+3. ✅ Maîtrise sur les 20 dernières réponses, puis mélange des notions (faits le 8 oct.).

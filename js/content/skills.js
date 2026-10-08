@@ -56,6 +56,10 @@ const HINTS = { freePerSession: 2, maxStarsOverQuota: 2 };
 // compétence du jour) jusqu'à `clearAfter` réussites consécutives sans coup de pouce.
 const REVIEW = { maxPerSession: 2, clearAfter: 2, maxStored: 30 };
 
+// Mélange des notions : jusqu'à `recallPerSession` questions sur 5 (40 %) reprennent des compétences déjà
+// pratiquées (autres que la compétence du jour). Les calculs à revoir (REVIEW) occupent ces places en priorité.
+const MIX = { recallPerSession: 2 };
+
 // Planètes déverrouillées avec le total d'étoiles collectées
 const PLANETS = [
     { name: 'Lune', emoji: '🌕', unlockAt: 10 },
