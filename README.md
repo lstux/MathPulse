@@ -1,4 +1,6 @@
-# MathPulse 🚀🦊
+# MathPulse 🦊
+
+🚀 **https://lstux.github.io/MathPulse/**
 
 Jeu de calcul mental pour enfants (~8 ans, CE2), en HTML/CSS/JS sans dépendance, installable (PWA), qui fonctionne hors ligne. Les données restent dans le navigateur (localStorage) : pas de compte, pas de serveur.
 
