@@ -480,7 +480,7 @@ class ScreenManager {
     createParentScreen() {
         const screen = this.screenEl('parent-screen');
         const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
-        const cards = SKILL_ORDER.map(id => {
+        const card = (id) => {
             const st = this.progression.getSkillStats(id);
             if (!st) {
                 const req = SKILLS[id].requires;
@@ -494,7 +494,33 @@ class ScreenManager {
                 <div class="skill-head"><h3>${SKILLS[id].name}</h3><span aria-label="Maîtrise ${st.mastery_level} sur 3">${this.stars(st.mastery_level)}</span></div>
                 <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s de réflexion en moyenne</p>
             </div>`;
+        };
+        const axisLabel = (id) => `${SKILLS[id].operation}${SKILLS[id].factor || SKILLS[id].divisor}`;
+        const cards = PATHS.map(path => {
+            const levels = path.skills.map(id => this.progression.getMasteryLevel(id));
+            const mastered = levels.filter(l => l >= 3).length;
+            const started = levels.filter(l => l >= 1).length;
+            const percent = levels.reduce((x, y) => x + y, 0) / (3 * levels.length) * 100;
+            const radar = path.radar
+                ? `<div class="radar-wrap">${Charts.radar(path.radar.map(id => ({ label: axisLabel(id), value: this.progression.getMasteryLevel(id) })), { title: path.name })}
+                   <p class="muted text-sm text-center">Du centre vers l'extérieur : vu, en cours, maîtrisé ⭐⭐⭐</p></div>`
+                : '';
+            return `<section class="path">
+                <div class="path-head"><h2 class="text-lg font-bold">${path.emoji} ${path.name}</h2><span class="muted text-sm">${mastered}/${path.skills.length} maîtrisées</span></div>
+                ${Charts.bar(percent, `Progression ${path.name}`)}
+                <p class="muted text-sm mb-md">${started} sur ${path.skills.length} commencées</p>
+                ${radar}
+                <details class="path-details"><summary>Détail par compétence</summary>
+                    <div class="flex flex-col gap-md">${path.skills.map(card).join('')}</div>
+                </details>
+            </section>`;
         }).join('');
+        // étoiles gagnées par jour (7 derniers jours)
+        const days = Array.from({ length: 7 }, (_, k) => {
+            const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (6 - k));
+            const stars = history.filter(h => new Date(h.at).toDateString() === d.toDateString()).reduce((x, h) => x + (h.starsEarned || 0), 0);
+            return { label: d.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3), stars };
+        });
         const recent = history.slice(-5).reverse().map(h =>
             `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${h.rapid ? 'Série rapide ⚡' : (SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill)} · ${h.abandoned ? `abandon (question ${h.at_question}/${h.total})` : `${h.correct}/${h.total}`}</li>`).join('');
 
@@ -508,7 +534,9 @@ class ScreenManager {
             <div class="parent-wrap">
                 <h1 class="text-2xl font-bold mb-md">Progression</h1>
                 <p class="mb-lg">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
-                <div class="flex flex-col gap-md mb-lg">${cards}</div>
+                ${cards}
+                <h2 class="text-lg font-bold mb-md">⭐ Étoiles des 7 derniers jours</h2>
+                <div class="mb-lg">${Charts.week(days)}</div>
                 ${toReview}
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>

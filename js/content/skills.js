@@ -1,7 +1,7 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.8.0';
+const APP_VERSION = '0.9.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
@@ -185,6 +185,17 @@ const SKILLS = {
 SKILLS['divide-7'].maxAvgMs = 6000;   // comme ×7
 
 const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'];
+
+// Voies d'apprentissage (regroupement dans l'espace parent). `radar` : compétences affichées en « toile d'araignée ».
+const PATHS = [
+    { id: 'calc', name: 'Additions et soustractions', emoji: '➕', skills: ['addition-simple', 'subtract-simple'] },
+    { id: 'tables', name: 'Tables de multiplication', emoji: '✖️',
+      skills: ['multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix'],
+      radar: ['multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10'] },
+    { id: 'division', name: 'Divisions', emoji: '➗',
+      skills: ['divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'],
+      radar: ['divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'] }
+];
 
 // Seuils de maîtrise (niveau 1 = vu ; une compétence peut surcharger le temps avec `maxAvgMs` dans SKILLS, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
 const MASTERY = {

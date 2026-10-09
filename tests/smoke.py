@@ -155,6 +155,8 @@ with sync_playwright() as p:
     assert pg.inner_text('#btn-start-game') == 'Retour'; pg.click('#btn-start-game')
     assert 'Version' in pg.inner_text('#app-version')
     assert pg.evaluate('window.mathpulse.progression.getTotalStars()') == stars_before
+    assert pg.locator('.path').count() == 3 and pg.locator('svg.radar').count() == 2 and pg.locator('.pbar').count() == 3 and pg.locator('.wk-col').count() == 7, 'graphiques espace parent'
+    pg.evaluate("document.querySelectorAll('.path-details').forEach(d => d.open = true)")
     assert 'réflexion' in pg.inner_text('.skill-card >> nth=0') or 'Pas encore' in pg.inner_text('.skill-card >> nth=0')
     ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(600)
     assert pg.inner_text('h1') == 'MathPulse', 'rechargement hors ligne en échec'
