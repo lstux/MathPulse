@@ -10,8 +10,25 @@ class Engine {
     // Priorité : maîtrise la plus basse, puis pratiquée il y a le plus longtemps, puis ordre du catalogue.
     // Une compétence est disponible quand son prérequis (autre compétence, niveau de maîtrise) est atteint
     isUnlocked(id) {
+        if (Cheat.isOn()) return true;   // mode test : tout est débloqué
         const req = SKILLS[id] && SKILLS[id].requires;
         return !req || this.progression.getMasteryLevel(req.skill) >= req.level;
+    }
+
+    // Compétences « en cours » : commencées, pas encore maîtrisées (une compétence qui stagne au niveau 2 finit par ne plus compter)
+    inProgressSkills() {
+        return SKILL_ORDER.filter(id => {
+            const st = this.progression.getSkillStats(id);
+            if (!st) return false;
+            const level = this.progression.getMasteryLevel(id);
+            return level < 3 && !(level >= 2 && st.seen >= PROGRESS_CAP.relaxAfterSeen);
+        });
+    }
+
+    // Débloquée, jamais pratiquée, mais le plafond de compétences en cours est atteint : elle attend sa place
+    isWaiting(id) {
+        return !Cheat.isOn() && this.isUnlocked(id) && !this.progression.getSkillStats(id)
+            && this.inProgressSkills().length >= PROGRESS_CAP.max;
     }
 
     // ---------- Série rapide ----------
@@ -42,7 +59,7 @@ class Engine {
     }
 
     selectSkillForSession() {
-        const ranked = SKILL_ORDER.filter(id => this.isUnlocked(id)).map((id, order) => {
+        const ranked = SKILL_ORDER.filter(id => this.isUnlocked(id) && !this.isWaiting(id)).map((id, order) => {
             const stats = this.progression.getSkillStats(id);
             return {
                 id, order,

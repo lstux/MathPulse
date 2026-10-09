@@ -6,7 +6,7 @@ const vm = require('vm');
 const assert = require('assert');
 
 const root = path.join(__dirname, '..');
-const sources = ['js/content/skills.js', 'js/core/storage.js', 'js/core/progression.js', 'js/core/engine.js', 'js/core/session.js'];
+const sources = ['js/content/skills.js', 'js/core/storage.js', 'js/core/cheat.js', 'js/core/progression.js', 'js/core/engine.js', 'js/core/session.js'];
 
 function makeContext() {
     const store = new Map();

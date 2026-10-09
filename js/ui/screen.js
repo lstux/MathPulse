@@ -150,7 +150,7 @@ class ScreenManager {
                 <button class="btn-secondary" id="btn-parent">Espace parent</button>
                 <button class="btn-secondary" id="btn-intro">🎬 Revoir l'intro</button>
             </div>
-            <p class="text-sm muted">⭐ ${this.progression.getTotalStars()}</p>
+            <p class="text-sm muted">⭐ ${this.progression.getTotalStars()}${Cheat.isOn() ? ' · 🧪 mode test' : ''}</p>
         `;
         screen.querySelector('#btn-play').addEventListener('click', () => this.show('universe'));
         screen.querySelector('#btn-parent').addEventListener('click', () => this.show('parent'));
@@ -231,9 +231,9 @@ class ScreenManager {
         </div>`;
     }
 
-    startSession() {
+    startSession(forcedSkill = null) {
         this.session = new Session(this.engine, this.progression);
-        this.session.start();
+        this.session.start(forcedSkill ? { skill: forcedSkill } : {});
         Sound.play('start');
         const skillId = this.session.skill;
         if (!this.progression.hasSeenDiscovery(skillId)) {
@@ -480,19 +480,23 @@ class ScreenManager {
     createParentScreen() {
         const screen = this.screenEl('parent-screen');
         const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
+        const cheat = Cheat.isOn();
+        const playBtn = (id) => cheat ? `<button class="btn-secondary btn-small" data-play="${id}">▶ Jouer cette compétence</button>` : '';
         const card = (id) => {
             const st = this.progression.getSkillStats(id);
             if (!st) {
                 const req = SKILLS[id].requires;
-                const note = this.engine.isUnlocked(id) ? 'Pas encore pratiquée'
+                const note = this.engine.isWaiting(id) ? `⏳ Prête : elle démarrera dès qu'une des ${PROGRESS_CAP.max} compétences en cours sera maîtrisée`
+                    : this.engine.isUnlocked(id) ? 'Pas encore pratiquée'
                     : `🔒 Se débloque avec ${SKILLS[req.skill].name} niveau ${req.level} (${this.stars(req.level)})`;
-                return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">${note}</p></div>`;
+                return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">${note}</p>${playBtn(id)}</div>`;
             }
             const w = this.progression.windowStats(st);
             const acc = Math.round(w.accuracy);
             return `<div class="skill-card">
                 <div class="skill-head"><h3>${SKILLS[id].name}</h3><span aria-label="Maîtrise ${st.mastery_level} sur 3">${this.stars(st.mastery_level)}</span></div>
                 <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s de réflexion en moyenne</p>
+                ${playBtn(id)}
             </div>`;
         };
         const axisLabel = (id) => SKILLS[id].axis || `${SKILLS[id].operation}${SKILLS[id].factor || SKILLS[id].divisor}`;
@@ -533,7 +537,10 @@ class ScreenManager {
         screen.innerHTML = `
             <div class="parent-wrap">
                 <h1 class="text-2xl font-bold mb-md">Progression</h1>
-                <p class="mb-lg">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
+                <p class="mb-md">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
+                <p class="mb-lg" id="in-progress">Compétences en cours : <strong>${this.engine.inProgressSkills().length} / ${PROGRESS_CAP.max}</strong>${this.engine.inProgressSkills().length ? ` <span class="muted text-sm">(${this.engine.inProgressSkills().map(id => SKILLS[id].name).join(', ')})</span>` : ''}</p>
+                ${cheat ? `<div class="cheat-panel" id="cheat-panel"><p>🧪 <strong>Mode test activé</strong> : seuils réduits (niveau 2 dès 1 réponse, niveau 3 dès 2), tout est débloqué, plafond levé. Ouvre une compétence et appuie sur ▶ Jouer.</p>
+                    <button class="btn-secondary btn-small" id="btn-cheat-off">Désactiver le mode test</button></div>` : ''}
                 ${cards}
                 <h2 class="text-lg font-bold mb-md">⭐ Étoiles des 7 derniers jours</h2>
                 <div class="mb-lg">${Charts.week(days)}</div>
@@ -557,6 +564,16 @@ class ScreenManager {
         `;
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
         this.bindSoundButton(screen.querySelector('#btn-sound-parent'), true);
+        // « cheat code » : 7 appuis rapprochés sur la ligne de version
+        const toggleCheat = (on) => { Cheat.set(on); this.progression.recomputeAll(); this.show('parent'); };
+        let taps = 0, tapTimer = null;
+        screen.querySelector('#app-version').addEventListener('click', () => {
+            taps++; clearTimeout(tapTimer); tapTimer = setTimeout(() => { taps = 0; }, 1500);
+            if (taps >= 7) toggleCheat(!Cheat.isOn());
+        });
+        const off = screen.querySelector('#btn-cheat-off');
+        if (off) off.addEventListener('click', () => toggleCheat(false));
+        screen.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => this.startSession(b.dataset.play)));
         screen.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => this.show('discovery', { skillId: b.dataset.replay, replay: true })));
         screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
         screen.querySelector('#btn-reset').addEventListener('click', () => {

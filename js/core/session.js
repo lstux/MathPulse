@@ -26,7 +26,7 @@ class Session {
             this.skill = 'rapid';
             this.exercises = this.engine.generateRapid();
         } else {
-            this.skill = this.engine.selectSkillForSession();
+            this.skill = options.skill || this.engine.selectSkillForSession();   // `skill` : mode test
             this.exercises = this.engine.generateSession(this.skill);
             this.progression.markAsked(this.exercises.filter(e => e.review).map(e => e.key));
         }

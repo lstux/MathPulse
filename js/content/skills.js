@@ -1,7 +1,7 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.10.0';
+const APP_VERSION = '0.11.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
@@ -324,6 +324,11 @@ const RAPID = { length: 5, minLevel: 2, fastMs: 5000, maxRewardedPerDay: 2 };
 // Mélange des notions : jusqu'à `recallPerSession` questions sur 5 (40 %) reprennent des compétences déjà
 // pratiquées (autres que la compétence du jour). Les calculs à revoir (REVIEW) occupent ces places en priorité.
 const MIX = { recallPerSession: 2 };
+
+// Plafond de compétences « en cours » : au plus `max` compétences commencées et pas encore maîtrisées (niveau < 3)
+// en même temps ; une nouvelle compétence n'est proposée que si la place est libre. Pour ne jamais bloquer
+// l'enfant, une compétence au niveau 2 ayant déjà `relaxAfterSeen` réponses ne compte plus.
+const PROGRESS_CAP = { max: 3, relaxAfterSeen: 30 };
 
 // Planètes déverrouillées avec le total d'étoiles collectées
 const PLANETS = [

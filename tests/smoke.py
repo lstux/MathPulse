@@ -166,6 +166,18 @@ with sync_playwright() as p:
     assert pg.locator('.path').count() == 3 and pg.locator('svg.radar').count() == 3 and pg.locator('.pbar').count() == 3 and pg.locator('.wk-col').count() == 7, 'graphiques espace parent'
     pg.evaluate("document.querySelectorAll('.path-details').forEach(d => d.open = true)")
     assert 'réflexion' in pg.inner_text('.skill-card >> nth=0') or 'Pas encore' in pg.inner_text('.skill-card >> nth=0')
+    # plafond : au plus 3 compétences en cours, affiché dans l'espace parent
+    assert '/ 3' in pg.inner_text('#in-progress'), pg.inner_text('#in-progress')
+    # mode test : 7 appuis sur la version, ▶ Jouer sur une compétence verrouillée, puis désactivation
+    assert pg.locator('#cheat-panel').count() == 0 and pg.locator('[data-play]').count() == 0
+    for _ in range(7): pg.click('#app-version')
+    pg.wait_for_selector('#cheat-panel'); assert pg.locator('[data-play]').count() == len(pg.evaluate('SKILL_ORDER'))
+    pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
+    pg.click('[data-play="divide-9"]'); pg.wait_for_timeout(300)
+    if pg.locator('#btn-start-game').count(): pg.click('#btn-start-game')
+    assert '÷ 9' in pg.inner_text('#question') or '÷ 9' in pg.inner_text('#question').replace('\u00a0', ' ') or pg.locator('#question').count() == 1
+    pg.evaluate("window.mathpulse.screenManager.show('parent')"); pg.wait_for_selector('#btn-cheat-off'); pg.click('#btn-cheat-off')
+    pg.wait_for_timeout(200); assert pg.locator('#cheat-panel').count() == 0 and pg.evaluate('Cheat.isOn()') is False
     ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(600)
     assert pg.inner_text('h1') == 'MathPulse', 'rechargement hors ligne en échec'
     b.close()

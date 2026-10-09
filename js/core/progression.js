@@ -54,6 +54,12 @@ class Progression {
         return skill;
     }
 
+    // Recalcule la maîtrise de toutes les compétences (après activation / désactivation du mode test)
+    recomputeAll() {
+        Object.entries(this.data.skills).forEach(([id, s]) => { s.mastery_level = this.computeMastery(s, id); });
+        this.save();
+    }
+
     // Données d'avant la fenêtre glissante : on la reconstitue à partir des totaux (proportions, temps moyen)
     ensureRecent(skill) {
         if (Array.isArray(skill.recent)) return;
@@ -76,8 +82,9 @@ class Progression {
 
     computeMastery(skill, skillId) {
         const w = this.windowStats(skill);
-        const l3 = MASTERY.level3, l2 = MASTERY.level2;
-        const maxAvgMs = (SKILLS[skillId] && SKILLS[skillId].maxAvgMs) || l3.maxAvgMs;   // seuil propre à la compétence, sinon général
+        const M = Cheat.mastery();   // seuils réduits en mode test
+        const l3 = M.level3, l2 = M.level2;
+        const maxAvgMs = Cheat.isOn() ? Infinity : (SKILLS[skillId] && SKILLS[skillId].maxAvgMs) || l3.maxAvgMs;   // seuil propre à la compétence, sinon général
         if (w.n >= l3.minSeen && w.accuracy >= l3.minAccuracy && w.avgMs <= maxAvgMs) return 3;
         if (w.n >= l2.minSeen && w.accuracy >= l2.minAccuracy) return 2;
         return 1;

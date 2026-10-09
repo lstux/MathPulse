@@ -10,6 +10,8 @@ class MathPulse {
         try {
             this.registerServiceWorker();
             storage.init();
+            const cheatParam = new URLSearchParams(location.search).get('cheat');   // ?cheat=1 / ?cheat=0 : mode test
+            if (cheatParam !== null) Cheat.set(cheatParam === '1');
             this.requestPersistentStorage();
             Sound.init();
 

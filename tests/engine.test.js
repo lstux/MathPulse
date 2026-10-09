@@ -643,3 +643,46 @@ test('voie C : chaîne de déblocage', () => {
     assert.ok(PATHS.every(p => p.skills.every(id => SKILLS[id])));
     assert.strictEqual([].concat(...PATHS.map(p => p.skills)).length, SKILL_ORDER.length, 'chaque compétence est dans une voie');
 });
+
+test('plafond de 3 compétences en cours : les nouvelles attendent, une place se libère à la maîtrise', () => {
+    localStorage.clear();
+    const { engine, progression } = setup();
+    const good = (id, n = 4, ms = 2000) => { for (let i = 0; i < n; i++) progression.recordAnswer(id, true, ms); };
+    good('addition-simple'); good('subtract-simple');                 // niveau 2 : débloque complement-10, tens-add, tens-sub, multiply-3… (÷ 2 aussi via ×2)
+    good('multiply-2');
+    // 3 compétences en cours (niveau 2)
+    assert.strictEqual(engine.inProgressSkills().length, 3);
+    assert.ok(engine.isUnlocked('multiply-3') && engine.isWaiting('multiply-3'), 'une 4e compétence attend');
+    for (let k = 0; k < 200; k++) assert.ok(engine.inProgressSkills().includes(engine.selectSkillForSession()), 'seules les compétences en cours sont proposées');
+    // l'une est maîtrisée (niveau 3) : une place se libère
+    good('multiply-2', 6);
+    assert.strictEqual(progression.getMasteryLevel('multiply-2'), 3);
+    assert.strictEqual(engine.inProgressSkills().length, 2);
+    assert.ok(!engine.isWaiting('multiply-3'));
+    // une compétence qui stagne au niveau 2 avec beaucoup de réponses ne bloque plus personne
+    localStorage.clear();
+    const { engine: e2, progression: p2 } = setup();
+    for (let i = 0; i < 4; i++) { p2.recordAnswer('addition-simple', true, 2000); p2.recordAnswer('subtract-simple', true, 2000); p2.recordAnswer('multiply-2', true, 2000); }
+    for (let i = 0; i < PROGRESS_CAP.relaxAfterSeen; i++) p2.recordAnswer('subtract-simple', true, 9000);   // juste mais lent : reste au niveau 2
+    assert.strictEqual(p2.getMasteryLevel('subtract-simple'), 2);
+    assert.ok(!e2.inProgressSkills().includes('subtract-simple'), 'ne compte plus après 30 réponses au niveau 2');
+});
+
+test('mode test : seuils réduits, tout débloqué, plafond levé, compétence imposée', () => {
+    localStorage.clear();
+    const { engine, progression } = setup();
+    assert.ok(!Cheat.isOn() && !engine.isUnlocked('divide-9'));
+    progression.recordAnswer('multiply-5', true, 9000); progression.recordAnswer('multiply-5', true, 9000);
+    assert.strictEqual(progression.getMasteryLevel('multiply-5'), 1, 'seuils normaux : 2 réponses lentes ne suffisent pas');
+    Cheat.set(true); progression.recomputeAll();
+    assert.ok(Cheat.isOn() && engine.isUnlocked('divide-9') && !engine.isWaiting('sub-2digits'));
+    assert.strictEqual(progression.getMasteryLevel('multiply-5'), 3, 'mode test : 2 bonnes réponses = maîtrisé, temps ignoré');
+    progression.recordAnswer('divide-7', true, 9000);
+    assert.strictEqual(progression.getMasteryLevel('divide-7'), 2, 'niveau 2 dès la première bonne réponse');
+    const session = new Session(engine, progression);
+    session.start({ skill: 'add-2digits' });
+    assert.strictEqual(session.skill, 'add-2digits');
+    Cheat.set(false); progression.recomputeAll();
+    assert.ok(!engine.isUnlocked('divide-9'));
+    assert.strictEqual(progression.getMasteryLevel('multiply-5'), 1, 'retour aux seuils normaux');
+});
