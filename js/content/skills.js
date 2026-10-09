@@ -1,7 +1,7 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.5.0';
+const APP_VERSION = '0.6.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
@@ -73,10 +73,44 @@ const SKILLS = {
         operation: '×',
         animation: 'groups',
         plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    // Divisions : a ÷ n avec a = q × n (q de 1 à 10, pas de reste). Se débloquent avec la table correspondante.
+    'divide-2': {
+        id: 'divide-2',
+        divisor: 2,
+        name: '÷2 (partager en 2)',
+        title: 'Partager en 2',
+        operation: '÷',
+        animation: 'share',
+        requires: { skill: 'multiply-2', level: 2 },
+        explain: (a, b, t) => `${a} ÷ 2 : on partage ${a} en 2 parts égales, il y en a ${t} dans chaque part, car ${t} + ${t} = ${a}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    'divide-5': {
+        id: 'divide-5',
+        divisor: 5,
+        name: '÷5 (paquets de 5)',
+        title: 'Des paquets de 5',
+        operation: '÷',
+        animation: 'groups',
+        requires: { skill: 'multiply-5', level: 2 },
+        explain: (a, b, t) => `${a} ÷ 5 : combien de paquets de 5 dans ${a} ? Il y en a ${t}, car ${t} × 5 = ${a}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    'divide-10': {
+        id: 'divide-10',
+        divisor: 10,
+        name: '÷10 (paquets de 10)',
+        title: 'Des paquets de 10',
+        operation: '÷',
+        animation: 'tens',
+        requires: { skill: 'multiply-10', level: 2 },
+        explain: (a, b, t) => `${a} ÷ 10 : on enlève le zéro de ${a}. Il y a ${t} paquets de 10, car ${t} × 10 = ${a}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
     }
 };
 
-const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-10'];
+const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-10', 'divide-2', 'divide-5', 'divide-10'];
 
 // Seuils de maîtrise (niveau 1 = vu ; une compétence peut surcharger le temps avec `maxAvgMs` dans SKILLS, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
 const MASTERY = {

@@ -118,6 +118,7 @@ class Engine {
         if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
         let a, b;
         if (skill.factor) { a = this.randInt(1, 10); b = skill.factor; }          // table de multiplication : a × n
+        else if (skill.divisor) { b = skill.divisor; a = this.randInt(1, 10) * b; }   // division exacte : a ÷ n
         else if (skillId === 'addition-simple') { a = this.randInt(1, 9); b = this.randInt(1, 9); }
         else if (skillId === 'subtract-simple') { a = this.randInt(3, 18); b = this.randInt(1, Math.min(9, a - 1)); }   // reste toujours ≥ 1
         else throw new Error(`Compétence inconnue : ${skillId}`);
@@ -126,7 +127,7 @@ class Engine {
 
     buildExercise(skillId, type, a, b) {
         const op = SKILLS[skillId].operation;
-        const total = op === '+' ? a + b : op === '−' ? a - b : a * b;
+        const total = op === '+' ? a + b : op === '−' ? a - b : op === '÷' ? a / b : a * b;
         const ex = {
             skill: skillId, type, operation: op,
             operands: [a, b], total,
@@ -135,15 +136,15 @@ class Engine {
         };
 
         if (type === 'missing') {
-            // le nombre manquant est le premier opérande en ×, le second en + et en −
-            const hidden = op === '×' ? a : b;
+            // le nombre manquant est le premier opérande en × et en ÷, le second en + et en −
+            const hidden = (op === '×' || op === '÷') ? a : b;
             ex.answer = hidden;
-            ex.question = op === '×' ? `? × ${b} = ${total}` : `${a} ${op} ? = ${total}`;
-            ex.choices = this.makeChoices(hidden, [-3, -2, -1, 1, 2, 3]);
+            ex.question = (op === '×' || op === '÷') ? `? ${op} ${b} = ${total}` : `${a} ${op} ? = ${total}`;
+            ex.choices = this.makeChoices(hidden, op === '÷' ? [-2 * b, -b, b, 2 * b, -1, 1, 2] : [-3, -2, -1, 1, 2, 3]);
         } else if (type === 'multiple') {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;
-            ex.choices = this.makeChoices(total, op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
+            ex.choices = this.makeChoices(total, op === '÷' ? [-3, -2, -1, 1, 2, 3] : op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
         } else {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;

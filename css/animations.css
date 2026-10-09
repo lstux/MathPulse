@@ -71,3 +71,7 @@
 .dot-item { width: 1.15rem; height: 1.15rem; border-radius: 50%; }
 .dbl-1 .dot-item { background: var(--color-space-blue); }
 .dbl-2 .dot-item { background: var(--color-space-purple); }
+
+/* Partage (÷2) : des paniers pleins */
+.visual-share { gap: var(--spacing-md); }
+.visual-share .basket { border-style: solid; border-color: var(--color-warning, #d99a3d); border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: rgba(217, 154, 61, 0.12); max-width: 120px; }

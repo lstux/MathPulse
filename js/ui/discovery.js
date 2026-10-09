@@ -32,6 +32,21 @@ const Discovery = {
             visual: () => Animations.table(3, 4),
             text: '3 × 4 : le double de 3 (en bleu), puis encore le double (en violet)', formula: '3 × 4 = 6 + 6 = 12'
         },
+        'divide-2': {
+            title: 'Partager en 2 !',
+            visual: () => Animations.share(8, 2),
+            text: '8 pommes partagées en 2 paniers : 4 dans chaque panier', formula: '8 ÷ 2 = 4'
+        },
+        'divide-5': {
+            title: 'Combien de paquets de 5 ?',
+            visual: () => Animations.groups(3, 5),
+            text: 'Dans 15, il y a 3 paquets de 5', formula: '15 ÷ 5 = 3'
+        },
+        'divide-10': {
+            title: 'Combien de paquets de 10 ?',
+            visual: () => Animations.tens(3),
+            text: 'Dans 30, il y a 3 paquets de 10 : on enlève un zéro !', formula: '30 ÷ 10 = 3'
+        },
         'multiply-5': {
             title: 'Des groupes de 5 !',
             visual: () => Animations.groups(3, 5),

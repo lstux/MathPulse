@@ -50,11 +50,26 @@ const Animations = {
         return `<div class="visual visual-groups" role="img" aria-label="${groupCount} groupes de ${perGroup}">${groups}</div>`;
     },
 
+    // Partage : `total` objets répartis équitablement dans `n` paniers
+    share(total, n, item = '🍎') {
+        const per = total / n;
+        const baskets = Array.from({ length: n }, (_, g) => `
+            <div class="group basket" style="animation-delay:${g * 160}ms">
+                ${Array.from({ length: per }, () => `<span class="group-item">${item}</span>`).join('')}
+            </div>`).join('');
+        return `<div class="visual visual-groups visual-share" role="img" aria-label="${total} objets partagés en ${n} paniers : ${per} dans chaque panier">${baskets}</div>`;
+    },
+
     // Représentation adaptée à un exercice
     forExercise(exercise) {
         const [a, b] = exercise.operands;
         if (exercise.operation === '+') return this.blocks(a, b);
         if (exercise.operation === '−') return this.takeAway(a, b);
+        if (exercise.operation === '÷') {
+            if (b === 10) return this.tens(a / 10);
+            if (b === 2) return this.share(a, 2);
+            return this.groups(a / b, b);      // groupement : combien de paquets de b dans a ?
+        }
         if (b === 10) return this.tens(a);
         if (b === 3 || b === 4) return this.table(a, b);
         if (b === 2) return this.groups(2, a);      // doubler : 2 groupes identiques

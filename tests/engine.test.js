@@ -15,9 +15,9 @@ test('engine: toutes les sessions ont 5 exercices corrects (500 tirages / compé
             assert.strictEqual(session.length, 5);
             for (const ex of session) {
                 const [a, b] = ex.operands;
-                const total = ex.operation === '+' ? a + b : ex.operation === '−' ? a - b : a * b;
+                const total = ex.operation === '+' ? a + b : ex.operation === '−' ? a - b : ex.operation === '÷' ? a / b : a * b;
                 assert.strictEqual(ex.total, total);
-                if (ex.type === 'missing') assert.strictEqual(ex.answer, ex.operation === '×' ? a : b);
+                if (ex.type === 'missing') assert.strictEqual(ex.answer, (ex.operation === '×' || ex.operation === '÷') ? a : b);
                 else assert.strictEqual(ex.answer, total);
             }
         }
@@ -528,4 +528,30 @@ test('tables ×3 et ×4: débloquées par ×2 niveau 2 ; seuil de temps propre �
     } finally { delete SKILLS['multiply-4'].maxAvgMs; }
     for (let i = 0; i < 6; i++) progression.recordAnswer('multiply-3', true, 4000);
     assert.strictEqual(progression.getMasteryLevel('multiply-3'), 3, 'seuil général (5 s) : 4 s suffit');
+});
+
+test('divisions ÷2, ÷5, ÷10: divisions exactes, QCM valides, explications, déblocage par la table', () => {
+    for (const [id, n, table] of [['divide-2', 2, 'multiply-2'], ['divide-5', 5, 'multiply-5'], ['divide-10', 10, 'multiply-10']]) {
+        const { engine, progression } = setup();
+        if (id === 'divide-2') assert.ok(!engine.isUnlocked(id), 'verrouillée au départ');
+        for (let i = 0; i < 4; i++) progression.recordAnswer(table, true, 2000);   // débloque la division
+        assert.ok(engine.isUnlocked(id), `${id} débloquée par ${table} niveau 2`);
+        const seen = new Set();
+        for (let k = 0; k < 400; k++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;   // rappels de la table déjà pratiquée
+            const [a, b] = ex.operands;
+            assert.strictEqual(b, n);
+            assert.strictEqual(a % n, 0);
+            assert.ok(a / n >= 1 && a / n <= 10);
+            assert.strictEqual(ex.total, a / n);
+            if (ex.type === 'missing') { assert.strictEqual(ex.answer, a); assert.strictEqual(ex.question, `? ÷ ${n} = ${a / n}`); }
+            else { assert.strictEqual(ex.answer, a / n); assert.strictEqual(ex.question, `${a} ÷ ${n} = ?`); }
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && new Set(ex.choices).size === 4 && ex.choices.includes(ex.answer));
+            seen.add(a / n);
+        }
+        assert.strictEqual(seen.size, 10, `${id}: tous les quotients de 1 à 10`);
+    }
+    const { engine } = setup();
+    assert.match(engine.getExplanation({ skill: 'divide-5', operation: '÷', operands: [35, 5], total: 7 }), /Il y en a 7, car 7 × 5 = 35/);
+    assert.match(engine.getExplanation({ skill: 'divide-2', operation: '÷', operands: [14, 2], total: 7 }), /7 dans chaque part/);
 });
