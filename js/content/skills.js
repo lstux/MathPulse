@@ -1,7 +1,7 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.6.0';
+const APP_VERSION = '0.7.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
@@ -74,6 +74,64 @@ const SKILLS = {
         animation: 'groups',
         plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
     },
+    'multiply-6': {
+        id: 'multiply-6',
+        factor: 6,
+        name: '×6 (×5 puis encore une fois)',
+        title: 'Les paquets de 6',
+        operation: '×',
+        animation: 'array',
+        requires: { skill: 'multiply-5', level: 2 },
+        explain: (a, b, t) => `${a} × 6 : ${a} × 5 = ${5 * a}, et encore ${a}, ça fait ${t}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    'multiply-7': {
+        id: 'multiply-7',
+        factor: 7,
+        name: '×7 (×5 puis ×2)',
+        title: 'Les paquets de 7',
+        operation: '×',
+        animation: 'array',
+        requires: { skill: 'multiply-8', level: 2 },
+        maxAvgMs: 6000,   // la table la plus difficile : un peu plus de temps
+        explain: (a, b, t) => `${a} × 7 : ${a} × 5 = ${5 * a}, ${a} × 2 = ${2 * a}, et ${5 * a} + ${2 * a} = ${t}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    'multiply-8': {
+        id: 'multiply-8',
+        factor: 8,
+        name: '×8 (doubler trois fois)',
+        title: 'Les paquets de 8',
+        operation: '×',
+        animation: 'array',
+        requires: { skill: 'multiply-4', level: 2 },
+        explain: (a, b, t) => `${a} × 8 : le double de ${a} × 4. ${a} × 4 = ${4 * a}, et le double de ${4 * a}, c'est ${t}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    'multiply-9': {
+        id: 'multiply-9',
+        factor: 9,
+        name: '×9 (×10 moins une fois)',
+        title: 'Les paquets de 9',
+        operation: '×',
+        animation: 'array',
+        requires: { skill: 'multiply-10', level: 2 },
+        explain: (a, b, t) => `${a} × 9 : ${a} × 10 = ${10 * a}, moins ${a}, ça fait ${t}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
+    // Tables mélangées : a × b avec a et b de 2 à 9 (commutativité : 3 × 7 = 7 × 3)
+    'multiply-mix': {
+        id: 'multiply-mix',
+        mixed: [2, 9],
+        name: 'Tables mélangées (×2 à ×9)',
+        title: 'Toutes les tables',
+        operation: '×',
+        animation: 'array',
+        requires: { skill: 'multiply-7', level: 2 },
+        maxAvgMs: 6000,
+        explain: (a, b, t) => `${a} × ${b} = ${t}. Et ${b} × ${a} = ${t} aussi : on peut échanger les nombres !`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    },
     // Divisions : a ÷ n avec a = q × n (q de 1 à 10, pas de reste). Se débloquent avec la table correspondante.
     'divide-2': {
         id: 'divide-2',
@@ -110,7 +168,7 @@ const SKILLS = {
     }
 };
 
-const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-10', 'divide-2', 'divide-5', 'divide-10'];
+const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-5', 'divide-10'];
 
 // Seuils de maîtrise (niveau 1 = vu ; une compétence peut surcharger le temps avec `maxAvgMs` dans SKILLS, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
 const MASTERY = {

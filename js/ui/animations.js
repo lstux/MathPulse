@@ -50,6 +50,16 @@ const Animations = {
         return `<div class="visual visual-groups" role="img" aria-label="${groupCount} groupes de ${perGroup}">${groups}</div>`;
     },
 
+    // Tableau de `rows` lignes × `cols` colonnes : les `split` premières colonnes en bleu, les autres en violet.
+    // Avec `minus`, une colonne supplémentaire grisée montre ce qu'on retire (×9 = ×10 moins une colonne).
+    array(rows, cols, split = cols, minus = false) {
+        const total = minus ? cols + 1 : cols;
+        const lines = Array.from({ length: rows }, (_, r) =>
+            `<div class="dot-row" style="animation-delay:${r * 120}ms">${Array.from({ length: total }, (_, c) =>
+                `<span class="dot-item ${c >= cols ? 'dot-out' : c < split ? 'dbl-blue' : 'dbl-violet'}"></span>`).join('')}</div>`).join('');
+        return `<div class="visual visual-array" role="img" aria-label="${rows} lignes de ${cols} points : ${rows} × ${cols} = ${rows * cols}">${lines}</div>`;
+    },
+
     // Partage : `total` objets répartis équitablement dans `n` paniers
     share(total, n, item = '🍎') {
         const per = total / n;
@@ -71,7 +81,12 @@ const Animations = {
             return this.groups(a / b, b);      // groupement : combien de paquets de b dans a ?
         }
         if (b === 10) return this.tens(a);
+        if (SKILLS[exercise.skill] && SKILLS[exercise.skill].mixed) return this.array(a, b);
         if (b === 3 || b === 4) return this.table(a, b);
+        if (b === 6) return this.array(a, 6, 5);
+        if (b === 7) return this.array(a, 7, 5);
+        if (b === 8) return this.array(a, 8, 4);
+        if (b === 9) return this.array(a, 9, 9, true);
         if (b === 2) return this.groups(2, a);      // doubler : 2 groupes identiques
         return this.groups(a, b);
     }

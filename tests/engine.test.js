@@ -555,3 +555,27 @@ test('divisions ÷2, ÷5, ÷10: divisions exactes, QCM valides, explications, d�
     assert.match(engine.getExplanation({ skill: 'divide-5', operation: '÷', operands: [35, 5], total: 7 }), /Il y en a 7, car 7 × 5 = 35/);
     assert.match(engine.getExplanation({ skill: 'divide-2', operation: '÷', operands: [14, 2], total: 7 }), /7 dans chaque part/);
 });
+
+test('tables ×6 à ×9 et mélange: opérandes, explications, chaîne de déblocage, seuil ×7', () => {
+    const { engine, progression } = setup();
+    const chain = [['multiply-6', 6, 'multiply-5'], ['multiply-8', 8, 'multiply-4'], ['multiply-9', 9, 'multiply-10'], ['multiply-7', 7, 'multiply-8'], ['multiply-mix', 0, 'multiply-7']];
+    for (const [id, n] of chain) {
+        const { engine: e } = setup();
+        for (let k = 0; k < 300; k++) for (const ex of e.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            const [a, b] = ex.operands;
+            if (n) { assert.strictEqual(b, n); assert.ok(a >= 1 && a <= 10); }
+            else { assert.ok(a >= 2 && a <= 9 && b >= 2 && b <= 9); }
+            assert.strictEqual(ex.total, a * b);
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && ex.choices.includes(ex.answer));
+        }
+    }
+    for (const [id, , req] of chain) {
+        assert.strictEqual(SKILLS[id].requires.skill, req);
+    }
+    assert.match(engine.getExplanation({ skill: 'multiply-9', operation: '×', operands: [7, 9], total: 63 }), /7 × 10 = 70, moins 7, ça fait 63/);
+    assert.match(engine.getExplanation({ skill: 'multiply-6', operation: '×', operands: [7, 6], total: 42 }), /7 × 5 = 35, et encore 7, ça fait 42/);
+    assert.match(engine.getExplanation({ skill: 'multiply-7', operation: '×', operands: [6, 7], total: 42 }), /30 \+ 12 = 42/);
+    assert.match(engine.getExplanation({ skill: 'multiply-8', operation: '×', operands: [6, 8], total: 48 }), /24, et le double de 24, c'est 48/);
+    assert.strictEqual(SKILLS['multiply-7'].maxAvgMs, 6000);
+});

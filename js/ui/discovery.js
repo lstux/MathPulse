@@ -32,6 +32,31 @@ const Discovery = {
             visual: () => Animations.table(3, 4),
             text: '3 × 4 : le double de 3 (en bleu), puis encore le double (en violet)', formula: '3 × 4 = 6 + 6 = 12'
         },
+        'multiply-6': {
+            title: 'Les paquets de 6 !',
+            visual: () => Animations.array(4, 6, 5),
+            text: '4 × 6 : 4 × 5 (en bleu) plus encore 4 (en violet)', formula: '4 × 6 = 20 + 4 = 24'
+        },
+        'multiply-7': {
+            title: 'Les paquets de 7 !',
+            visual: () => Animations.array(4, 7, 5),
+            text: '4 × 7 : 4 × 5 (en bleu) plus 4 × 2 (en violet)', formula: '4 × 7 = 20 + 8 = 28'
+        },
+        'multiply-8': {
+            title: 'Les paquets de 8 !',
+            visual: () => Animations.array(3, 8, 4),
+            text: '3 × 8 : 3 × 4 (en bleu), puis encore autant (en violet)', formula: '3 × 8 = 12 + 12 = 24'
+        },
+        'multiply-9': {
+            title: 'Les paquets de 9 !',
+            visual: () => Animations.array(4, 9, 9, true),
+            text: '4 × 9 : 4 × 10, moins la colonne en pointillés', formula: '4 × 9 = 40 − 4 = 36'
+        },
+        'multiply-mix': {
+            title: 'On peut échanger !',
+            visual: () => Animations.array(3, 7),
+            text: '3 lignes de 7, ou 7 lignes de 3 : c\'est pareil !', formula: '3 × 7 = 7 × 3 = 21'
+        },
         'divide-2': {
             title: 'Partager en 2 !',
             visual: () => Animations.share(8, 2),

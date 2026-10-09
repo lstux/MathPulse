@@ -118,6 +118,7 @@ class Engine {
         if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
         let a, b;
         if (skill.factor) { a = this.randInt(1, 10); b = skill.factor; }          // table de multiplication : a × n
+        else if (skill.mixed) { a = this.randInt(...skill.mixed); b = this.randInt(...skill.mixed); }   // tables mélangées
         else if (skill.divisor) { b = skill.divisor; a = this.randInt(1, 10) * b; }   // division exacte : a ÷ n
         else if (skillId === 'addition-simple') { a = this.randInt(1, 9); b = this.randInt(1, 9); }
         else if (skillId === 'subtract-simple') { a = this.randInt(3, 18); b = this.randInt(1, Math.min(9, a - 1)); }   // reste toujours ≥ 1
