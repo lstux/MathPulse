@@ -72,6 +72,31 @@ const Discovery = {
             visual: () => Animations.jumps([83, 63, 56], ['−20', '−7']),
             text: '83 − 27 : on enlève 20, puis encore 7', formula: '83 − 27 = 83 − 20 − 7 = 56'
         },
+        'multiply-100': {
+            title: 'Cent fois plus !',
+            visual: () => Animations.zeros(37, 2),
+            text: '37 × 100 : on ajoute deux zéros', formula: '37 × 100 = 3 700'
+        },
+        'double-100': {
+            title: 'Les doubles !',
+            visual: () => Animations.piles(35, 'double'),
+            text: 'Le double de 35 : 30 + 30 = 60, 5 + 5 = 10, et 60 + 10 = 70', formula: 'double de 35 = 70'
+        },
+        'half-100': {
+            title: 'Les moitiés !',
+            visual: () => Animations.piles(35, 'half'),
+            text: 'La moitié de 70 : 2 parts égales de 35', formula: 'moitié de 70 = 35'
+        },
+        'add-round': {
+            title: 'Ajouter des dizaines, des centaines…',
+            visual: () => Animations.digits(3204, 3274, 1, '+', 7),
+            text: '3 204 + 70 : seul le chiffre des dizaines change, de 0 à 7', formula: '3 204 + 70 = 3 274'
+        },
+        'sub-round': {
+            title: 'Enlever des milliers, des centaines…',
+            visual: () => Animations.digits(8756, 3756, 3, '−', 5),
+            text: '8 756 − 5 000 : seul le chiffre des milliers change, de 8 à 3', formula: '8 756 − 5 000 = 3 756'
+        },
         'multiply-6': {
             title: 'Les paquets de 6 !',
             visual: () => Animations.array(4, 6, 5),

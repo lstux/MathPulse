@@ -91,6 +91,32 @@ const Animations = {
         return this.jumps([a, a - d, a - b], [`−${d}`, `−${b % 10}`]);
     },
 
+    // ×100 : on ajoute `n` zéros (ils glissent à droite du nombre)
+    zeros(a, n = 2) {
+        const chips = Array.from({ length: n }, (_, i) => `<span class="zero-chip" style="animation-delay:${400 + i * 350}ms">0</span>`).join('');
+        return `<div class="visual visual-zeros" role="img" aria-label="${a}, on ajoute ${n} zéros : ${a}${'0'.repeat(n)}"><span class="zeros-num">${a}</span>${chips}</div>`;
+    },
+
+    // Un nombre en dizaines (paquets) et unités (blocs) ; deux piles identiques pour un double ou une moitié
+    piles(n, kind) {
+        const tens = Math.floor(n / 10), units = n % 10;
+        const pile = (c, i) => `<div class="pile" style="animation-delay:${i * 300}ms">${Array.from({ length: tens }, () => `<span class="ten-bar ${c === 1 ? 'ten-first' : 'ten-second'}">10</span>`).join('')}${Array.from({ length: units }, () => `<span class="block ${c === 1 ? 'addition-first' : 'addition-second'}"></span>`).join('')}</div>`;
+        const label = kind === 'half' ? `la moitié de ${n * 2} : ${n} dans chaque part` : `deux fois ${n} font ${n * 2}`;
+        return `<div class="visual visual-piles" role="img" aria-label="${label}">${pile(1, 0)}<div class="visual-sign">${kind === 'half' ? '=' : '+'}</div>${pile(2, 1)}</div>`;
+    },
+
+    // Chiffres d'un nombre avant / après un calcul sur un seul rang (3 204 + 70 = 3 274)
+    digits(a, t, k, op, d) {
+        const sa = String(a), st = String(t).padStart(sa.length, ' ');
+        const hl = sa.length - 1 - k;
+        const row = (str, cls) => `<div class="digit-row ${cls}">${[...str].map((c, i) => `<span class="digit${i === hl ? ' hl' : ''}">${c.trim() ? c : ''}</span>`).join('')}</div>`;
+        const label = `${op}${d} ${placeName(k, d)}`;
+        return `<div class="visual visual-digits" role="img" aria-label="${fmtNum(a)}, ${op === '+' ? 'on ajoute' : 'on enlève'} ${d} ${placeName(k, d)} : ${fmtNum(t)}">
+            ${row(sa, 'from')}
+            <div class="digit-places">${[...sa].map((_, i) => `<span>${i === hl ? PLACE[k][1] : ''}</span>`).join('')}</div>
+            <div class="digit-arrow"><span>${op === '+' ? '＋' : '−'} ${d} ${placeName(k, d)}</span>↓</div>${row(st, 'to')}</div>`;
+    },
+
     // Partage : `total` objets répartis équitablement dans `n` paniers
     share(total, n, item = '🍎') {
         const per = total / n;
@@ -105,6 +131,10 @@ const Animations = {
     forExercise(exercise) {
         const [a, b] = exercise.operands;
         switch (exercise.skill) {
+            case 'multiply-100': return this.zeros(a, 2);
+            case 'double-100': return this.piles(a, 'double');
+            case 'half-100': return this.piles(exercise.total, 'half');
+            case 'add-round': case 'sub-round': { const k = String(b).length - 1; return this.digits(a, exercise.total, k, exercise.operation, b / 10 ** k); }
             case 'complement-10': return this.blocks(a, b);
             case 'complement-100': return this.tensBars(a / 10, b / 10, 'missing');
             case 'tens-add': return this.tensBars(a / 10, b / 10, 'add');

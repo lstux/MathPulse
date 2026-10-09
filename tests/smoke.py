@@ -163,7 +163,7 @@ with sync_playwright() as p:
     pg.click('#btn-start-game')
     assert 'Version' in pg.inner_text('#app-version')
     assert pg.evaluate('window.mathpulse.progression.getTotalStars()') == stars_before
-    assert pg.locator('.path').count() == 3 and pg.locator('svg.radar').count() == 3 and pg.locator('.pbar').count() == 3 and pg.locator('.wk-col').count() == 7, 'graphiques espace parent'
+    nb = pg.evaluate('PATHS.length'); assert nb >= 4 and pg.locator('.path').count() == nb and pg.locator('svg.radar').count() == pg.evaluate('PATHS.filter(p => p.radar).length') and pg.locator('.pbar').count() == nb and pg.locator('.wk-col').count() == 7, 'graphiques espace parent'
     pg.evaluate("document.querySelectorAll('.path-details').forEach(d => d.open = true)")
     assert 'réflexion' in pg.inner_text('.skill-card >> nth=0') or 'Pas encore' in pg.inner_text('.skill-card >> nth=0')
     # plafond : au plus 3 compétences en cours, affiché dans l'espace parent

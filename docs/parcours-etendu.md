@@ -110,8 +110,8 @@ Paliers alignés sur les attendus CE2, du plus simple au plus difficile :
 | P3 | Voie B1 : ÷2, ÷5, ÷10 (opérateur `÷`, partage/groupement) | M | ✅ **fait** (v0.6.0) |
 | P4 | Voie B2–B3 : ÷3 à ÷9 | S | ✅ **fait** (v0.8.0) |
 | P5 | Voie C1–C5 (compléments, dizaines, retenue, < 100) | L | ✅ **fait** (v0.10.0) : sauf compléments à 100 non multiples de 10 (64 + ? = 100) |
-| P6 | Voie D (×100, doubles/moitiés) | S | 1.1 |
-| P7 | Voie C6–C7 (centaines, milliers, grands nombres), division avec reste (B4) | L | 1.2 |
+| P6 | Voie D (×100, doubles/moitiés) | S | ✅ **fait** (v0.12.0) |
+| P7 | Voie C6–C7 (centaines, milliers, grands nombres), division avec reste (B4) | L | C6 ✅ fait (v0.12.0) ; reste C7 (compensation, ex. 1 375 − 376) et B4 (reste) |
 
 ## 9. Questions à trancher
 

@@ -263,7 +263,7 @@ class ScreenManager {
             `<span class="dot ${i < s.currentIndex ? 'done' : i === s.currentIndex ? 'current' : ''}"></span>`).join('');
 
         const answerArea = ex.choices
-            ? `<div class="choices">${ex.choices.map(c => `<button class="choice" data-value="${c}">${c}</button>`).join('')}</div>`
+            ? `<div class="choices">${ex.choices.map(c => `<button class="choice" data-value="${c}">${fmtNum(c)}</button>`).join('')}</div>`
             : `<output class="answer-display empty" id="answer-display" aria-live="polite" aria-label="Ta réponse">?</output>
                <div class="keypad" id="keypad">
                    ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button class="key" data-key="${n}">${n}</button>`).join('')}
@@ -360,7 +360,7 @@ class ScreenManager {
                 if (/^\d$/.test(key)) s.noteInput();
                 if (key === 'ok') return submit(typed);
                 if (key === 'del') typed = typed.slice(0, -1);
-                else if (typed.length < 3) typed = (typed + key).replace(/^0+(?=\d)/, '');
+                else if (typed.length < 4) typed = (typed + key).replace(/^0+(?=\d)/, '');
                 display.textContent = typed || '?';
                 display.classList.toggle('empty', !typed);
             };

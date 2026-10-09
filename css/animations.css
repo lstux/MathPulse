@@ -105,3 +105,24 @@
 @keyframes jumpDraw { to { stroke-dashoffset: 0; } }
 @keyframes jumpLabel { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .jump-arc { stroke-dashoffset: 0; animation: none; } .jump-label { opacity: 1; animation: none; } .ten-bar.ten-removed { animation: none; opacity: .45; } }
+
+/* ×100 : les zéros glissent */
+.visual-zeros { display: flex; align-items: center; justify-content: center; gap: .25rem; font-size: 3rem; font-weight: 800; }
+.zeros-num { color: var(--color-space-blue); }
+.zero-chip { color: #fff; background: var(--color-space-purple); border-radius: .6rem; padding: 0 .55rem; animation: zeroSlide .55s var(--easing-out, ease-out) backwards; }
+@keyframes zeroSlide { from { opacity: 0; transform: translateX(-1.8rem) scale(.6); } }
+
+/* Doubles et moitiés : deux piles identiques */
+.visual-piles { display: flex; align-items: center; justify-content: center; gap: .75rem; flex-wrap: wrap; }
+.pile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem; max-width: 11rem; padding: .5rem; border-radius: var(--radius-md); border: 2px dashed var(--color-border); animation: groupAppear var(--duration-base) var(--easing-out) backwards; }
+.pile .ten-bar { min-width: 2.2rem; padding: .25rem .1rem; }
+
+/* Chiffres d'un nombre (calcul sur un rang) */
+.visual-digits { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.digit-row { display: flex; gap: .3rem; }
+.digit { width: 2.6rem; height: 3.2rem; display: inline-flex; align-items: center; justify-content: center; font-size: 1.9rem; font-weight: 800; border-radius: .6rem; background: var(--color-surface); border: 2px solid var(--color-border); }
+.digit.hl { background: var(--color-space-purple); border-color: var(--color-space-purple); color: #fff; }
+.digit-row.to .digit.hl { background: var(--color-space-blue); border-color: var(--color-space-blue); animation: groupAppear .5s var(--easing-out, ease-out) .4s backwards; }
+.digit-arrow { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: var(--color-primary); }
+.digit-places { display: flex; gap: .3rem; margin-top: -.15rem; }
+.digit-places span { width: 2.6rem; text-align: center; font-size: .65rem; color: var(--color-text-light); font-weight: 600; }

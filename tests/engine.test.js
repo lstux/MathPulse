@@ -686,3 +686,42 @@ test('mode test : seuils réduits, tout débloqué, plafond levé, compétence i
     assert.ok(!engine.isUnlocked('divide-9'));
     assert.strictEqual(progression.getMasteryLevel('multiply-5'), 1, 'retour aux seuils normaux');
 });
+
+test('voie D : ×100, doubles, moitiés, dizaines/centaines/milliers ronds', () => {
+    localStorage.clear();
+    const { engine } = setup();
+    const digitAt = (n, k) => Math.floor(n / 10 ** k) % 10;
+    const check = {
+        'multiply-100': (a, b, t) => b === 100 && a >= 2 && a <= 99 && t === a * 100,
+        'double-100': (a, b, t) => b === 2 && a >= 6 && a <= 50 && t === 2 * a,
+        'half-100': (a, b, t) => b === 2 && a % 2 === 0 && a >= 12 && a <= 100 && t === a / 2,
+        'add-round': (a, b, t) => { const k = String(b).length - 1; return a >= 100 && a <= 9999 && b / 10 ** k >= 1 && b / 10 ** k <= 9 && k >= 1 && digitAt(a, k) + b / 10 ** k <= 9 && t === a + b && t <= 9999; },
+        'sub-round': (a, b, t) => { const k = String(b).length - 1; return a >= 100 && b / 10 ** k >= 1 && digitAt(a, k) >= b / 10 ** k && t === a - b && String(t).length === String(a).length; }
+    };
+    for (const id of Object.keys(check)) {
+        for (let n = 0; n < 300; n++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            assert.ok(check[id](ex.operands[0], ex.operands[1], ex.total), `${id}: ${ex.operands}`);
+            if (ex.type === 'missing') assert.strictEqual(ex.answer, (SKILLS[id].operation === '×' || SKILLS[id].operation === '÷') ? ex.operands[0] : ex.operands[1]);
+            else assert.strictEqual(ex.answer, ex.total);
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && new Set(ex.choices).size === 4 && ex.choices.includes(ex.answer), `${id} ${ex.question} ${ex.choices}`);
+            assert.ok(ex.answer >= 0 && String(ex.answer).length <= 4, 'tient sur le pavé de 4 chiffres');
+        }
+    }
+    // formulations et grands nombres avec espace fine
+    const q = (id, t, a, b) => engine.buildExercise(id, t, a, b).question;
+    assert.strictEqual(q('double-100', 'numeric', 35, 2), 'double de 35 = ?');
+    assert.strictEqual(q('double-100', 'missing', 35, 2), 'double de ? = 70');
+    assert.strictEqual(q('half-100', 'numeric', 70, 2), 'moitié de 70 = ?');
+    assert.strictEqual(q('add-round', 'numeric', 3204, 70), '3 204 + 70 = ?');
+    assert.strictEqual(q('multiply-100', 'missing', 37, 100), '? × 100 = 3 700');
+    const ex = (skill, op, a, b, t) => engine.getExplanation({ skill, operation: op, operands: [a, b], total: t });
+    assert.match(ex('multiply-100', '×', 37, 100, 3700), /deux zéros à 37, ça fait 3 700/);
+    assert.match(ex('double-100', '×', 35, 2, 70), /double de 30 est 60, le double de 5 est 10, et 60 \+ 10 = 70/);
+    assert.match(ex('add-round', '+', 3204, 70, 3274), /on ajoute 7 dizaines ; le chiffre des dizaines passe de 0 à 7 : 3 274/);
+    assert.match(ex('sub-round', '−', 8756, 5000, 3756), /on enlève 5 milliers ; le chiffre des milliers passe de 8 à 3 : 3 756/);
+    assert.strictEqual(fmtNum(999), '999'); assert.strictEqual(fmtNum(10000), '10 000');
+    // déblocage
+    const req = { 'multiply-100': 'multiply-10', 'double-100': 'multiply-2', 'half-100': 'double-100', 'add-round': 'tens-add', 'sub-round': 'tens-sub' };
+    for (const [id, r] of Object.entries(req)) assert.strictEqual(SKILLS[id].requires.skill, r, id);
+});

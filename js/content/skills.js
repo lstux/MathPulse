@@ -1,7 +1,7 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.11.0';
+const APP_VERSION = '0.12.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
@@ -260,6 +260,82 @@ Object.assign(SKILLS, {
     }
 });
 
+// Nombres et calcul malin (voie D) : ×100, doubles, moitiés, dizaines/centaines/milliers ronds.
+// fmtNum : les grands nombres s'écrivent avec une espace fine (3 204), comme à l'école.
+const fmtNum = (n) => (n >= 1000 ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : String(n));
+const PLACE = [['unité', 'unités'], ['dizaine', 'dizaines'], ['centaine', 'centaines'], ['millier', 'milliers']];
+const placeName = (k, d) => PLACE[k][d > 1 ? 1 : 0];
+const placeOf = (b) => String(b).length - 1;          // 70 → 1 (dizaines), 5000 → 3 (milliers)
+const digitAt = (n, k) => Math.floor(n / 10 ** k) % 10;
+Object.assign(SKILLS, {
+    'multiply-100': {
+        id: 'multiply-100', axis: '×100', name: '×100 (deux zéros de plus)', title: 'Les paquets de 100',
+        operation: '×', animation: 'zeros', maxAvgMs: 5000,
+        requires: { skill: 'multiply-10', level: 2 },
+        generate: (r) => [r(2, 99), 100],
+        explain: (a, b, t) => `${a} × 100 : on ajoute deux zéros à ${a}, ça fait ${fmtNum(t)}.`,
+        choiceOffsets: [-1000, -100, 100, 200, 1000, -10, 10],
+        missingOffsets: [-10, -3, -2, -1, 1, 2, 3, 10],
+        plan: PLAN_STD
+    },
+    'double-100': {
+        id: 'double-100', axis: 'double', name: 'Doubles (jusqu\'à 100)', title: 'Les doubles',
+        operation: '×', animation: 'double', maxAvgMs: 6000,
+        requires: { skill: 'multiply-2', level: 2 },
+        generate: (r) => [r(6, 50), 2],
+        ask: (a, b, t, missing) => missing ? `double de ? = ${t}` : `double de ${a} = ?`,
+        explain: (a, b, t) => unitsOf(a) === 0
+            ? `Le double de ${a} : ${a / 10} dizaines + ${a / 10} dizaines = ${t / 10} dizaines, soit ${t}.`
+            : `Le double de ${a} : le double de ${a - unitsOf(a)} est ${2 * (a - unitsOf(a))}, le double de ${unitsOf(a)} est ${2 * unitsOf(a)}, et ${2 * (a - unitsOf(a))} + ${2 * unitsOf(a)} = ${t}.`,
+        choiceOffsets: [-10, -2, -1, 1, 2, 10],
+        missingOffsets: [-10, -5, -2, -1, 1, 2, 5, 10],
+        plan: PLAN_STD
+    },
+    'half-100': {
+        id: 'half-100', axis: 'moitié', name: 'Moitiés (jusqu\'à 100)', title: 'Les moitiés',
+        operation: '÷', animation: 'double', maxAvgMs: 6000,
+        requires: { skill: 'double-100', level: 2 },
+        generate: (r) => [2 * r(6, 50), 2],
+        ask: (a, b, t, missing) => missing ? `moitié de ? = ${t}` : `moitié de ${a} = ?`,
+        explain: (a, b, t) => `La moitié de ${a} : on partage en 2 parts égales, chacune en a ${t}, car ${t} + ${t} = ${a}.`,
+        choiceOffsets: [-10, -2, -1, 1, 2, 10],
+        missingOffsets: [-20, -10, -2, 2, 10, 20],
+        plan: PLAN_STD
+    },
+    'add-round': {
+        id: 'add-round', axis: '3204+70', name: 'Ajouter des dizaines, centaines, milliers', title: 'Ajouter des dizaines, des centaines…',
+        operation: '+', animation: 'digits', maxAvgMs: 7000,
+        requires: { skill: 'tens-add', level: 2 },
+        generate: (r) => {
+            for (;;) {
+                const len = r(3, 4), a = r(10 ** (len - 1), 10 ** len - 1), k = r(1, len - 1), dg = digitAt(a, k);
+                if (a % 10 !== 0 && dg < 9) return [a, r(1, 9 - dg) * 10 ** k];
+            }
+        },
+        explain: (a, b, t) => { const k = placeOf(b), d = b / 10 ** k;
+            return `${fmtNum(a)} + ${fmtNum(b)} : on ajoute ${d} ${placeName(k, d)} ; le chiffre des ${PLACE[k][1]} passe de ${digitAt(a, k)} à ${digitAt(a, k) + d} : ${fmtNum(t)}.`; },
+        offsetsFor: (a, b) => { const p = 10 ** placeOf(b); return [-p, p, -10 * p, 10 * p, -p / 10, p / 10]; },   // se tromper de rang
+        plan: PLAN_STD
+    },
+    'sub-round': {
+        id: 'sub-round', axis: '8756−5000', name: 'Enlever des dizaines, centaines, milliers', title: 'Enlever des dizaines, des centaines…',
+        operation: '−', animation: 'digits', maxAvgMs: 7000,
+        requires: { skill: 'tens-sub', level: 2 },
+        generate: (r) => {
+            for (;;) {
+                const len = r(3, 4), a = r(10 ** (len - 1), 10 ** len - 1), k = r(1, len - 1), dg = digitAt(a, k);
+                if (a % 10 === 0 || dg < 2) continue;
+                const d = r(1, k === len - 1 ? dg - 1 : dg);
+                return [a, d * 10 ** k];
+            }
+        },
+        explain: (a, b, t) => { const k = placeOf(b), d = b / 10 ** k;
+            return `${fmtNum(a)} − ${fmtNum(b)} : on enlève ${d} ${placeName(k, d)} ; le chiffre des ${PLACE[k][1]} passe de ${digitAt(a, k)} à ${digitAt(a, k) - d} : ${fmtNum(t)}.`; },
+        offsetsFor: (a, b) => { const p = 10 ** placeOf(b); return [-p, p, -10 * p, 10 * p, -p / 10, p / 10]; },
+        plan: PLAN_STD
+    }
+});
+
 // Divisions ÷3, ÷4, ÷6, ÷7, ÷8, ÷9 : même principe que ÷2, ÷5, ÷10, débloquées par la table correspondante
 [3, 4, 6, 7, 8, 9].forEach(n => {
     SKILLS[`divide-${n}`] = {
@@ -276,7 +352,7 @@ Object.assign(SKILLS, {
 });
 SKILLS['divide-7'].maxAvgMs = 6000;   // comme ×7
 
-const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'complement-10', 'tens-add', 'tens-sub', 'complement-100', 'add-units', 'sub-units', 'add-2digits', 'sub-2digits', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'];
+const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'complement-10', 'tens-add', 'tens-sub', 'complement-100', 'add-units', 'sub-units', 'add-2digits', 'sub-2digits', 'add-round', 'sub-round', 'double-100', 'half-100', 'multiply-100', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'];
 
 // Voies d'apprentissage (regroupement dans l'espace parent). `radar` : compétences affichées en « toile d'araignée ».
 const PATHS = [
@@ -286,6 +362,9 @@ const PATHS = [
     { id: 'tables', name: 'Tables de multiplication', emoji: '✖️',
       skills: ['multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix'],
       radar: ['multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10'] },
+    { id: 'mental', name: 'Nombres et calcul malin', emoji: '🧠',
+      skills: ['multiply-100', 'double-100', 'half-100', 'add-round', 'sub-round'],
+      radar: ['multiply-100', 'double-100', 'half-100', 'add-round', 'sub-round'] },
     { id: 'division', name: 'Divisions', emoji: '➗',
       skills: ['divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'],
       radar: ['divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'] }

@@ -155,19 +155,24 @@ class Engine {
             key: `${op}:${a}:${b}`          // sert à éviter les doublons dans une session
         };
 
+        const sk = SKILLS[skillId];
+        const fmt = (n) => (typeof fmtNum === 'function' ? fmtNum(n) : String(n));   // 3 204 : espace fine pour les grands nombres
         if (type === 'missing') {
             // le nombre manquant est le premier opérande en × et en ÷, le second en + et en −
             const hidden = (op === '×' || op === '÷') ? a : b;
             ex.answer = hidden;
-            ex.question = (op === '×' || op === '÷') ? `? ${op} ${b} = ${total}` : `${a} ${op} ? = ${total}`;
-            ex.choices = this.makeChoices(hidden, SKILLS[skillId].choiceOffsets ? SKILLS[skillId].choiceOffsets : op === '÷' ? [-2 * b, -b, b, 2 * b, -1, 1, 2] : [-3, -2, -1, 1, 2, 3]);
+            ex.question = sk.ask ? sk.ask(a, b, total, true)
+                : (op === '×' || op === '÷') ? `? ${op} ${fmt(b)} = ${fmt(total)}` : `${fmt(a)} ${op} ? = ${fmt(total)}`;
+            ex.choices = this.makeChoices(hidden, sk.offsetsFor ? sk.offsetsFor(a, b) : sk.missingOffsets || sk.choiceOffsets
+                || (op === '÷' ? [-2 * b, -b, b, 2 * b, -1, 1, 2] : [-3, -2, -1, 1, 2, 3]));
         } else if (type === 'multiple') {
             ex.answer = total;
-            ex.question = `${a} ${op} ${b} = ?`;
-            ex.choices = this.makeChoices(total, SKILLS[skillId].choiceOffsets ? SKILLS[skillId].choiceOffsets : op === '÷' ? [-3, -2, -1, 1, 2, 3] : op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
+            ex.question = sk.ask ? sk.ask(a, b, total, false) : `${fmt(a)} ${op} ${fmt(b)} = ?`;
+            ex.choices = this.makeChoices(total, sk.offsetsFor ? sk.offsetsFor(a, b) : sk.choiceOffsets
+                || (op === '÷' ? [-3, -2, -1, 1, 2, 3] : op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]));
         } else {
             ex.answer = total;
-            ex.question = `${a} ${op} ${b} = ?`;
+            ex.question = sk.ask ? sk.ask(a, b, total, false) : `${fmt(a)} ${op} ${fmt(b)} = ?`;
         }
         return ex;
     }
