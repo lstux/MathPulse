@@ -600,3 +600,46 @@ test('divisions ÷3 à ÷9: exactes, débloquées par la table, explication « c
         assert.match(engine.getExplanation({ skill: id, operation: '÷', operands: [6 * n, n], total: 6 }), new RegExp(`car 6 × ${n} = ${6 * n}`));
     }
 });
+
+test('voie C : bornes des nombres, compléments en « nombre manquant », explications', () => {
+    const { engine } = setup();
+    const check = {
+        'complement-10': (a, b) => a + b === 10 && a >= 1 && b >= 1,
+        'complement-100': (a, b) => a + b === 100 && a % 10 === 0 && b % 10 === 0,
+        'tens-add': (a, b) => a % 10 === 0 && b % 10 === 0 && a + b <= 100,
+        'tens-sub': (a, b) => a % 10 === 0 && b % 10 === 0 && a > b,
+        'add-units': (a, b) => a % 10 !== 0 && b >= 2 && b <= 9 && a + b <= 99,
+        'sub-units': (a, b) => a % 10 !== 0 && b >= 2 && b <= 9 && a > b,
+        'add-2digits': (a, b) => b >= 11 && b % 10 !== 0 && a + b <= 99,
+        'sub-2digits': (a, b) => b >= 11 && b % 10 !== 0 && a > b && a <= 99
+    };
+    for (const id of Object.keys(check)) {
+        for (let k = 0; k < 300; k++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            assert.ok(check[id](...ex.operands), `${id}: ${ex.operands}`);
+            assert.ok(ex.total >= 1 && ex.total <= 100);
+            if (SKILLS[id].noNumeric) assert.notStrictEqual(ex.type, 'numeric', `${id}: jamais « a + b = ? »`);
+            assert.ok(ex.type !== 'multiple' || (ex.choices.length === 4 && ex.choices.includes(ex.answer)));
+            assert.strictEqual(typeof engine.getExplanation(ex), 'string');
+        }
+    }
+    // série rapide et rappels : les compléments restent des « nombres manquants »
+    assert.strictEqual(engine.generateExercise('complement-10', 'numeric').type, 'missing');
+    const ex = (skill, op, a, b, t) => engine.getExplanation({ skill, operation: op, operands: [a, b], total: t });
+    assert.match(ex('add-units', '+', 47, 8, 55), /on va jusqu'à 50 \(\+3\), puis on ajoute encore 5 : 55/);
+    assert.match(ex('add-units', '+', 42, 5, 47), /2 \+ 5 = 7, donc 47/);
+    assert.match(ex('sub-units', '−', 52, 7, 45), /on descend à 50 \(−2\), puis on enlève encore 5 : 45/);
+    assert.match(ex('add-2digits', '+', 38, 45, 83), /38 \+ 40 = 78, puis \+ 5 = 83/);
+    assert.match(ex('sub-2digits', '−', 83, 27, 56), /83 − 20 = 63, puis − 7 = 56/);
+    assert.match(ex('tens-add', '+', 30, 40, 70), /3 dizaines \+ 4 dizaines = 7 dizaines, soit 70/);
+    assert.match(ex('complement-100', '+', 60, 40, 100), /il manque 40/);
+});
+
+test('voie C : chaîne de déblocage', () => {
+    const chain = { 'complement-10': 'addition-simple', 'tens-add': 'complement-10', 'tens-sub': 'subtract-simple', 'complement-100': 'tens-add',
+        'add-units': 'tens-add', 'sub-units': 'tens-sub', 'add-2digits': 'add-units', 'sub-2digits': 'sub-units' };
+    for (const [id, req] of Object.entries(chain)) assert.strictEqual(SKILLS[id].requires.skill, req, id);
+    assert.ok(SKILL_ORDER.every(id => SKILLS[id]) && new Set(SKILL_ORDER).size === SKILL_ORDER.length);
+    assert.ok(PATHS.every(p => p.skills.every(id => SKILLS[id])));
+    assert.strictEqual([].concat(...PATHS.map(p => p.skills)).length, SKILL_ORDER.length, 'chaque compétence est dans une voie');
+});

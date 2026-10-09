@@ -60,6 +60,37 @@ const Animations = {
         return `<div class="visual visual-array" role="img" aria-label="${rows} lignes de ${cols} points : ${rows} × ${cols} = ${rows * cols}">${lines}</div>`;
     },
 
+    // Paquets de dizaines : `first` paquets bleus, puis `second` paquets (mode 'add' : violets ; 'sub' : retirés ; 'missing' : à trouver)
+    tensBars(first, second, mode) {
+        const bar = (cls, i, extra = '') => `<span class="ten-bar ${cls}" style="animation-delay:${i * 90}ms${extra}">10</span>`;
+        const bars = Array.from({ length: first }, (_, i) => bar(mode === 'sub' && i >= first - second ? 'ten-removed' : 'ten-first', i, `;--cross-delay:${first * 90 + 300 + (i - (first - second)) * 140}ms`)).join('')
+            + (mode === 'sub' ? '' : Array.from({ length: second }, (_, i) => bar(mode === 'missing' ? 'ten-missing' : 'ten-second', first + i)).join(''));
+        const label = mode === 'sub' ? `${first} paquets de 10, on en enlève ${second}`
+            : mode === 'missing' ? `${first} paquets de 10, il en manque ${second} pour faire 10`
+            : `${first} paquets de 10 et ${second} paquets de 10`;
+        return `<div class="visual visual-tens tens-compact" role="img" aria-label="${label}">${bars}</div>`;
+    },
+
+    // Frise de sauts : `nodes` = nombres successifs, `labels` = valeur de chaque saut (« +3 », « −20 »)
+    jumps(nodes, labels) {
+        const W = 300, pad = 34, gap = nodes.length > 1 ? (W - 2 * pad) / (nodes.length - 1) : 0;
+        const x = (i) => pad + i * gap;
+        const arcs = labels.map((l, i) => `
+            <path class="jump-arc ${i % 2 ? 'second' : 'first'}" pathLength="1" d="M ${x(i)} 78 Q ${(x(i) + x(i + 1)) / 2} 14 ${x(i + 1)} 78" style="animation-delay:${i * 700 + 200}ms"/>
+            <text class="jump-label ${i % 2 ? 'second' : 'first'}" x="${(x(i) + x(i + 1)) / 2}" y="36" text-anchor="middle" style="animation-delay:${i * 700 + 600}ms">${l}</text>`).join('');
+        const pts = nodes.map((n, i) => `<circle class="jump-dot" cx="${x(i)}" cy="78" r="4"/><text class="jump-num" x="${x(i)}" y="102" text-anchor="middle">${n}</text>`).join('');
+        return `<div class="visual visual-jumps"><svg viewBox="0 0 ${W} 112" role="img" aria-label="${nodes.join(', puis ')} : ${labels.join(', ')}"><line class="jump-line" x1="${x(0) - 14}" y1="78" x2="${x(nodes.length - 1) + 14}" y2="78"/>${arcs}${pts}</svg></div>`;
+    },
+
+    // Frise adaptée au calcul : on passe par la dizaine (47 + 8), ou on décompose (38 + 45)
+    jumpsFor(skillId, a, b) {
+        const u = a % 10, d = b - (b % 10);
+        if (skillId === 'add-units') return u + b > 10 ? this.jumps([a, a + 10 - u, a + b], [`+${10 - u}`, `+${b - (10 - u)}`]) : this.jumps([a, a + b], [`+${b}`]);
+        if (skillId === 'sub-units') return b > u ? this.jumps([a, a - u, a - b], [`−${u}`, `−${b - u}`]) : this.jumps([a, a - b], [`−${b}`]);
+        if (skillId === 'add-2digits') return this.jumps([a, a + d, a + b], [`+${d}`, `+${b % 10}`]);
+        return this.jumps([a, a - d, a - b], [`−${d}`, `−${b % 10}`]);
+    },
+
     // Partage : `total` objets répartis équitablement dans `n` paniers
     share(total, n, item = '🍎') {
         const per = total / n;
@@ -73,6 +104,13 @@ const Animations = {
     // Représentation adaptée à un exercice
     forExercise(exercise) {
         const [a, b] = exercise.operands;
+        switch (exercise.skill) {
+            case 'complement-10': return this.blocks(a, b);
+            case 'complement-100': return this.tensBars(a / 10, b / 10, 'missing');
+            case 'tens-add': return this.tensBars(a / 10, b / 10, 'add');
+            case 'tens-sub': return this.tensBars(a / 10, b / 10, 'sub');
+            case 'add-units': case 'sub-units': case 'add-2digits': case 'sub-2digits': return this.jumpsFor(exercise.skill, a, b);
+        }
         if (exercise.operation === '+') return this.blocks(a, b);
         if (exercise.operation === '−') return this.takeAway(a, b);
         if (exercise.operation === '÷') {

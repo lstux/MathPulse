@@ -495,7 +495,7 @@ class ScreenManager {
                 <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s de réflexion en moyenne</p>
             </div>`;
         };
-        const axisLabel = (id) => `${SKILLS[id].operation}${SKILLS[id].factor || SKILLS[id].divisor}`;
+        const axisLabel = (id) => SKILLS[id].axis || `${SKILLS[id].operation}${SKILLS[id].factor || SKILLS[id].divisor}`;
         const cards = PATHS.map(path => {
             const levels = path.skills.map(id => this.progression.getMasteryLevel(id));
             const mastered = levels.filter(l => l >= 3).length;
@@ -541,8 +541,10 @@ class ScreenManager {
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
                 <h2 class="text-lg font-bold mb-md">Revoir les explications</h2>
-                <div class="replay-list mb-lg">
-                    ${SKILL_ORDER.map(id => `<button class="btn-secondary" data-replay="${id}">${SKILLS[id].name}</button>`).join('')}
+                <div class="mb-lg">
+                    ${PATHS.map(p => `<details class="path-details replay-path"><summary>${p.emoji} ${p.name}</summary>
+                        <div class="replay-list">${p.skills.map(id => `<button class="btn-secondary" data-replay="${id}">${SKILLS[id].name}</button>`).join('')}</div>
+                    </details>`).join('')}
                 </div>
                 <p class="muted text-sm mb-md" id="app-version">Version ${APP_VERSION} (${APP_BUILD})</p>
                 <div class="flex flex-col gap-md">

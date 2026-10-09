@@ -138,8 +138,11 @@ with sync_playwright() as p:
     assert pg.locator('#elan').count() == 1 and pg.is_hidden('#btn-hint'), 'jauge visible, pas de coup de pouce'
     for i in range(5):
         ans = solve(pg.inner_text('#question'))
-        for d in str(ans): pg.click(f'.key[data-key="{d}"]')
-        pg.click('.key[data-key="ok"]'); pg.wait_for_timeout(250)
+        if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')   # compléments : nombre manquant en choix multiple
+        else:
+            for d in str(ans): pg.click(f'.key[data-key="{d}"]')
+            pg.click('.key[data-key="ok"]')
+        pg.wait_for_timeout(250)
         assert pg.locator('.elan-cell.on').count() == i + 1, f"l'élan doit se charger à chaque réponse rapide ({i + 1})"
         pg.wait_for_timeout(1000)
     assert pg.locator('#rapid-result').count() == 1, 'résultat de la série rapide attendu'
@@ -151,11 +154,16 @@ with sync_playwright() as p:
     assert 'Version' in pg.inner_text('#app-version')
     # revoir une explication depuis l'espace parent (sans toucher à la progression)
     stars_before = pg.evaluate('window.mathpulse.progression.getTotalStars()')
+    pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
     pg.click('[data-replay="subtract-simple"]'); assert 'Soustraire' in pg.inner_text('h1')
     assert pg.inner_text('#btn-start-game') == 'Retour'; pg.click('#btn-start-game')
+    # découverte avec frise de sauts (voie C) : rejouable aussi
+    pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
+    pg.click('[data-replay="add-units"]'); assert pg.locator('.visual-jumps svg').count() == 1 and '47 + 8' in pg.inner_text('.formula')
+    pg.click('#btn-start-game')
     assert 'Version' in pg.inner_text('#app-version')
     assert pg.evaluate('window.mathpulse.progression.getTotalStars()') == stars_before
-    assert pg.locator('.path').count() == 3 and pg.locator('svg.radar').count() == 2 and pg.locator('.pbar').count() == 3 and pg.locator('.wk-col').count() == 7, 'graphiques espace parent'
+    assert pg.locator('.path').count() == 3 and pg.locator('svg.radar').count() == 3 and pg.locator('.pbar').count() == 3 and pg.locator('.wk-col').count() == 7, 'graphiques espace parent'
     pg.evaluate("document.querySelectorAll('.path-details').forEach(d => d.open = true)")
     assert 'réflexion' in pg.inner_text('.skill-card >> nth=0') or 'Pas encore' in pg.inner_text('.skill-card >> nth=0')
     ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(600)

@@ -1,13 +1,14 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.9.0';
+const APP_VERSION = '0.10.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
 const SKILLS = {
     'addition-simple': {
         id: 'addition-simple',
+        axis: 'a+b',
         name: 'Additions',
         title: 'Les additions',
         operation: '+',
@@ -17,6 +18,7 @@ const SKILLS = {
     },
     'subtract-simple': {
         id: 'subtract-simple',
+        axis: 'a−b',
         name: 'Soustractions',
         title: 'Les soustractions',
         operation: '−',
@@ -168,6 +170,96 @@ const SKILLS = {
     }
 };
 
+// Additions et soustractions étendues (voie C du parcours). Chaque compétence a un générateur `generate(rand)`
+// qui renvoie [a, b], une phrase d'explication et un seuil de réflexion propre (`maxAvgMs`).
+// `noNumeric` : pas de question « a + b = ? » (le résultat serait évident) : on demande le nombre manquant.
+const PLAN_STD = ['numeric', 'numeric', 'multiple', 'multiple', 'missing'];
+const PLAN_MISSING = ['missing', 'missing', 'missing', 'missing', 'missing'];
+const unitsOf = (a) => a % 10;
+Object.assign(SKILLS, {
+    'complement-10': {
+        id: 'complement-10', axis: '→10', name: 'Compléments à 10', title: 'Aller jusqu\'à 10',
+        operation: '+', animation: 'blocks', noNumeric: true, maxAvgMs: 5000,
+        requires: { skill: 'addition-simple', level: 2 },
+        generate: (r) => { const a = r(1, 9); return [a, 10 - a]; },
+        explain: (a, b) => `${a} + ${b} = 10 : pour aller de ${a} à 10, il manque ${b}.`,
+        plan: PLAN_MISSING
+    },
+    'tens-add': {
+        id: 'tens-add', axis: '30+40', name: 'Dizaines : additions', title: 'Additionner des dizaines',
+        operation: '+', animation: 'tens', maxAvgMs: 5000,
+        requires: { skill: 'complement-10', level: 2 },
+        generate: (r) => { const a = r(1, 9) * 10; return [a, r(1, 10 - a / 10) * 10]; },
+        explain: (a, b, t) => `${a / 10} dizaines + ${b / 10} dizaines = ${t / 10} dizaines, soit ${t}.`,
+        choiceOffsets: [-20, -10, 10, 20, 30],
+        plan: PLAN_STD
+    },
+    'tens-sub': {
+        id: 'tens-sub', axis: '80−50', name: 'Dizaines : soustractions', title: 'Soustraire des dizaines',
+        operation: '−', animation: 'tens', maxAvgMs: 5000,
+        requires: { skill: 'subtract-simple', level: 2 },
+        generate: (r) => { const a = r(2, 10) * 10; return [a, r(1, a / 10 - 1) * 10]; },
+        explain: (a, b, t) => `${a / 10} dizaines − ${b / 10} dizaines = ${t / 10} dizaines, soit ${t}.`,
+        choiceOffsets: [-20, -10, 10, 20, 30],
+        plan: PLAN_STD
+    },
+    'complement-100': {
+        id: 'complement-100', axis: '→100', name: 'Compléments à 100', title: 'Aller jusqu\'à 100',
+        operation: '+', animation: 'tens', noNumeric: true, maxAvgMs: 5000,
+        requires: { skill: 'tens-add', level: 2 },
+        generate: (r) => { const a = r(1, 9) * 10; return [a, 100 - a]; },
+        explain: (a, b) => `${a / 10} dizaines + ${b / 10} dizaines = 10 dizaines, soit 100 : pour aller de ${a} à 100, il manque ${b}.`,
+        choiceOffsets: [-30, -20, -10, 10, 20, 30],
+        plan: PLAN_MISSING
+    },
+    'add-units': {
+        id: 'add-units', axis: '47+8', name: 'Additions avec dizaine (47 + 8)', title: 'Passer la dizaine en additionnant',
+        operation: '+', animation: 'jumps', maxAvgMs: 6000,
+        requires: { skill: 'tens-add', level: 2 },
+        generate: (r) => { let a; do { a = r(11, 90); } while (unitsOf(a) === 0); return [a, r(2, Math.min(9, 99 - a))]; },
+        explain: (a, b, t) => {
+            const u = unitsOf(a);
+            return u + b > 10
+                ? `${a} + ${b} : de ${a}, on va jusqu'à ${a + 10 - u} (+${10 - u}), puis on ajoute encore ${b - (10 - u)} : ${t}.`
+                : `${a} + ${b} : ${u} + ${b} = ${u + b}, donc ${t}.`;
+        },
+        choiceOffsets: [-10, -2, -1, 1, 2, 10],
+        plan: PLAN_STD
+    },
+    'sub-units': {
+        id: 'sub-units', axis: '52−7', name: 'Soustractions avec dizaine (52 − 7)', title: 'Passer la dizaine en soustrayant',
+        operation: '−', animation: 'jumps', maxAvgMs: 6000,
+        requires: { skill: 'tens-sub', level: 2 },
+        generate: (r) => { let a; do { a = r(11, 99); } while (unitsOf(a) === 0); return [a, r(2, 9)]; },
+        explain: (a, b, t) => {
+            const u = unitsOf(a);
+            return b > u
+                ? `${a} − ${b} : de ${a}, on descend à ${a - u} (−${u}), puis on enlève encore ${b - u} : ${t}.`
+                : `${a} − ${b} : ${u} − ${b} = ${u - b}, donc ${t}.`;
+        },
+        choiceOffsets: [-10, -2, -1, 1, 2, 10],
+        plan: PLAN_STD
+    },
+    'add-2digits': {
+        id: 'add-2digits', axis: '38+45', name: 'Additions à 2 chiffres', title: 'Additionner des nombres à 2 chiffres',
+        operation: '+', animation: 'jumps', maxAvgMs: 8000,
+        requires: { skill: 'add-units', level: 2 },
+        generate: (r) => { for (;;) { const a = r(11, 88), b = r(11, 99 - a); if (b % 10) return [a, b]; } },
+        explain: (a, b, t) => { const d = b - unitsOf(b); return `${a} + ${b} : ${a} + ${d} = ${a + d}, puis + ${unitsOf(b)} = ${t}.`; },
+        choiceOffsets: [-10, -2, -1, 1, 2, 10],
+        plan: PLAN_STD
+    },
+    'sub-2digits': {
+        id: 'sub-2digits', axis: '83−27', name: 'Soustractions à 2 chiffres', title: 'Soustraire des nombres à 2 chiffres',
+        operation: '−', animation: 'jumps', maxAvgMs: 8000,
+        requires: { skill: 'sub-units', level: 2 },
+        generate: (r) => { for (;;) { const a = r(31, 99), b = r(11, a - 1); if (b % 10) return [a, b]; } },
+        explain: (a, b, t) => { const d = b - unitsOf(b); return `${a} − ${b} : ${a} − ${d} = ${a - d}, puis − ${unitsOf(b)} = ${t}.`; },
+        choiceOffsets: [-10, -2, -1, 1, 2, 10],
+        plan: PLAN_STD
+    }
+});
+
 // Divisions ÷3, ÷4, ÷6, ÷7, ÷8, ÷9 : même principe que ÷2, ÷5, ÷10, débloquées par la table correspondante
 [3, 4, 6, 7, 8, 9].forEach(n => {
     SKILLS[`divide-${n}`] = {
@@ -184,11 +276,13 @@ const SKILLS = {
 });
 SKILLS['divide-7'].maxAvgMs = 6000;   // comme ×7
 
-const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'];
+const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'complement-10', 'tens-add', 'tens-sub', 'complement-100', 'add-units', 'sub-units', 'add-2digits', 'sub-2digits', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'];
 
 // Voies d'apprentissage (regroupement dans l'espace parent). `radar` : compétences affichées en « toile d'araignée ».
 const PATHS = [
-    { id: 'calc', name: 'Additions et soustractions', emoji: '➕', skills: ['addition-simple', 'subtract-simple'] },
+    { id: 'calc', name: 'Additions et soustractions', emoji: '➕',
+      skills: ['addition-simple', 'subtract-simple', 'complement-10', 'tens-add', 'tens-sub', 'complement-100', 'add-units', 'sub-units', 'add-2digits', 'sub-2digits'],
+      radar: ['addition-simple', 'subtract-simple', 'complement-10', 'tens-add', 'tens-sub', 'complement-100', 'add-units', 'sub-units', 'add-2digits', 'sub-2digits'] },
     { id: 'tables', name: 'Tables de multiplication', emoji: '✖️',
       skills: ['multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix'],
       radar: ['multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10'] },

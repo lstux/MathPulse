@@ -32,6 +32,46 @@ const Discovery = {
             visual: () => Animations.table(3, 4),
             text: '3 × 4 : le double de 3 (en bleu), puis encore le double (en violet)', formula: '3 × 4 = 6 + 6 = 12'
         },
+        'complement-10': {
+            title: 'Aller jusqu\'à 10 !',
+            visual: () => Animations.blocks(7, 3),
+            text: '7, et combien pour faire 10 ? Il en manque 3 !', formula: '7 + 3 = 10'
+        },
+        'tens-add': {
+            title: 'Des dizaines, comme des paquets !',
+            visual: () => Animations.tensBars(3, 4, 'add'),
+            text: '3 dizaines + 4 dizaines = 7 dizaines', formula: '30 + 40 = 70'
+        },
+        'tens-sub': {
+            title: 'Enlever des dizaines !',
+            visual: () => Animations.tensBars(8, 5, 'sub'),
+            text: '8 dizaines, on en enlève 5 : il en reste 3', formula: '80 − 50 = 30'
+        },
+        'complement-100': {
+            title: 'Aller jusqu\'à 100 !',
+            visual: () => Animations.tensBars(6, 4, 'missing'),
+            text: '6 dizaines : il en manque 4 (en pointillés) pour faire 10 dizaines', formula: '60 + 40 = 100'
+        },
+        'add-units': {
+            title: 'Passer par la dizaine !',
+            visual: () => Animations.jumps([47, 50, 55], ['+3', '+5']),
+            text: '47 + 8 : on va jusqu\'à 50, puis on ajoute le reste', formula: '47 + 8 = 47 + 3 + 5 = 55'
+        },
+        'sub-units': {
+            title: 'Descendre à la dizaine !',
+            visual: () => Animations.jumps([52, 50, 45], ['−2', '−5']),
+            text: '52 − 7 : on descend à 50, puis on enlève encore 5', formula: '52 − 7 = 52 − 2 − 5 = 45'
+        },
+        'add-2digits': {
+            title: 'Les dizaines, puis les unités !',
+            visual: () => Animations.jumps([38, 78, 83], ['+40', '+5']),
+            text: '38 + 45 : on ajoute 40, puis encore 5', formula: '38 + 45 = 38 + 40 + 5 = 83'
+        },
+        'sub-2digits': {
+            title: 'Enlever par étapes !',
+            visual: () => Animations.jumps([83, 63, 56], ['−20', '−7']),
+            text: '83 − 27 : on enlève 20, puis encore 7', formula: '83 − 27 = 83 − 20 − 7 = 56'
+        },
         'multiply-6': {
             title: 'Les paquets de 6 !',
             visual: () => Animations.array(4, 6, 5),

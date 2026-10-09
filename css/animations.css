@@ -81,3 +81,27 @@
 .dbl-violet { background: var(--color-space-purple); }
 .dot-out { background: transparent; border: 2px dashed var(--color-text-muted, #9aa3b5); box-sizing: border-box; opacity: .7; }
 @media (max-width: 380px) { .dot-item { width: 1rem; height: 1rem; } .dot-row { gap: .3rem; } }
+
+/* Dizaines (additions/soustractions de dizaines, compléments à 100) */
+.tens-compact { max-width: 19rem; }
+.tens-compact .ten-bar { min-width: 2.7rem; padding: .3rem .2rem; }
+.ten-bar.ten-first { background: var(--color-space-blue); color: #fff; }
+.ten-bar.ten-second { background: var(--color-space-purple); color: #fff; }
+.ten-bar.ten-missing { background: transparent !important; color: var(--color-primary); border: 2px dashed var(--color-primary) !important; box-shadow: none; }
+.ten-bar.ten-removed { background: var(--color-space-blue); color: #fff; animation: groupAppear var(--duration-base) var(--easing-out) backwards, tenCross .5s ease var(--cross-delay, 1s) forwards; }
+@keyframes tenCross { to { background: transparent; color: var(--color-text-light); box-shadow: none; outline: 2px dashed currentColor; outline-offset: -2px; opacity: .45; transform: scale(.88); } }
+
+/* Frise de sauts (47 + 8, 83 − 27…) */
+.visual-jumps svg { width: 100%; max-width: 20rem; height: auto; overflow: visible; }
+.jump-line { stroke: var(--color-border); stroke-width: 3; stroke-linecap: round; }
+.jump-dot { fill: var(--color-primary); }
+.jump-num { font-size: 15px; font-weight: 800; fill: var(--color-text, #1a1a2e); }
+.jump-arc { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: jumpDraw .6s ease forwards; }
+.jump-arc.first, .jump-label.first { stroke: var(--color-space-blue); fill: none; }
+.jump-arc.second, .jump-label.second { stroke: var(--color-space-purple); fill: none; }
+.jump-label { font-size: 15px; font-weight: 800; stroke: none !important; opacity: 0; animation: jumpLabel .3s ease forwards; }
+.jump-label.first { fill: var(--color-space-blue); }
+.jump-label.second { fill: var(--color-space-purple); }
+@keyframes jumpDraw { to { stroke-dashoffset: 0; } }
+@keyframes jumpLabel { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .jump-arc { stroke-dashoffset: 0; animation: none; } .jump-label { opacity: 1; animation: none; } .ten-bar.ten-removed { animation: none; opacity: .45; } }

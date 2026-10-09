@@ -116,8 +116,10 @@ class Engine {
     generateExercise(skillId, type = 'numeric') {
         const skill = SKILLS[skillId];
         if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
+        if (skill.noNumeric && type === 'numeric') type = 'missing';   // ex. compléments : « 7 + ? = 10 »
         let a, b;
-        if (skill.factor) { a = this.randInt(1, 10); b = skill.factor; }          // table de multiplication : a × n
+        if (skill.generate) [a, b] = skill.generate((lo, hi) => this.randInt(lo, hi));
+        else if (skill.factor) { a = this.randInt(1, 10); b = skill.factor; }          // table de multiplication : a × n
         else if (skill.mixed) { a = this.randInt(...skill.mixed); b = this.randInt(...skill.mixed); }   // tables mélangées
         else if (skill.divisor) { b = skill.divisor; a = this.randInt(1, 10) * b; }   // division exacte : a ÷ n
         else if (skillId === 'addition-simple') { a = this.randInt(1, 9); b = this.randInt(1, 9); }
@@ -141,11 +143,11 @@ class Engine {
             const hidden = (op === '×' || op === '÷') ? a : b;
             ex.answer = hidden;
             ex.question = (op === '×' || op === '÷') ? `? ${op} ${b} = ${total}` : `${a} ${op} ? = ${total}`;
-            ex.choices = this.makeChoices(hidden, op === '÷' ? [-2 * b, -b, b, 2 * b, -1, 1, 2] : [-3, -2, -1, 1, 2, 3]);
+            ex.choices = this.makeChoices(hidden, SKILLS[skillId].choiceOffsets ? SKILLS[skillId].choiceOffsets : op === '÷' ? [-2 * b, -b, b, 2 * b, -1, 1, 2] : [-3, -2, -1, 1, 2, 3]);
         } else if (type === 'multiple') {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;
-            ex.choices = this.makeChoices(total, op === '÷' ? [-3, -2, -1, 1, 2, 3] : op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
+            ex.choices = this.makeChoices(total, SKILLS[skillId].choiceOffsets ? SKILLS[skillId].choiceOffsets : op === '÷' ? [-3, -2, -1, 1, 2, 3] : op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]);
         } else {
             ex.answer = total;
             ex.question = `${a} ${op} ${b} = ?`;
@@ -172,9 +174,9 @@ class Engine {
     getExplanation(exercise) {
         const [a, b] = exercise.operands;
         const t = exercise.total;
-        if (exercise.operation === '+') return `${a} et ${b} font ${t} ensemble.`;
         const custom = SKILLS[exercise.skill] && SKILLS[exercise.skill].explain;
         if (custom) return custom(a, b, t);
+        if (exercise.operation === '+') return `${a} et ${b} font ${t} ensemble.`;
         if (exercise.operation === '−') return `Si on enlève ${b} de ${a}, il en reste ${t}.`;
         if (b === 10) return `Multiplier par 10, c'est ajouter un zéro : ${a} × 10 = ${t}.`;
         if (b === 2) return `Le double de ${a}, c'est ${a} + ${a} = ${t}.`;
