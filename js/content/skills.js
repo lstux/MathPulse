@@ -1,7 +1,7 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.7.0';
+const APP_VERSION = '0.8.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
@@ -168,7 +168,23 @@ const SKILLS = {
     }
 };
 
-const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-5', 'divide-10'];
+// Divisions ÷3, ÷4, ÷6, ÷7, ÷8, ÷9 : même principe que ÷2, ÷5, ÷10, débloquées par la table correspondante
+[3, 4, 6, 7, 8, 9].forEach(n => {
+    SKILLS[`divide-${n}`] = {
+        id: `divide-${n}`,
+        divisor: n,
+        name: `÷${n} (paquets de ${n})`,
+        title: `Des paquets de ${n}`,
+        operation: '÷',
+        animation: n <= 4 ? 'groups' : 'array',
+        requires: { skill: `multiply-${n}`, level: 2 },
+        explain: (a, b, t) => `${a} ÷ ${n} : combien de paquets de ${n} dans ${a} ? Il y en a ${t}, car ${t} × ${n} = ${a}.`,
+        plan: ['numeric', 'numeric', 'multiple', 'multiple', 'missing']
+    };
+});
+SKILLS['divide-7'].maxAvgMs = 6000;   // comme ×7
+
+const SKILL_ORDER = ['addition-simple', 'subtract-simple', 'multiply-2', 'multiply-3', 'multiply-4', 'multiply-5', 'multiply-6', 'multiply-7', 'multiply-8', 'multiply-9', 'multiply-10', 'multiply-mix', 'divide-2', 'divide-3', 'divide-4', 'divide-5', 'divide-6', 'divide-7', 'divide-8', 'divide-9', 'divide-10'];
 
 // Seuils de maîtrise (niveau 1 = vu ; une compétence peut surcharger le temps avec `maxAvgMs` dans SKILLS, 2 = en cours, 3 = maîtrisé ⭐⭐⭐)
 const MASTERY = {

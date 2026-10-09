@@ -108,7 +108,7 @@ Paliers alignés sur les attendus CE2, du plus simple au plus difficile :
 | P1 | Voie A : **×3, ×4** (+ générateur par `factor`, seuils par compétence `maxAvgMs`, tableau de points) | M | ✅ **fait** (v0.5.0) |
 | P2 | Voie A : ×9, ×6, ×8, ×7, tables mélangées | M | ✅ **fait** (v0.7.0) |
 | P3 | Voie B1 : ÷2, ÷5, ÷10 (opérateur `÷`, partage/groupement) | M | ✅ **fait** (v0.6.0) |
-| P4 | Voie B2–B3 : ÷3 à ÷9 | S | 1.1 |
+| P4 | Voie B2–B3 : ÷3 à ÷9 | S | ✅ **fait** (v0.8.0) |
 | P5 | Voie C1–C5 (compléments, dizaines, retenue, < 100) | L | 1.1 |
 | P6 | Voie D (×100, doubles/moitiés) | S | 1.1 |
 | P7 | Voie C6–C7 (centaines, milliers, grands nombres), division avec reste (B4) | L | 1.2 |

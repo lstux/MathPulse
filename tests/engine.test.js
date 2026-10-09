@@ -579,3 +579,24 @@ test('tables ×6 à ×9 et mélange: opérandes, explications, chaîne de déblo
     assert.match(engine.getExplanation({ skill: 'multiply-8', operation: '×', operands: [6, 8], total: 48 }), /24, et le double de 24, c'est 48/);
     assert.strictEqual(SKILLS['multiply-7'].maxAvgMs, 6000);
 });
+
+test('divisions ÷3 à ÷9: exactes, débloquées par la table, explication « car q × n = a »', () => {
+    for (const n of [3, 4, 6, 7, 8, 9]) {
+        const id = `divide-${n}`;
+        assert.strictEqual(SKILLS[id].requires.skill, `multiply-${n}`);
+        const { engine, progression } = setup();
+        for (let i = 0; i < 4; i++) progression.recordAnswer(`multiply-${n}`, true, 2000);
+        assert.ok(engine.isUnlocked(id));
+        const seen = new Set();
+        for (let k = 0; k < 300; k++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            assert.strictEqual(ex.operands[1], n);
+            assert.strictEqual(ex.operands[0] % n, 0);
+            assert.strictEqual(ex.total, ex.operands[0] / n);
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && ex.choices.includes(ex.answer));
+            seen.add(ex.total);
+        }
+        assert.strictEqual(seen.size, 10);
+        assert.match(engine.getExplanation({ skill: id, operation: '÷', operands: [6 * n, n], total: 6 }), new RegExp(`car 6 × ${n} = ${6 * n}`));
+    }
+});

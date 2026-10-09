@@ -99,3 +99,14 @@ const Discovery = {
         return screen;
     }
 };
+
+// Divisions ÷3, ÷4, ÷6, ÷7, ÷8, ÷9 : « combien de paquets de n ? » (le lien avec la table de multiplication)
+[[3, 4, () => Animations.groups(4, 3)], [4, 3, () => Animations.groups(3, 4)], [6, 4, () => Animations.array(4, 6)],
+ [7, 3, () => Animations.array(3, 7)], [8, 3, () => Animations.array(3, 8)], [9, 4, () => Animations.array(4, 9)]].forEach(([n, q, visual]) => {
+    Discovery.content[`divide-${n}`] = {
+        title: `Combien de paquets de ${n} ?`,
+        visual,
+        text: `Dans ${n * q}, il y a ${q} paquets de ${n}, car ${q} × ${n} = ${n * q}`,
+        formula: `${n * q} ÷ ${n} = ${q}`
+    };
+});

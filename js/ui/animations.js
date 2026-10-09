@@ -78,6 +78,7 @@ const Animations = {
         if (exercise.operation === '÷') {
             if (b === 10) return this.tens(a / 10);
             if (b === 2) return this.share(a, 2);
+            if (b >= 6) return this.array(a / b, b);       // beaucoup de points : tableau de q lignes de b
             return this.groups(a / b, b);      // groupement : combien de paquets de b dans a ?
         }
         if (b === 10) return this.tens(a);
