@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" preserveAspectRatio="xMidYMid slice">
+  <title>Le signal radio</title>
+  <desc>Le poste de pilotage. Sur l'écran, une onde bleue : un signal radio venu de loin.</desc>
+  <defs><path id="pine" d="M0 -62 L15 -32 H8 L21 -8 H10 L25 18 H-25 L-10 -8 H-21 L-8 -32 H-15Z M-4 18 H4 V34 H-4Z"/><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1f3d"/><stop offset="1" stop-color="#262c58"/></linearGradient><linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f3668"/><stop offset="1" stop-color="#1b1f3d"/></linearGradient><linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2370"/><stop offset=".6" stop-color="#6a4fc0"/><stop offset="1" stop-color="#d0689c"/></linearGradient><linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e0d2b"/><stop offset="1" stop-color="#232a7a"/></linearGradient><radialGradient id="halo"><stop offset="0" stop-color="#ffd54a" stop-opacity=".4"/><stop offset="1" stop-color="#ffd54a" stop-opacity="0"/></radialGradient></defs>
+  <rect width="360" height="240" fill="url(#wall)"/>
+  <rect y="190" width="360" height="50" fill="url(#floor)"/>
+  <g stroke="#323a72" stroke-width="2" fill="none"><path d="M0 24 H360"/><path d="M40 0 V24 M320 0 V24"/></g>
+  <circle cx="28" cy="46" r="6" fill="#a23a4a"/><circle cx="28" cy="46" r="13" fill="#a23a4a" opacity=".2"/>
+  <rect x="76" y="32" width="208" height="88" rx="14" fill="#0b1030"/><path d="M92 76 H130 L140 52 L152 100 L164 60 L174 88 L184 76 H210 L218 58 L228 94 L238 76 H268" fill="none" stroke="#7fe9ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="268" cy="76" r="9" fill="#7fe9ff" opacity=".35"/><circle cx="268" cy="76" r="4" fill="#bfe6ff"/><path d="M180 32 V20 M168 20 H192" stroke="#8f97b8" stroke-width="3" stroke-linecap="round"/><g fill="#fff" opacity=".6"><circle cx="100" cy="50" r="1.2"/><circle cx="160" cy="44" r="1"/><circle cx="214" cy="48" r="1.2"/><circle cx="268" cy="104" r="1"/></g><rect x="76" y="32" width="208" height="88" rx="14" fill="none" stroke="#4a5392" stroke-width="6"/>
+  <rect x="82" y="126" width="196" height="46" rx="10" fill="#2a3160" stroke="#4a5392" stroke-width="3"/>
+  
+  <circle cx="100" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/><circle cx="122" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/><circle cx="144" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/><circle cx="166" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/><circle cx="188" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/><circle cx="210" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/><circle cx="232" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/><circle cx="254" cy="148" r="5.5" fill="#3d4478" stroke="#4a5392" stroke-width="1.2"/>
+  <rect x="96" y="160" width="60" height="5" rx="2.5" fill="#323a72"/>
+  
+</svg>

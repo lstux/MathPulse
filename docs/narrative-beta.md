@@ -29,7 +29,7 @@ Aujourd'hui la progression est abstraite : des étoiles font avancer une fusée 
 | Sujet | Décision |
 |---|---|
 | Échéance | Contenu prêt pour la **bêta v0.9** (19 oct. – 6 nov. dans le plan actuel) |
-| Longueur | **10 chapitres**, la durée de vie du jeu compte ; pas besoin de tout livrer d'un coup |
+| Longueur | **13 chapitres** (10 au départ, étendus le 11 octobre), la durée de vie du jeu compte ; pas besoin de tout livrer d'un coup |
 | Mécanique | Palier d'étoiles atteint → chapitre débloqué ; les seuils sont croissants et seront calculés à partir de l'économie réelle d'étoiles |
 | Rythme des scènes | Une **scène complète** seulement au déblocage d'un chapitre, soit une fois toutes les quelques sessions. Les autres sessions ont une **ligne de texte** de la 🐰, qu'on peut passer |
 | Visuels | SVG simples. Renard et lapine existent déjà en SVG (4 expressions chacun) |

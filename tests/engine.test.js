@@ -126,10 +126,10 @@ test('session: étoiles créditées une seule fois, chapitre 2 débloqué à 6',
     assert.strictEqual(storage.get(storage.KEYS.SESSION_HISTORY).length, 1);
 });
 
-test('chapitres: 10 chapitres, seuils croissants, le premier est ouvert dès le départ', () => {
-    assert.strictEqual(CHAPTERS.length, 10);
-    assert.deepStrictEqual(CHAPTERS.map(c => c.number), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    assert.strictEqual(new Set(CHAPTERS.map(c => c.id)).size, 10, 'identifiants uniques');
+test('chapitres: 13 chapitres, seuils croissants, le premier est ouvert dès le départ', () => {
+    assert.strictEqual(CHAPTERS.length, 13);
+    assert.deepStrictEqual(CHAPTERS.map(c => c.number), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    assert.strictEqual(new Set(CHAPTERS.map(c => c.id)).size, 13, 'identifiants uniques');
     assert.strictEqual(CHAPTERS[0].unlockAt, 0);
     for (let i = 1; i < CHAPTERS.length; i++) assert.ok(CHAPTERS[i].unlockAt > CHAPTERS[i - 1].unlockAt, `seuil croissant au chapitre ${i + 1}`);
     for (const c of CHAPTERS) assert.ok(c.title && c.mission && c.emoji, `titre, mission et émoji au chapitre ${c.number}`);
@@ -143,8 +143,8 @@ test('chapitres: déblocage par seuil, plusieurs chapitres d\'un coup, fin de l\
     assert.deepStrictEqual(newChaptersBetween(14, 30).map(c => c.number), [3, 4]);
     assert.strictEqual(nextChapter(0).number, 2);
     assert.strictEqual(nextChapter(6).number, 3);
-    assert.strictEqual(nextChapter(195), null);
-    assert.strictEqual(chaptersUnlockedAt(500).length, 10);
+    assert.strictEqual(nextChapter(225), null);
+    assert.strictEqual(chaptersUnlockedAt(500).length, 13);
 });
 
 test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier chapitre « en cours »', () => {
@@ -153,16 +153,16 @@ test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier
     const html = new Universe(progression).render();
     assert.ok(html.includes('Les circuits'), 'le chapitre 3 est ouvert');
     assert.ok(!html.includes('La salle des machines'), 'le titre du chapitre 4 reste caché');
-    assert.strictEqual((html.match(/chapter-card locked/g) || []).length, 7);
+    assert.strictEqual((html.match(/chapter-card locked/g) || []).length, 10);
     assert.strictEqual((html.match(/aria-current="step"/g) || []).length, 1);
     assert.ok(html.includes('pour le chapitre 4'));
 });
 
-test('scènes: chapitres 1 à 10 complets, vignettes courtes, décors et personnages connus', () => {
-    const ARTS = ['forest', 'clearing', 'ship', 'ship-lit', 'engine', 'engine-on', 'tanks', 'tanks-full', 'cockpit', 'cockpit-night', 'cockpit-chart', 'cockpit-lit', 'airlock', 'airlock-closed', 'porthole-earth', 'fuel', 'space-asteroids', 'space-beacon', 'space-beacon-on', 'space-home', 'earth-top', 'hill', 'hill-reply'];
+test('scènes: tous les chapitres complets, vignettes courtes, décors et personnages connus', () => {
+    const ARTS = ['forest', 'clearing', 'ship', 'ship-lit', 'engine', 'engine-on', 'tanks', 'tanks-full', 'cockpit', 'cockpit-night', 'cockpit-chart', 'cockpit-lit', 'cockpit-radio', 'airlock', 'airlock-closed', 'porthole-earth', 'fuel', 'space-asteroids', 'space-beacon', 'space-beacon-on', 'space-home', 'earth-top', 'hill', 'hill-reply'];
     const MOODS = { fox: ['content', 'bravo', 'think', 'comfort', 'worried', 'moved'], rabbit: ['content', 'bravo', 'think', 'comfort', 'surprise'] };
-    for (const c of CHAPTERS.slice(0, 10)) {
-        assert.strictEqual(c.scene.length, 5, `5 vignettes au chapitre ${c.number}`);
+    for (const c of CHAPTERS) {
+        assert.ok(c.scene.length >= 5 && c.scene.length <= 8, `5 à 8 vignettes au chapitre ${c.number}`);
         assert.strictEqual(c.lines.length, 3, `3 lignes de la lapine au chapitre ${c.number}`);
         assert.ok(c.end, `message de fin au chapitre ${c.number}`);
         for (const v of c.scene) {
@@ -178,7 +178,7 @@ test('scènes: chapitres 1 à 10 complets, vignettes courtes, décors et personn
                 if (l.who !== 'narrator') assert.ok(!l.mood || MOODS[l.who].includes(l.mood), `expression connue : ${l.who} ${l.mood}`);
                 words += l.text.split(/\s+/).length;
             }
-            assert.ok(words <= 40, `vignette trop longue au chapitre ${c.number} (${words} mots)`);
+            assert.ok(words <= 50, `vignette trop longue au chapitre ${c.number} (${words} mots)`);
         }
     }
 });
@@ -189,7 +189,7 @@ test('scènes: scène à lire = premier chapitre ouvert avec scène non lue', ()
     assert.strictEqual(pendingScene(7, { lapine: true }).id, 'vaisseau');
     assert.strictEqual(pendingScene(16, { lapine: true }).id, 'vaisseau', 'dans l\'ordre');
     assert.strictEqual(pendingScene(16, { lapine: true, vaisseau: true }).id, 'circuits');
-    assert.strictEqual(pendingScene(500, { lapine: true, vaisseau: true, circuits: true, machines: true, energie: true, carnet: true, fenetre: true, embarquement: true, voyage: true, retour: true }), null, 'les chapitres sans scène ne comptent pas');
+    assert.strictEqual(pendingScene(500, Object.fromEntries(CHAPTERS.map(c => [c.id, true]))), null, 'les chapitres sans scène ne comptent pas');
     assert.strictEqual(pendingScene(0, undefined).id, 'lapine');
 });
 

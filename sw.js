@@ -42,6 +42,7 @@ const PRECACHE = [
     './assets/story/scene/cockpit-night.svg',
     './assets/story/scene/cockpit-chart.svg',
     './assets/story/scene/cockpit-lit.svg',
+    './assets/story/scene/cockpit-radio.svg',
     './assets/story/scene/airlock.svg',
     './assets/story/scene/airlock-closed.svg',
     './assets/story/scene/porthole-earth.svg',
