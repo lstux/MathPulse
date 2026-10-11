@@ -31,6 +31,7 @@ class ScreenManager {
             intro: () => this.createIntroScreen(data),
             home: () => this.createHomeScreen(),
             universe: () => this.createUniverseScreen(),
+            scene: () => this.createSceneScreen(data),
             rapidIntro: () => this.createRapidIntroScreen(),
             rapidCountdown: () => this.createRapidCountdownScreen(),
             discovery: () => data.replay
@@ -161,19 +162,52 @@ class ScreenManager {
     // ---------- Univers ----------
     createUniverseScreen() {
         const screen = this.screenEl();
+        const universe = new Universe(this.progression);
+        // Une ligne de la lapine avant « C'est parti » (ici et pas pendant la session : elle ne retarde aucune réponse)
+        const line = randomLine(currentChapter(this.progression.getTotalStars()));
         screen.innerHTML = `
-            <div class="universe-wrap">${new Universe(this.progression).render()}</div>
+            <div class="universe-wrap">
+                ${universe.renderHeader()}
+                ${line ? `<div class="rabbit-says" id="rabbit-line">${this.face('rabbit', 'content')}<p class="speech">${line}</p></div>` : ''}
+            </div>
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-start-session">C'est parti !</button>
                 ${this.engine.rapidAvailable() ? '<button class="btn-secondary" id="btn-rapid">⚡ Série rapide</button>' : ''}
                 <button class="btn-secondary" id="btn-back-home">Retour</button>
+            </div>
+            <div class="universe-wrap">
+                <h2 class="text-lg font-bold mb-md">L'histoire</h2>
+                ${universe.renderChapters()}
             </div>
         `;
         screen.querySelector('#btn-start-session').addEventListener('click', () => this.startSession());
         const rapidBtn = screen.querySelector('#btn-rapid');
         if (rapidBtn) rapidBtn.addEventListener('click', () => this.show('rapidIntro'));
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
+        screen.querySelectorAll('[data-chapter]').forEach(btn => btn.addEventListener('click', () => {
+            const chapter = CHAPTERS.find(c => c.id === btn.dataset.chapter);
+            this.show('scene', { chapter, replay: true, doneLabel: 'Retour', next: () => this.show('universe') });
+        }));
         return screen;
+    }
+
+    // Scène d'histoire d'un chapitre ; la première lecture est mémorisée (pas une relecture)
+    createSceneScreen({ chapter, next, doneLabel, replay }) {
+        const done = () => {
+            if (!replay) this.progression.markChapterSeen(chapter.id);
+            next();
+        };
+        return Scenes.create(chapter, { onDone: done, doneLabel });
+    }
+
+    // Bouton « Lire le chapitre » : propose la scène en attente (chapitre ouvert, pas encore lu)
+    readChapterButton(pending) {
+        return pending ? `<button class="btn-primary btn-large" id="btn-read">📖 Lire le chapitre ${pending.number}</button>` : '';
+    }
+
+    bindReadChapter(screen, pending) {
+        const btn = screen.querySelector('#btn-read');
+        if (btn) btn.addEventListener('click', () => this.show('scene', { chapter: pending, doneLabel: 'Continuer', next: () => this.show('universe') }));
     }
 
     startRapid() {
@@ -232,6 +266,12 @@ class ScreenManager {
     }
 
     startSession(forcedSkill = null) {
+        // Scène d'histoire à lire avant la session (chapitre ouvert, pas encore lu) ; pas en mode test (compétence imposée)
+        const pending = forcedSkill ? null : pendingScene(this.progression.getTotalStars(), this.progression.data.chaptersSeen);
+        if (pending) {
+            this.show('scene', { chapter: pending, doneLabel: 'À toi de jouer !', next: () => this.startSession() });
+            return;
+        }
         this.session = new Session(this.engine, this.progression);
         this.session.start(forcedSkill ? { skill: forcedSkill } : {});
         Sound.play('start');
@@ -402,7 +442,9 @@ class ScreenManager {
     createResultScreen(summary) {
         if (summary.rapid) return this.createRapidResultScreen(summary);
         const screen = this.screenEl();
-        const { correct, total, starsEarned, newChapters, skill, capped, cleared } = summary;
+        const { correct, total, starsEarned, newChapters, skill, capped, cleared, totalStars } = summary;
+        const endLine = chapterEndLine(currentChapter(Math.max(0, totalStars - starsEarned)), starsEarned);
+        const pending = pendingScene(totalStars, this.progression.data.chaptersSeen);
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
         const chapters = newChapters.map(c => `<p class="unlock text-lg font-bold">${c.emoji} Nouveau chapitre : ${c.title} !</p>`).join('');
         const mood = correct === total ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
@@ -418,16 +460,19 @@ class ScreenManager {
                     <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
+                    ${endLine ? `<p class="story-line text-lg">${endLine}</p>` : ''}
                     ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
                     ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
                     ${chapters}
                 </div>
             </div>
             <div class="flex flex-col gap-md btn-column">
-                <button class="btn-primary btn-large" id="btn-again">Encore !</button>
+                ${this.readChapterButton(pending)}
+                <button class="${pending ? 'btn-secondary' : 'btn-primary btn-large'}" id="btn-again">Encore !</button>
                 <button class="btn-secondary" id="btn-universe">Mon univers</button>
             </div>
         `;
+        this.bindReadChapter(screen, pending);
         // Sons de fin de session, échelonnés : étoiles, puis calcul acquis, puis chapitre
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 3 ? 'stars3' : 'stars'), at); at += 1100; }
@@ -440,7 +485,8 @@ class ScreenManager {
 
     createRapidResultScreen(summary) {
         const screen = this.screenEl();
-        const { correct, total, fast, starsEarned, rewarded, newChapters } = summary;
+        const { correct, total, fast, starsEarned, rewarded, newChapters, totalStars } = summary;
+        const pending = pendingScene(totalStars, this.progression.data.chaptersSeen);
         const mood = correct === total && fast >= total - 1 ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
         const line = { bravo: 'Décollage réussi ! Plus rapide que mon vaisseau !', content: 'Bien joué, tes réflexes progressent !', comfort: 'Pas grave, la prochaine série sera la bonne !' }[mood];
         const stars = !rewarded
@@ -464,10 +510,12 @@ class ScreenManager {
                 </div>
             </div>
             <div class="flex flex-col gap-md btn-column">
-                <button class="btn-primary btn-large" id="btn-again">Encore !</button>
+                ${this.readChapterButton(pending)}
+                <button class="${pending ? 'btn-secondary' : 'btn-primary btn-large'}" id="btn-again">Encore !</button>
                 <button class="btn-secondary" id="btn-universe">Mon univers</button>
             </div>
         `;
+        this.bindReadChapter(screen, pending);
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 2 ? 'stars3' : 'stars'), at); at += 1100; }
         if (newChapters.length) this.later(() => Sound.play('planet'), at);

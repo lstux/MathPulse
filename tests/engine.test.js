@@ -158,6 +158,72 @@ test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier
     assert.ok(html.includes('pour le chapitre 4'));
 });
 
+test('scènes: chapitres 1 à 3 complets, vignettes courtes, décors et personnages connus', () => {
+    const ARTS = ['forest', 'clearing', 'ship', 'ship-lit'];
+    const MOODS = { fox: ['content', 'bravo', 'think', 'comfort', 'worried'], rabbit: ['content', 'bravo', 'think', 'comfort'] };
+    for (const c of CHAPTERS.slice(0, 3)) {
+        assert.strictEqual(c.scene.length, 5, `5 vignettes au chapitre ${c.number}`);
+        assert.strictEqual(c.lines.length, 3, `3 lignes de la lapine au chapitre ${c.number}`);
+        assert.ok(c.end, `message de fin au chapitre ${c.number}`);
+        for (const v of c.scene) {
+            assert.ok(ARTS.includes(v.art), `décor connu : ${v.art}`);
+            assert.ok(v.cast.length >= 1);
+            for (const m of v.cast) {
+                assert.ok(['fox', 'rabbit'].includes(m.who) && ['left', 'right', 'center'].includes(m.at));
+            }
+            assert.ok(v.lines.length >= 1 && v.lines.length <= 2);
+            let words = 0;
+            for (const l of v.lines) {
+                assert.ok(['narrator', 'fox', 'rabbit'].includes(l.who));
+                if (l.who !== 'narrator') assert.ok(!l.mood || MOODS[l.who].includes(l.mood), `expression connue : ${l.who} ${l.mood}`);
+                words += l.text.split(/\s+/).length;
+            }
+            assert.ok(words <= 40, `vignette trop longue au chapitre ${c.number} (${words} mots)`);
+        }
+    }
+    for (const c of CHAPTERS.slice(3)) assert.ok(!c.scene, `le chapitre ${c.number} n'a pas encore de scène`);
+});
+
+test('scènes: scène à lire = premier chapitre ouvert avec scène non lue', () => {
+    assert.strictEqual(pendingScene(0, {}).id, 'lapine');
+    assert.strictEqual(pendingScene(0, { lapine: true }), null, 'au départ, seul le chapitre 1 est ouvert');
+    assert.strictEqual(pendingScene(7, { lapine: true }).id, 'vaisseau');
+    assert.strictEqual(pendingScene(16, { lapine: true }).id, 'vaisseau', 'dans l\'ordre');
+    assert.strictEqual(pendingScene(16, { lapine: true, vaisseau: true }).id, 'circuits');
+    assert.strictEqual(pendingScene(500, { lapine: true, vaisseau: true, circuits: true }), null, 'les chapitres sans scène ne comptent pas');
+    assert.strictEqual(pendingScene(0, undefined).id, 'lapine');
+});
+
+test('scènes: ligne de la lapine au hasard et message de fin selon les étoiles', () => {
+    const c = CHAPTERS[0];
+    assert.strictEqual(randomLine(c, () => 0), c.lines[0]);
+    assert.strictEqual(randomLine(c, () => 0.999), c.lines[2]);
+    assert.strictEqual(randomLine(CHAPTERS[3]), null, 'pas de ligne tant que le chapitre n\'est pas écrit');
+    assert.strictEqual(currentChapter(14).number, 2);
+    assert.strictEqual(currentChapter(15).number, 3);
+    assert.ok(chapterEndLine(c, 3).includes('Parfait'));
+    assert.ok(chapterEndLine(c, 2).includes('Bien joué'));
+    assert.ok(chapterEndLine(c, 0).includes('Pas grave'));
+    const c3 = CHAPTERS[2];
+    assert.strictEqual(chapterEndLine(c3, 3), c3.end.some, 'sans variante « full », on retombe sur le message courant');
+    assert.strictEqual(chapterEndLine(c3, 0), null, 'rien à dire sans étoile');
+    assert.strictEqual(chapterEndLine(CHAPTERS[3], 3), null);
+});
+
+test('progression: chapitres lus mémorisés, anciennes données sans ce champ, réinitialisation', () => {
+    const { progression } = setup();
+    assert.ok(!progression.hasSeenChapter('lapine'));
+    progression.markChapterSeen('lapine');
+    const again = new Progression(); again.load();
+    assert.ok(again.hasSeenChapter('lapine') && !again.hasSeenChapter('vaisseau'));
+    storage.set(storage.KEYS.PROGRESSION, { version: 1, skills: {}, totalStars: 3, discovered: {} });   // données d'avant l'histoire
+    const old = new Progression(); old.load();
+    assert.ok(!old.hasSeenChapter('lapine'));
+    assert.strictEqual(old.getTotalStars(), 3);
+    again.reset();
+    assert.ok(!again.hasSeenChapter('lapine'));
+});
+
 test('session: barème d\'étoiles', () => {
     assert.deepStrictEqual([0, 1, 2, 3, 4, 5].map(starsForScore), [0, 0, 0, 1, 2, 3]);
 });

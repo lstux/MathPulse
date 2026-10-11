@@ -126,3 +126,6 @@
 .digit-arrow { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: var(--color-primary); }
 .digit-places { display: flex; gap: .3rem; margin-top: -.15rem; }
 .digit-places span { width: 2.6rem; text-align: center; font-size: .65rem; color: var(--color-text-light); font-weight: 600; }
+
+/* Entrée des personnages dans une vignette */
+@keyframes castIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }

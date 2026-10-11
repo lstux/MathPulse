@@ -8,7 +8,8 @@ class Universe {
         this.currentId = unlocked[unlocked.length - 1].id;   // le dernier chapitre ouvert
     }
 
-    render() {
+    // Haut de l'écran : étoiles, fusée, progression et prochain objectif
+    renderHeader() {
         const pct = Math.min(100, Math.round((this.stars / this.max) * 100));
         return `
             <div class="universe-container">
@@ -22,10 +23,6 @@ class Universe {
                     <div class="fox" aria-hidden="true">🦊</div>
                 </div>
 
-                <ol class="chapters-list mb-lg" aria-label="Les chapitres de l'histoire">
-                    ${CHAPTERS.map(c => this.renderChapter(c)).join('')}
-                </ol>
-
                 <div class="progress-bar mb-md">
                     <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${this.max}" aria-valuenow="${Math.min(this.stars, this.max)}">
                         <div class="progress-fill" style="width:${pct}%"></div>
@@ -34,6 +31,17 @@ class Universe {
 
                 <p class="next-goal text-center text-sm">${this.nextGoalText()}</p>
             </div>`;
+    }
+
+    renderChapters() {
+        return `
+            <ol class="chapters-list" aria-label="Les chapitres de l'histoire">
+                ${CHAPTERS.map(c => this.renderChapter(c)).join('')}
+            </ol>`;
+    }
+
+    render() {
+        return this.renderHeader() + this.renderChapters();
     }
 
     // Un chapitre verrouillé cache son titre : on découvre l'histoire au fur et à mesure
@@ -58,8 +66,9 @@ class Universe {
                     <div class="chapter-number text-sm">Chapitre ${chapter.number}</div>
                     <div class="chapter-title">${chapter.title}</div>
                     <div class="chapter-mission text-sm">${chapter.mission}</div>
+                    ${current ? '<div class="chapter-tag text-sm">En cours</div>' : ''}
                 </div>
-                ${current ? '<div class="chapter-tag text-sm">En cours</div>' : ''}
+                ${chapter.scene ? `<button class="chapter-replay" data-chapter="${chapter.id}" aria-label="Revoir la scène du chapitre ${chapter.number}">Revoir</button>` : ''}
             </li>`;
     }
 

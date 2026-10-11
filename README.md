@@ -40,7 +40,7 @@ js/
   content/skills.js     catalogue des compétences, seuils de maîtrise, barème d'étoiles
   content/chapters.js   chapitres de l'histoire et seuils d'étoiles
   core/                 storage · progression · engine (génération/validation) · session
-  ui/                   screen (écrans) · universe · discovery · animations (blocs/groupes)
+  ui/                   screen (écrans) · universe · scene (scènes d'histoire) · discovery · animations (blocs/groupes)
   app.js                démarrage
 assets/icons/           icône SVG + PNG (PWA)
 tests/                  run.js + engine.test.js (unitaires) · smoke.py (navigateur)

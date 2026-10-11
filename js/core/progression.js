@@ -5,7 +5,7 @@
 
 class Progression {
     constructor() {
-        this.data = { version: 1, skills: {}, totalStars: 0, discovered: {}, errors: {} };
+        this.data = { version: 1, skills: {}, totalStars: 0, discovered: {}, errors: {}, chaptersSeen: {} };
     }
 
     load() {
@@ -15,7 +15,8 @@ class Progression {
             skills: this.migrateSkills(saved.skills || {}),
             totalStars: Number.isFinite(saved.totalStars) ? saved.totalStars : 0,
             discovered: saved.discovered || {},
-            errors: saved.errors || {}   // calculs à revoir, indexés par exercise.key
+            errors: saved.errors || {},   // calculs à revoir, indexés par exercise.key
+            chaptersSeen: saved.chaptersSeen || {}   // scènes d'histoire déjà lues { idDuChapitre: true } (champ ajouté : les anciennes données n'en ont pas, version inchangée)
         };
     }
 
@@ -162,6 +163,15 @@ class Progression {
             stats[skillId] = { name: SKILLS[skillId] ? SKILLS[skillId].name : skillId, ...skillData };
         }
         return stats;
+    }
+
+    hasSeenChapter(chapterId) {
+        return !!this.data.chaptersSeen[chapterId];
+    }
+
+    markChapterSeen(chapterId) {
+        this.data.chaptersSeen[chapterId] = true;
+        this.save();
     }
 
     hasSeenDiscovery(skillId) {
