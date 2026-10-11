@@ -168,7 +168,7 @@ class ScreenManager {
         screen.innerHTML = `
             <div class="universe-wrap">
                 ${universe.renderHeader()}
-                ${line ? `<div class="rabbit-says" id="rabbit-line">${this.face('rabbit', 'content')}<p class="speech">${line}</p></div>` : ''}
+                ${line ? `<div class="rabbit-says" id="rabbit-line">${this.face('rabbit', 'content')}<p class="speech">${Scenes.fr(line)}</p></div>` : ''}
             </div>
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-start-session">C'est parti !</button>
@@ -471,7 +471,7 @@ class ScreenManager {
                     <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
-                    ${endLine ? `<p class="story-line text-lg">${endLine}</p>` : ''}
+                    ${endLine ? `<p class="story-line text-lg">${Scenes.fr(endLine)}</p>` : ''}
                     ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
                     ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
                     ${chapters}

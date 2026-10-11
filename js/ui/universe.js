@@ -111,7 +111,7 @@ class Universe {
 
     nextGoalText() {
         const next = nextChapter(this.stars);
-        if (!next) return 'Bravo ! Tu as débloqué toute l\'histoire. À suivre…';
+        if (!next) return 'Bravo ! Tu as débloqué toute l\'histoire. À\u00a0suivre…';
         const left = next.unlockAt - this.stars;
         return `Encore ${left} ${left > 1 ? 'étoiles' : 'étoile'} pour le chapitre ${next.number} !`;
     }
