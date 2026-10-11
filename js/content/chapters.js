@@ -76,10 +76,95 @@ const CHAPTERS = [
         ],
         end: { some: "Un voyant de plus brille grâce à toi !" }
     },
-    { id: 'machines',    number: 4,  unlockAt: 28,  emoji: '⚙️', title: 'La salle des machines',      mission: 'Compter par groupes' },
-    { id: 'energie',     number: 5,  unlockAt: 45,  emoji: '🔋', title: 'Partager l\'énergie',        mission: 'Répartir les cellules' },
-    { id: 'carnet',      number: 6,  unlockAt: 65,  emoji: '📒', title: 'Le carnet de mesures',       mission: 'Compléter les relevés' },
-    { id: 'fenetre',     number: 7,  unlockAt: 90,  emoji: '⏰', title: 'La fenêtre de départ',       mission: 'Trouver le bon moment' },
+    { id: 'machines',    number: 4,  unlockAt: 28,  emoji: '⚙️', title: 'La salle des machines',      mission: 'Compter par groupes',
+        scene: [
+            { art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Voici le cœur du vaisseau : les moteurs." }] },
+            { art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Pour les relancer, je dois savoir combien il y a de pistons en tout." }] },
+            { art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'fox', mood: 'think', text: "Quatre, huit, douze…" },
+                { who: 'rabbit', mood: 'bravo', text: "Douze ! Voilà." }] },
+            { art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'fox', mood: 'worried', text: "Et si le moteur s'emballe ?" },
+                { who: 'rabbit', text: "Alors on le calme. Un moteur se règle par petits pas." }] },
+            { art: 'engine-on', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'think', text: "Les moteurs tournent. Mais sans circuit de navigation, impossible de savoir où aller. Il me faudra mes mesures." }] }
+        ],
+        lines: [
+            "Trois par rangée, quatre par rangée : tu verras, ça roule.",
+            "Écoute : les moteurs commencent à ronronner.",
+            "Compter par groupes, c'est compter malin."
+        ],
+        end: { some: "Un moteur de plus tourne grâce à toi !" }
+    },
+    { id: 'energie',     number: 5,  unlockAt: 45,  emoji: '🔋', title: 'Partager l\'énergie',        mission: 'Répartir les cellules',
+        scene: [
+            { art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Pour démarrer, il faut répartir l'énergie." }] },
+            { art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Douze cellules, trois réservoirs, autant dans chacun. Combien ?" },
+                { who: 'fox', mood: 'content', text: "Quatre !" }] },
+            { art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Chez moi aussi on partage tout. Le soir, tout le village partage la lumière de la veillée." }] },
+            { art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'think', text: "Et si je fais des paquets de 5 avec 15 cellules ?" },
+                { who: 'fox', mood: 'bravo', text: "Trois paquets !" }] },
+            { art: 'tanks-full', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'bravo', text: "Ils sont pleins. Ton partage était juste." }] }
+        ],
+        lines: [
+            "Partager, c'est un peu l'inverse de multiplier.",
+            "Combien de paquets ? Pense à ta table, elle t'aide.",
+            "Chez moi, on dit : un partage juste fait des amis."
+        ],
+        end: { some: "Tu as aidé la 🐰 à répartir l'énergie." }
+    },
+    { id: 'carnet',      number: 6,  unlockAt: 65,  emoji: '📒', title: 'Le carnet de mesures',       mission: 'Compléter les relevés',
+        scene: [
+            { art: 'cockpit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Voilà ma vraie mission : vérifier que la Terre est comme on l'avait mesurée de loin." }] },
+            { art: 'cockpit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Il manque des chiffres. Pour arriver à 100, il manque combien à 64 ?" },
+                { who: 'fox', mood: 'content', text: "36 !" }] },
+            { art: 'cockpit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'fox', mood: 'worried', text: "Et si les mesures étaient fausses ?" },
+                { who: 'rabbit', text: "Alors je le noterai aussi. Un résultat surprenant, c'est de la science." }] },
+            { art: 'cockpit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'bravo', text: "Les mesures de loin étaient justes. La Terre accueille bien les voyageurs." }] },
+            { art: 'cockpit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'think', text: "Il me reste à réparer la navigation pour le rapporter chez moi." }] }
+        ],
+        lines: [
+            "Il manque combien ? C'est la question préférée des explorateurs.",
+            "Une mesure juste vaut mieux qu'une mesure rapide.",
+            "Encore une page, et le carnet sera complet."
+        ],
+        end: { some: "Tu as aidé la 🐰 à compléter son carnet." }
+    },
+    { id: 'fenetre',     number: 7,  unlockAt: 90,  emoji: '⏰', title: 'La fenêtre de départ',       mission: 'Trouver le bon moment',
+        scene: [
+            { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Pour quitter la Terre, il faut viser une fenêtre de départ : un moment précis." }] },
+            { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "Mon étoile et la Terre s'alignent toutes les 7 heures. Dans 6 alignements, combien d'heures ?" },
+                { who: 'fox', mood: 'think', text: "42 !" }] },
+            { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'fox', mood: 'worried', text: "Et si on rate la fenêtre ?" },
+                { who: 'rabbit', text: "Il y en aura une autre. Mais celle-ci est la meilleure : on ne gaspille pas d'énergie." }] },
+            { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'think', text: "56 minutes en 8 étapes égales : 56 ÷ 8 ?" },
+                { who: 'fox', mood: 'bravo', text: "7 minutes !" }] },
+            { art: 'cockpit-lit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Navigation réparée. Alors… c'est l'heure des adieux." }] }
+        ],
+        lines: [
+            "Une bonne table, c'est une bonne carte.",
+            "Plus qu'un petit calcul, et on peut décoller.",
+            "Tu as vu ? Tous les voyants se rallument."
+        ],
+        end: { some: "La fenêtre de départ est calculée grâce à toi !" }
+    },
     { id: 'embarquement', number: 8, unlockAt: 120, emoji: '🚪', title: 'Embarquement surprise',      mission: 'Vérifier le carburant' },
     { id: 'voyage',      number: 9,  unlockAt: 155, emoji: '☄️', title: 'Le voyage',                  mission: 'Naviguer entre les astéroïdes' },
     { id: 'retour',      number: 10, unlockAt: 195, emoji: '🔦', title: 'Le retour',                  mission: 'Atterrir en douceur' }
