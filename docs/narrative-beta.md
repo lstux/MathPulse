@@ -38,18 +38,18 @@ Aujourd'hui la progression est abstraite : des étoiles font avancer une fusée 
 
 ## 4. Les 10 chapitres (ébauche)
 
-Chaque chapitre est rattaché à une voie du parcours. Les titres et les seuils sont provisoires. Le détail des chapitres 1 à 3 et une proposition de seuils d'étoiles sont dans [`storyboard-narratif.md`](storyboard-narratif.md).
+Chaque chapitre est rattaché à une voie du parcours. Les titres et les seuils sont provisoires. Le détail des chapitres (scènes, textes, illustrations) et une proposition de seuils d'étoiles sont dans [`storyboard-narratif.md`](storyboard-narratif.md).
 
 | # | Chapitre | Voie et compétences | Enjeu narratif |
 |---|---|---|---|
-| 1 | Rencontre | Additions (test d'entrée) | Le 🦊 trouve la 🐰 dans les bois |
-| 2 | Le vaisseau | Soustractions | Dégager les débris, découverte de la panne |
+| 1 | Une drôle de lapine | Additions (test d'entrée) | Le 🦊 trouve la 🐰 dans les bois |
+| 2 | Le vaisseau en piteux état | Soustractions | Dégager les débris, découverte de la panne |
 | 3 | Les circuits | ×2, ×5, ×10 | Remettre les circuits en route |
-| 4 | Les tables qui s'allument | ×3, ×4 | Réparer les moteurs |
-| 5 | Partager et grouper | ÷2, ÷5, ÷10 | Répartir l'énergie entre les réservoirs |
-| 6 | Les mesures | Compléments, dizaines | Vérifier les relevés de la 🐰 |
-| 7 | Le décollage | Tables ×6 à ×9, ÷3 à ÷9 | Calculer le meilleur moment de départ |
-| 8 | L'embarquement | Soustractions à deux chiffres | Le 🦊 monte à bord par accident |
+| 4 | La salle des machines | ×3, ×4 | Réparer les moteurs |
+| 5 | Partager l'énergie | ÷2, ÷5, ÷10 | Répartir l'énergie entre les réservoirs |
+| 6 | Le carnet de mesures | Compléments, dizaines | Vérifier les relevés de la 🐰 |
+| 7 | La fenêtre de départ | Tables ×6 à ×9, ÷3 à ÷9 | Calculer le meilleur moment de départ |
+| 8 | Embarquement surprise | Soustractions à deux chiffres | Le 🦊 monte à bord par accident |
 | 9 | Le voyage | Tables mélangées, additions étendues | Un vrai problème de navigation dans l'espace |
 | 10 | Le retour | Doubles, moitiés, ×100 | Adieux et signaux de lampe de poche |
 

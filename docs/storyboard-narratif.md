@@ -1,6 +1,6 @@
-# MathPulse — Storyboard narratif (chapitres 1 à 3)
+# MathPulse — Storyboard narratif (chapitres 1 à 10)
 
-_Rédigé le 11 octobre 2026. Complète [`narrative-beta.md`](narrative-beta.md) (décisions de fond). **Proposition à valider** : textes, seuils d'étoiles et découpage sont provisoires, rien n'est codé. Le code se fera sur la branche `feat/narrative-ux`._
+_Rédigé le 11 octobre 2026. Complète [`narrative-beta.md`](narrative-beta.md) (décisions de fond). Chapitres 1 à 3 validés, chapitres 4 à 10 **proposés à valider** : textes, seuils d'étoiles et découpage sont provisoires, rien n'est codé. Le code se fera sur la branche `feat/narrative-ux`._
 
 ## Règles d'écriture (valables pour tous les chapitres)
 
@@ -31,7 +31,7 @@ Ce rythme donne 4 à 5 chapitres pendant les 2 semaines de bêta, puis un chapit
 | # | Vignette | Texte |
 |---|---|---|
 | 1 | Le 🦊 avance prudemment entre les arbres vers une lueur bleue. | « Une lueur entre les arbres… Tu t'approches, le cœur un peu rapide. » |
-| 2 | La 🐰 est assise près de la lueur, calme, un carnet à la patte. | « Bonsoir ! Je suis exploratrice. Je viens d'une planète autour d'une étoile que tu vois parfois dans le ciel. » |
+| 2 | La 🐰 est assise près de sa petite lampe bleue (la lueur), calme, un carnet à la patte. | « Bonsoir ! Je suis exploratrice. Je viens d'une planète autour d'une étoile que tu vois parfois dans le ciel. » |
 | 3 | Le 🦊 recule d'un pas, inquiet. La 🐰 sourit. | « Tu es tombée du ciel ?! » — « Posée en urgence. Une micro-météorite a abîmé mon circuit de navigation. Rien de grave ! » |
 | 4 | La 🐰 montre du doigt un coin d'arbres, d'où dépasse une forme métallique. | « Mon vaisseau est juste derrière. Mais on ne montre pas ses instruments au premier venu : un petit test d'abord. » |
 | 5 | Gros plan sur la 🐰, bouton « C'est parti ». | « Cinq calculs. Prêt ? » |
@@ -46,7 +46,7 @@ Ce rythme donne 4 à 5 chapitres pendant les 2 semaines de bêta, puis un chapit
 - « Mon vaisseau t'attend. Encore un petit effort ! »
 - « Tu comptes vite. Les scientifiques adorent ça. »
 
-**Illustrations à produire** : décor de bois au soir, lueur bleue, silhouette du vaisseau entre les arbres. Le 🦊 et la 🐰 en pied existent déjà (`assets/story/fox-full.svg`, `rabbit-full.svg`).
+**Illustrations à produire** : décor de bois au soir, lampe bleue de la 🐰 (reprise au chapitre 10), silhouette du vaisseau entre les arbres. Le 🦊 et la 🐰 en pied existent déjà (`assets/story/fox-full.svg`, `rabbit-full.svg`).
 
 **Lien avec l'intro actuelle** : l'intro (quick draft) montre déjà l'atterrissage et l'arrivée de la 🐰. Proposition : la garder comme courte ouverture muette (atterrissage seul), et laisser le dialogue au chapitre 1. À refaire une fois le storyboard validé.
 
@@ -102,10 +102,196 @@ Ce rythme donne 4 à 5 chapitres pendant les 2 semaines de bêta, puis un chapit
 
 ---
 
-## Étapes suivantes proposées
+## Chapitre 4 — « La salle des machines »
 
-1. **Valider** les chapitres 1 à 3 (textes, seuils, lien avec l'intro).
-2. **Écrire les chapitres 4 à 10** dans ce même format, puis relire l'ensemble pour la cohérence de l'arc.
+**Seuil** : 28 ⭐.
+**Décor** : salle des machines (cuivre, bleu nuit, un peu de vapeur).
+**Mission thématique** : **compter par groupes** (trois rangées de quatre pistons). Correspond à ×3 et ×4.
+
+| # | Vignette | Texte |
+|---|---|---|
+| 1 | Le 🦊 et la 🐰 descendent une échelle vers une salle silencieuse. | « Voici le cœur du vaisseau : les moteurs. » |
+| 2 | Trois rangées de pistons, quatre par rangée. | « Pour les relancer, je dois savoir combien il y en a en tout. » |
+| 3 | Le 🦊 compte du doigt, la 🐰 souffle les nombres. | « Quatre, huit, douze… » — « Douze ! » — « Voilà. » |
+| 4 | Le 🦊 regarde les pistons, les oreilles basses. | « Et si le moteur s'emballe ? » — « Alors on le calme. Un moteur se règle par petits pas. » |
+| 5 | Un piston tourne doucement, voyant vert. La 🐰 regarde le tableau de bord, pensive. | « Les moteurs tournent. Mais sans circuit de navigation, impossible de savoir où aller. Il me faudra mes mesures. » |
+
+**Fin de session** : « Un moteur de plus tourne grâce à toi ! »
+
+**Lignes** :
+- « Trois par rangée, quatre par rangée : tu verras, ça roule. »
+- « Écoute : les moteurs commencent à ronronner. »
+- « Compter par groupes, c'est compter malin. »
+
+**Illustrations à produire** : salle des machines, pistons et rotors en icônes (arrêté, en marche), vapeur légère.
+
+---
+
+## Chapitre 5 — « Partager l'énergie »
+
+**Seuil** : 45 ⭐.
+**Décor** : soute aux réservoirs (bleu nuit, cellules d'énergie vert doux).
+**Mission thématique** : **partager et grouper**. Correspond à ÷2, ÷5 et ÷10.
+
+| # | Vignette | Texte |
+|---|---|---|
+| 1 | Trois réservoirs vides, une caisse de cellules lumineuses. | « Pour démarrer, il faut répartir l'énergie. » |
+| 2 | La 🐰 distribue les cellules. | « Douze cellules, trois réservoirs, autant dans chacun. Combien ? » — « Quatre ! » |
+| 3 | La 🐰, un peu rêveuse, regarde une cellule briller. | « Chez moi aussi on partage tout. Le soir, tout le village partage la lumière de la veillée. » |
+| 4 | La 🐰 aligne des paquets de cellules. | « Et si je fais des paquets de 5 avec 15 cellules ? » — « Trois paquets ! » |
+| 5 | Les trois réservoirs brillent d'une lueur douce. | « Ils sont pleins. Ton partage était juste. » |
+
+**Fin de session** : « Tu as aidé la 🐰 à répartir l'énergie. »
+
+**Lignes** :
+- « Partager, c'est un peu l'inverse de multiplier. »
+- « Combien de paquets ? Pense à ta table, elle t'aide. »
+- « Chez moi, on dit : un partage juste fait des amis. »
+
+**Illustrations à produire** : réservoirs (vide, plein), cellules d'énergie, caisse.
+
+---
+
+## Chapitre 6 — « Le carnet de mesures »
+
+**Seuil** : 65 ⭐.
+**Décor** : poste de pilotage (bleu nuit, voyants jaunes, grande vitre sur la forêt).
+**Mission thématique** : **compléter**. Correspond aux compléments à 10 et à 100, aux dizaines.
+
+| # | Vignette | Texte |
+|---|---|---|
+| 1 | La 🐰 ouvre son carnet. | « Voilà ma vraie mission : vérifier que la Terre est comme on l'avait mesurée de loin. » |
+| 2 | Une page de relevés (température, eau, air) avec des trous. | « Il manque des chiffres. Pour arriver à 100, il manque combien à 64 ? » — « 36 ! » |
+| 3 | Le 🦊 hésite, le stylo en l'air. | « Et si les mesures étaient fausses ? » — « Alors je le noterai aussi. Un résultat surprenant, c'est de la science. » |
+| 4 | Page après page, le carnet se remplit. | « Les mesures de loin étaient justes. La Terre accueille bien les voyageurs. » |
+| 5 | La 🐰 referme le carnet, le voyant principal clignote. | « Il me reste à réparer la navigation pour le rapporter chez moi. » |
+
+**Fin de session** : « Tu as aidé la 🐰 à compléter son carnet. »
+
+**Lignes** :
+- « Il manque combien ? C'est la question préférée des explorateurs. »
+- « Une mesure juste vaut mieux qu'une mesure rapide. »
+- « Encore une page, et le carnet sera complet. »
+
+**Illustrations à produire** : poste de pilotage avec vitre, carnet ouvert (page à trous, page remplie), icônes thermomètre, goutte, vent.
+
+---
+
+## Chapitre 7 — « La fenêtre de départ »
+
+**Seuil** : 90 ⭐.
+**Décor** : poste de pilotage, nuit étoilée à travers la vitre.
+**Mission thématique** : **calculer le bon moment**. Correspond aux tables ×6 à ×9 et aux divisions ÷3 à ÷9.
+
+| # | Vignette | Texte |
+|---|---|---|
+| 1 | La nuit étoilée dans la vitre. | « Pour quitter la Terre, il faut viser une fenêtre de départ : un moment précis. » |
+| 2 | La 🐰 trace des arcs sur une carte du ciel. | « Mon étoile et la Terre s'alignent toutes les 7 heures. Dans 6 alignements, combien d'heures ? » — « 42 ! » |
+| 3 | Le 🦊 serre les pattes. | « Et si on rate la fenêtre ? » — « Il y en aura une autre. Mais celle-ci est la meilleure : on ne gaspille pas d'énergie. » |
+| 4 | La 🐰 découpe le compte à rebours. | « 56 minutes en 8 étapes égales : 56 ÷ 8 ? » — « 7 minutes ! » |
+| 5 | Tous les voyants brillent. Le 🦊 sourit, un peu ému. | « Navigation réparée. Alors… c'est l'heure des adieux. » |
+
+**Fin de session** : « La fenêtre de départ est calculée grâce à toi ! »
+
+**Lignes** :
+- « Une bonne table, c'est une bonne carte. »
+- « Plus qu'un petit calcul, et on peut décoller. »
+- « Tu as vu ? Tous les voyants se rallument. »
+
+**Illustrations à produire** : carte du ciel avec arcs et horloge d'alignement, tous les voyants allumés (aboutissement du chapitre 3).
+
+---
+
+## Chapitre 8 — « Embarquement surprise »
+
+**Seuil** : 120 ⭐.
+**Décor** : sas, puis hublot sur l'espace (indigo, violet, étoiles). Deuxième bascule de palette.
+**Mission thématique** : **soustraire pour vérifier**. Correspond aux soustractions à deux chiffres.
+
+| # | Vignette | Texte |
+|---|---|---|
+| 1 | Adieux devant le sas. | « Merci pour tout, renard. Sans toi, je serais encore là. » |
+| 2 | Le 🦊 recule, sa patte accroche un levier, le sas se ferme. | « Euh… la porte ? » |
+| 3 | Le vaisseau décolle, la Terre rapetisse dans le hublot. La 🐰 lève les sourcils pour la première fois. | « Je n'avais pas prévu ça. » — « Comment je rentre ?! » |
+| 4 | La 🐰 retrouve son calme et montre la jauge de carburant. | « Respire. S'il reste assez pour revenir, je te ramène. 83 moins 27 ? » — « 56 ! » |
+| 5 | La jauge montre la réserve, la 🐰 sourit. | « Assez pour le retour. Mais d'abord une escale : mon rapport doit partir par la balise relais. » |
+
+**Fin de session** : « Tu as aidé la 🐰 à vérifier le carburant. »
+
+**Lignes** :
+- « Il en reste assez. Je te le promets, renard. »
+- « Calculer le retour, c'est la meilleure façon de se rassurer. »
+- « Regarde par le hublot : on n'est jamais perdu quand on sait compter. »
+
+**Illustrations à produire** : sas et porte qui se ferme, hublot avec la Terre qui s'éloigne, jauge de carburant, **expression « surprise » de la 🐰** (une seule fois dans l'histoire).
+
+---
+
+## Chapitre 9 — « Le voyage »
+
+**Seuil** : 155 ⭐.
+**Décor** : espace profond (indigo, violet, touches d'or), astéroïdes, balise relais.
+**Mission thématique** : **naviguer en additionnant**. Correspond aux tables mélangées et aux additions étendues. C'est le « vrai problème » le plus ambitieux : un trajet fait de plusieurs tronçons.
+
+| # | Vignette | Texte |
+|---|---|---|
+| 1 | Le vaisseau glisse entre des astéroïdes dorés. | « La balise relais est là-bas. Un chemin sûr passe entre ces rochers. » |
+| 2 | La 🐰 note les distances de deux tronçons. | « Chaque tronçon ajoute sa distance : 38 plus 45 ? » — « 83 ! » |
+| 3 | Un astéroïde frôle le hublot. Le 🦊 serre les pattes mais continue. | « 6 fois 7 ? Quarante-deux ! » — « Tu n'as plus peur ? » — « Si. Mais je calcule quand même. » |
+| 4 | La balise s'allume, le rapport s'envole. | « Mission accomplie. Regarde, la petite étoile jaune, là-bas : c'est chez moi. » |
+| 5 | Le vaisseau vire vers une petite lumière bleue. | « Maintenant, on te ramène. » |
+
+**Fin de session** : « Tu as aidé la 🐰 à guider le vaisseau jusqu'à la balise. »
+
+**Lignes** :
+- « Droit devant, puis à gauche : tu navigues comme un pro. »
+- « Chaque tronçon compte. Additionne, et on passe. »
+- « Ta peur est une bonne alliée : elle te rend prudent. »
+
+**Illustrations à produire** : espace profond avec astéroïdes, balise relais (éteinte, allumée), carte de route, étoile jaune lointaine.
+
+---
+
+## Chapitre 10 — « Le retour »
+
+**Seuil** : 195 ⭐.
+**Décor** : la Terre vue de haut, puis une colline la nuit (le vert et le brun du début reviennent, sous les étoiles).
+**Mission thématique** : **atterrir en douceur**. Correspond aux doubles, aux moitiés et à ×100.
+
+| # | Vignette | Texte |
+|---|---|---|
+| 1 | La Terre grossit dans le hublot. | « Pour se poser doucement, on divise la vitesse par deux. La moitié de 80 ? » — « 40 ! » |
+| 2 | La 🐰 règle les freins. | « Et le double de 35 ? » — « 70 ! » — « Pour les freins, 7 fois 100 ? » — « 700 ! » |
+| 3 | Le vaisseau se pose sur la colline, devant la porte. | « Tu vas me manquer. » — « Et toi à moi. » |
+| 4 | La 🐰 tend une petite lampe de poche, comme la sienne dans les bois. | « Un éclair pour dire bonne nuit, deux pour dire je pense à toi. Chaque soir, regarde le ciel. » |
+| 5 | Le vaisseau s'éloigne. Le 🦊, seul sur la colline, allume sa lampe. Une petite lueur lui répond au loin. | Deux éclairs. Puis le carnet de la 🐰 : « Prochaine mission : à suivre. » |
+
+**Fin de session** : « Tu as aidé la 🐰 à rentrer… et à te ramener. »
+
+**Lignes** :
+- « Chaque soir, une lumière dans le ciel : c'est moi. »
+- « Doubler, partager en deux : deux gestes pour atterrir en douceur. »
+- « Tu sais, renard, tu es un excellent copilote. »
+
+**Illustrations à produire** : Terre vue de haut, colline de nuit, faisceau de lampe de poche, lueur qui répond, expression « ému » du 🦊.
+
+---
+
+## Relecture de l'arc
+
+- **Le 🦊** : inquiet (chapitres 1 à 3), s'implique (4 à 6), panique à l'embarquement (8), « je calcule quand même » (9), serein au retour (10). C'est la progression de l'enfant : la peur de se tromper devient de la confiance.
+- **La 🐰** : sereine partout, avec **une seule fissure** au chapitre 8 (« Je n'avais pas prévu ça »). Cela la rend attachante sans casser son rôle rassurant.
+- **Motifs qui se répondent** : la lampe bleue du chapitre 1 revient au chapitre 10 ; les voyants du chapitre 3 sont tous allumés au chapitre 7 ; le carnet du chapitre 6 se clôt sur « à suivre ». À ajuster en conséquence au chapitre 1 (la lueur est la lampe de la 🐰).
+- **Palette** : forêt (1 et 2), vaisseau (3 à 7), espace (8 et 9), retour sur la colline (10).
+- **Fin ouverte** : après le chapitre 10, les sessions continuent. Idée à trancher plus tard : un court signal de la 🐰 à chaque nouveau palier d'étoiles, et des chapitres supplémentaires (division avec reste, grands nombres) comme « saison 2 ».
+- **Point de vigilance** : les chapitres sont débloqués par les **étoiles**, pas par la maîtrise. Un enfant peut donc atteindre le chapitre 7 sans avoir encore débloqué toutes les tables de ×6 à ×9. Les textes évitent de promettre une compétence précise, donc rien ne casse. À reconsidérer au moment du code : seuil d'étoiles seul (simple), ou double condition étoiles et compétence.
+
+---
+
+## Étapes suivantes
+
+1. ✅ Chapitres 1 à 3 validés (11 oct.).
+2. **Valider les chapitres 4 à 10** ci-dessus et l'arc d'ensemble.
 3. **Branche `feat/narrative-ux`**, en trois lots :
    - Lot 1, structure : fichier de données des chapitres, remplacement de `PLANETS`, écran des chapitres débloqués ou verrouillés dans `universe.js`, déblocage au passage d'un seuil (le résultat de session fournit déjà `newPlanets`), chapitres lus mémorisés (`version` de `progression.js`).
    - Lot 2, scènes : visionneuse de vignettes avec bouton « passer » et ligne de la 🐰 en début de session, accessible (lecteur d'écran, animations réduites), chapitres 1 à 3.
