@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img"><title>Les circuits</title>
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5864b0"/><stop offset="1" stop-color="#262c58"/></linearGradient></defs>
+<circle cx="24" cy="24" r="23" fill="url(#g)"/><circle cx="24" cy="24" r="22" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>
+<rect x="15" y="15" width="18" height="18" rx="3" fill="none" stroke="#f4f6ff" stroke-width="2.5"/><rect x="20" y="20" width="8" height="8" rx="1.5" fill="#ffd54a"/><g stroke="#f4f6ff" stroke-width="2.5" stroke-linecap="round"><path d="M20 15 V9 M28 15 V9 M20 39 V33 M28 39 V33 M15 20 H9 M15 28 H9 M39 20 H33 M39 28 H33"/></g>
+</svg>

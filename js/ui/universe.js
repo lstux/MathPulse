@@ -50,7 +50,7 @@ class Universe {
         if (!unlocked) {
             return `
             <li class="chapter-card locked">
-                <div class="chapter-emoji" aria-hidden="true">🔒</div>
+                <img class="chapter-icon" src="assets/story/icons/locked.svg" alt="" width="44" height="44">
                 <div class="chapter-body">
                     <div class="chapter-number text-sm">Chapitre ${chapter.number}</div>
                     <div class="chapter-title">À découvrir</div>
@@ -61,7 +61,7 @@ class Universe {
         const current = chapter.id === this.currentId;
         return `
             <li class="chapter-card unlocked${current ? ' current' : ''}"${current ? ' aria-current="step"' : ''}>
-                <div class="chapter-emoji" aria-hidden="true">${chapter.emoji}</div>
+                <img class="chapter-icon" src="assets/story/icons/${chapter.id}.svg" alt="" width="44" height="44">
                 <div class="chapter-body">
                     <div class="chapter-number text-sm">Chapitre ${chapter.number}</div>
                     <div class="chapter-title">${chapter.title}</div>

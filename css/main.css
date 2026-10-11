@@ -199,7 +199,8 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .chapter-card.unlocked { border-color: var(--color-primary); }
 .chapter-card.current { box-shadow: 0 0 0 2px var(--color-primary); }
 .chapter-card.locked { opacity: 0.75; }
-.chapter-emoji { font-size: 2rem; flex: 0 0 auto; }
+.chapter-icon { width: 44px; height: 44px; flex: 0 0 auto; }
+.chapter-card.locked .chapter-icon { opacity: .75; }
 .chapter-body { flex: 1 1 auto; min-width: 0; text-align: left; }
 .chapter-number, .chapter-mission, .chapter-goal { color: var(--color-text-light); }
 .chapter-title { font-weight: 600; }
