@@ -109,9 +109,9 @@ test('progression: persistance et reset sans toucher aux autres clés', () => {
     assert.strictEqual(localStorage.getItem('autre_app'), 'garder');
 });
 
-test('session: étoiles créditées une seule fois, planète débloquée à 10', () => {
+test('session: étoiles créditées une seule fois, chapitre 2 débloqué à 6', () => {
     const { engine, progression } = setup();
-    progression.addStars(8);
+    progression.addStars(4);
     const s = new Session(engine, progression);
     s.start();
     for (const ex of s.exercises) { s.beginQuestion(); s.submitAnswer(ex.answer); s.next(); }
@@ -119,11 +119,108 @@ test('session: étoiles créditées une seule fois, planète débloquée à 10',
     const sum = s.complete();
     assert.strictEqual(sum.correct, 5);
     assert.strictEqual(sum.starsEarned, 3);
-    assert.strictEqual(progression.getTotalStars(), 11);
-    assert.deepStrictEqual(sum.newPlanets.map(p => p.name), ['Lune']);
+    assert.strictEqual(progression.getTotalStars(), 7);
+    assert.deepStrictEqual(sum.newChapters.map(c => c.id), ['vaisseau']);
     s.complete();
-    assert.strictEqual(progression.getTotalStars(), 11, 'complete() doit être idempotent');
+    assert.strictEqual(progression.getTotalStars(), 7, 'complete() doit être idempotent');
     assert.strictEqual(storage.get(storage.KEYS.SESSION_HISTORY).length, 1);
+});
+
+test('chapitres: 10 chapitres, seuils croissants, le premier est ouvert dès le départ', () => {
+    assert.strictEqual(CHAPTERS.length, 10);
+    assert.deepStrictEqual(CHAPTERS.map(c => c.number), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert.strictEqual(new Set(CHAPTERS.map(c => c.id)).size, 10, 'identifiants uniques');
+    assert.strictEqual(CHAPTERS[0].unlockAt, 0);
+    for (let i = 1; i < CHAPTERS.length; i++) assert.ok(CHAPTERS[i].unlockAt > CHAPTERS[i - 1].unlockAt, `seuil croissant au chapitre ${i + 1}`);
+    for (const c of CHAPTERS) assert.ok(c.title && c.mission && c.emoji, `titre, mission et émoji au chapitre ${c.number}`);
+});
+
+test('chapitres: déblocage par seuil, plusieurs chapitres d\'un coup, fin de l\'histoire', () => {
+    assert.deepStrictEqual(chaptersUnlockedAt(0).map(c => c.number), [1]);
+    assert.deepStrictEqual(newChaptersBetween(5, 6).map(c => c.number), [2], 'le seuil est inclus');
+    assert.deepStrictEqual(newChaptersBetween(6, 7), [], 'pas de nouveau chapitre sans franchir un seuil');
+    assert.deepStrictEqual(newChaptersBetween(0, 0), [], 'le chapitre 1 est ouvert dès le départ, pas « nouveau »');
+    assert.deepStrictEqual(newChaptersBetween(14, 30).map(c => c.number), [3, 4]);
+    assert.strictEqual(nextChapter(0).number, 2);
+    assert.strictEqual(nextChapter(6).number, 3);
+    assert.strictEqual(nextChapter(195), null);
+    assert.strictEqual(chaptersUnlockedAt(500).length, 10);
+});
+
+test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier chapitre « en cours »', () => {
+    const { progression } = setup();
+    progression.addStars(16);
+    const html = new Universe(progression).render();
+    assert.ok(html.includes('Les circuits'), 'le chapitre 3 est ouvert');
+    assert.ok(!html.includes('La salle des machines'), 'le titre du chapitre 4 reste caché');
+    assert.strictEqual((html.match(/chapter-card locked/g) || []).length, 7);
+    assert.strictEqual((html.match(/aria-current="step"/g) || []).length, 1);
+    assert.ok(html.includes('pour le chapitre 4'));
+});
+
+test('scènes: chapitres 1 à 10 complets, vignettes courtes, décors et personnages connus', () => {
+    const ARTS = ['forest', 'clearing', 'ship', 'ship-lit', 'engine', 'engine-on', 'tanks', 'tanks-full', 'cockpit', 'cockpit-night', 'cockpit-chart', 'cockpit-lit', 'airlock', 'airlock-closed', 'porthole-earth', 'fuel', 'space-asteroids', 'space-beacon', 'space-beacon-on', 'space-home', 'earth-top', 'hill', 'hill-reply'];
+    const MOODS = { fox: ['content', 'bravo', 'think', 'comfort', 'worried', 'moved'], rabbit: ['content', 'bravo', 'think', 'comfort', 'surprise'] };
+    for (const c of CHAPTERS.slice(0, 10)) {
+        assert.strictEqual(c.scene.length, 5, `5 vignettes au chapitre ${c.number}`);
+        assert.strictEqual(c.lines.length, 3, `3 lignes de la lapine au chapitre ${c.number}`);
+        assert.ok(c.end, `message de fin au chapitre ${c.number}`);
+        for (const v of c.scene) {
+            assert.ok(ARTS.includes(v.art), `décor connu : ${v.art}`);
+            assert.ok(v.cast.length >= 1);
+            for (const m of v.cast) {
+                assert.ok(['fox', 'rabbit'].includes(m.who) && ['left', 'right', 'center'].includes(m.at));
+            }
+            assert.ok(v.lines.length >= 1 && v.lines.length <= 2);
+            let words = 0;
+            for (const l of v.lines) {
+                assert.ok(['narrator', 'fox', 'rabbit'].includes(l.who));
+                if (l.who !== 'narrator') assert.ok(!l.mood || MOODS[l.who].includes(l.mood), `expression connue : ${l.who} ${l.mood}`);
+                words += l.text.split(/\s+/).length;
+            }
+            assert.ok(words <= 40, `vignette trop longue au chapitre ${c.number} (${words} mots)`);
+        }
+    }
+});
+
+test('scènes: scène à lire = premier chapitre ouvert avec scène non lue', () => {
+    assert.strictEqual(pendingScene(0, {}).id, 'lapine');
+    assert.strictEqual(pendingScene(0, { lapine: true }), null, 'au départ, seul le chapitre 1 est ouvert');
+    assert.strictEqual(pendingScene(7, { lapine: true }).id, 'vaisseau');
+    assert.strictEqual(pendingScene(16, { lapine: true }).id, 'vaisseau', 'dans l\'ordre');
+    assert.strictEqual(pendingScene(16, { lapine: true, vaisseau: true }).id, 'circuits');
+    assert.strictEqual(pendingScene(500, { lapine: true, vaisseau: true, circuits: true, machines: true, energie: true, carnet: true, fenetre: true, embarquement: true, voyage: true, retour: true }), null, 'les chapitres sans scène ne comptent pas');
+    assert.strictEqual(pendingScene(0, undefined).id, 'lapine');
+});
+
+test('scènes: ligne de la lapine au hasard et message de fin selon les étoiles', () => {
+    const c = CHAPTERS[0];
+    assert.strictEqual(randomLine(c, () => 0), c.lines[0]);
+    assert.strictEqual(randomLine(c, () => 0.999), c.lines[2]);
+    assert.strictEqual(randomLine({ id: 'x' }), null, 'pas de ligne tant que le chapitre n\'est pas écrit');
+    assert.strictEqual(currentChapter(14).number, 2);
+    assert.strictEqual(currentChapter(15).number, 3);
+    assert.ok(chapterEndLine(c, 3).includes('Parfait'));
+    assert.ok(chapterEndLine(c, 2).includes('Bien joué'));
+    assert.ok(chapterEndLine(c, 0).includes('Pas grave'));
+    const c3 = CHAPTERS[2];
+    assert.strictEqual(chapterEndLine(c3, 3), c3.end.some, 'sans variante « full », on retombe sur le message courant');
+    assert.strictEqual(chapterEndLine(c3, 0), null, 'rien à dire sans étoile');
+    assert.strictEqual(chapterEndLine({ id: 'x' }, 3), null);
+});
+
+test('progression: chapitres lus mémorisés, anciennes données sans ce champ, réinitialisation', () => {
+    const { progression } = setup();
+    assert.ok(!progression.hasSeenChapter('lapine'));
+    progression.markChapterSeen('lapine');
+    const again = new Progression(); again.load();
+    assert.ok(again.hasSeenChapter('lapine') && !again.hasSeenChapter('vaisseau'));
+    storage.set(storage.KEYS.PROGRESSION, { version: 1, skills: {}, totalStars: 3, discovered: {} });   // données d'avant l'histoire
+    const old = new Progression(); old.load();
+    assert.ok(!old.hasSeenChapter('lapine'));
+    assert.strictEqual(old.getTotalStars(), 3);
+    again.reset();
+    assert.ok(!again.hasSeenChapter('lapine'));
 });
 
 test('session: barème d\'étoiles', () => {

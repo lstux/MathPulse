@@ -118,11 +118,11 @@ class Session {
         const starsEarned = rewarded ? Session.rapidStars(correct, total, fast) : 0;
         const before = this.progression.getTotalStars();
         const after = this.progression.addStars(starsEarned);
-        const newPlanets = PLANETS.filter(p => before < p.unlockAt && after >= p.unlockAt);
+        const newChapters = newChaptersBetween(before, after);
 
         this.summary = {
             rapid: true, skill: 'rapid', correct, total, fast, starsEarned, rewarded,
-            hintsUsed: 0, capped: false, reviewed: 0, cleared: 0, totalStars: after, newPlanets,
+            hintsUsed: 0, capped: false, reviewed: 0, cleared: 0, totalStars: after, newChapters,
             avgTime: total ? this.results.reduce((sum, r) => sum + r.think_ms, 0) / total : 0
         };
         storage.append(storage.KEYS.SESSION_HISTORY, {
@@ -160,13 +160,13 @@ class Session {
         const starsEarned = capped ? HINTS.maxStarsOverQuota : baseStars;
         const before = this.progression.getTotalStars();
         const after = this.progression.addStars(starsEarned);
-        const newPlanets = PLANETS.filter(p => before < p.unlockAt && after >= p.unlockAt);
+        const newChapters = newChaptersBetween(before, after);
 
         this.summary = {
             skill: this.skill, correct, total, starsEarned,
             hintsUsed: this.hintsUsed, capped,
             reviewed: this.exercises.filter(e => e.review).length, cleared: this.cleared,
-            totalStars: after, newPlanets,
+            totalStars: after, newChapters,
             avgTime: total ? this.results.reduce((s, r) => s + r.time_ms, 0) / total : 0
         };
         storage.append(storage.KEYS.SESSION_HISTORY, {

@@ -48,7 +48,20 @@ with sync_playwright() as p:
     # fin de l'animation : le bouton devient « Continuer › » puis l'accueil s'affiche tout seul 5 s plus tard
     pg.wait_for_function("document.querySelector('#btn-skip-intro').textContent.includes('Continuer')", timeout=10000)
     pg.wait_for_selector('#btn-play', timeout=8000)
-    pg.click('#btn-play'); pg.click('#btn-start-session')
+    pg.click('#btn-play')
+    # histoire : la lapine dit une ligne à l'univers, puis la scène du chapitre 1 précède la toute première session
+    assert pg.locator('#rabbit-line').count() == 1, 'ligne de la lapine attendue à l\'univers'
+    assert pg.locator('.chapter-card').count() == 10 and pg.locator('[data-chapter]').count() == 1, 'seul le chapitre 1 est ouvert (avec « Revoir »)'
+    pg.click('#btn-start-session')
+    assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 1' in pg.inner_text('.scene-chapter'), 'scène du chapitre 1 attendue avant la 1re session'
+    for _ in range(4):
+        pg.click('#btn-scene-next')
+    assert pg.inner_text('#btn-scene-next') == 'À toi de jouer !'
+    assert pg.evaluate("window.mathpulse.progression.hasSeenChapter('lapine')") is False, 'le chapitre n\'est « lu » qu\'à la fin'
+    pg.click('#btn-scene-next')
+    assert pg.evaluate("window.mathpulse.progression.hasSeenChapter('lapine')") is True
+    # les scènes des chapitres 2 et 3 sont testées plus loin ; on les marque lues pour ne pas interrompre le parcours
+    pg.evaluate("['vaisseau', 'circuits'].forEach(id => window.mathpulse.progression.markChapterSeen(id))")
     pg.click('#btn-start-game')
     # coups de pouce : 2 gratuits annoncés, le décompte baisse, le dernier annonce le plafond
     assert '2 gratuits' in pg.inner_text('#btn-hint'), pg.inner_text('#btn-hint')
@@ -130,6 +143,22 @@ with sync_playwright() as p:
     pg.wait_for_timeout(800)
     assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
     # série rapide : bouton à l'univers, pas de coup de pouce, jauge, résultat avec bonus
+    pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
+    assert pg.locator('.chapter-card').count() == 10, "10 chapitres attendus dans l'univers"
+    assert pg.locator('.chapter-card.unlocked').count() >= 1 and pg.locator('.chapter-card.current').count() == 1, 'chapitre en cours attendu'
+    # scènes : « Revoir » rejoue sans rien changer ; une scène non lue passe avant la session suivante, et « Passer » la marque lue
+    assert pg.locator('[data-chapter]').count() == 3, 'chapitres 1 à 3 ouverts : trois boutons « Revoir »'
+    assert pg.locator('#rabbit-line').count() == 1
+    pg.click('[data-chapter="vaisseau"]')
+    assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 2' in pg.inner_text('.scene-chapter')
+    assert pg.locator('.scene-stage img.cast').count() >= 1 and pg.locator('.scene-line, .scene-narr').count() >= 1
+    pg.click('#btn-scene-skip'); pg.wait_for_selector('#btn-start-session')
+    pg.evaluate("delete window.mathpulse.progression.data.chaptersSeen['vaisseau']; window.mathpulse.progression.save()")
+    pg.click('#btn-start-session')
+    assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 2' in pg.inner_text('.scene-chapter'), 'scène 2 non lue : elle précède la session'
+    pg.click('#btn-scene-skip')
+    assert pg.evaluate("window.mathpulse.progression.hasSeenChapter('vaisseau')") is True
+    pg.wait_for_selector('#btn-start-game, #question', timeout=4000)   # la session démarre ensuite (découverte ou question)
     pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
     assert pg.locator('#btn-rapid').count() == 1, 'bouton série rapide attendu (compétences au niveau 2)'
     pg.click('#btn-rapid'); pg.click('#btn-rapid-go')

@@ -12,7 +12,7 @@ Jeu de calcul mental pour enfants (~8 ans, CE2), en HTML/CSS/JS sans dépendance
 - Découverte animée la première fois qu'une compétence est jouée.
 - Erreur = explication visuelle (blocs / groupes), jamais de punition. Bouton « 💡 coup de pouce » pour voir l'illustration avant de répondre : **2 gratuits par session** ; au-delà, la session rapporte 2 étoiles au maximum et les réponses aidées ne comptent plus dans la maîtrise.
 - Saisie par pavé numérique intégré (clavier physique accepté sur ordinateur).
-- Étoiles de session (0–3) qui font avancer la fusée et débloquent des planètes (10 / 25 / 50 étoiles). Maîtrise par compétence (⭐ à ⭐⭐⭐) affichée dans l'espace parent.
+- Étoiles de session (0–3) qui font avancer la fusée et débloquent les chapitres de l'histoire du renard et de la lapine (10 chapitres, de 0 à 195 étoiles, voir `docs/storyboard-narratif.md`). Maîtrise par compétence (⭐ à ⭐⭐⭐) affichée dans l'espace parent.
 - Espace parent : progression, historique, export JSON, réinitialisation.
 - Hors ligne (service worker), thème clair/sombre automatique, animations réduites si demandé par le système.
 
@@ -37,9 +37,10 @@ python3 tests/smoke.py https://lstux.github.io/MathPulse/   # même test sur la 
 index.html · manifest.json · sw.js
 css/       main.css (base, composants, écrans) · animations.css · responsive.css
 js/
-  content/skills.js     catalogue des compétences, seuils de maîtrise, barème d'étoiles, planètes
+  content/skills.js     catalogue des compétences, seuils de maîtrise, barème d'étoiles
+  content/chapters.js   chapitres de l'histoire et seuils d'étoiles
   core/                 storage · progression · engine (génération/validation) · session
-  ui/                   screen (écrans) · universe · discovery · animations (blocs/groupes)
+  ui/                   screen (écrans) · universe · scene (scènes d'histoire) · discovery · animations (blocs/groupes)
   app.js                démarrage
 assets/icons/           icône SVG + PNG (PWA)
 tests/                  run.js + engine.test.js (unitaires) · smoke.py (navigateur)
@@ -51,6 +52,8 @@ Ajouter une compétence : une entrée dans `SKILLS` (skills.js), un cas dans `En
 ## Déploiement (GitHub Pages)
 
 À chaque push sur `main`, le workflow `.github/workflows/ci-pages.yml` lance les tests (unitaires + navigateur) puis publie le site sur **https://lstux.github.io/MathPulse/**. Seuls les fichiers de l'application sont publiés (pas `tests/` ni `docs/`), et l'étiquette du cache hors ligne (`CACHE_VERSION` dans `sw.js`) est remplacée automatiquement par l'identifiant du commit : pas besoin de l'incrémenter à la main.
+
+**Tester une branche en ligne** : onglet *Actions* → *Tests et déploiement* → *Run workflow* → choisir la branche → *Run workflow*. Les tests tournent, puis la branche est publiée à l'adresse ci-dessus. Attention : elle **remplace** la version en ligne jusqu'au prochain push sur `main` (le commit publié s'affiche dans l'espace parent, ligne « Version »). Si GitHub refuse le déploiement, autoriser la branche dans *Settings → Environments → github-pages → Deployment branches*.
 
 Réglage à faire **une seule fois** : *Settings → Pages → Build and deployment → Source : GitHub Actions*. Les chemins sont relatifs, l'application fonctionne telle quelle dans le sous-dossier `/MathPulse/`.
 

@@ -18,7 +18,7 @@
 @keyframes successPulse { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 @keyframes errorShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-0.4rem); } 75% { transform: translateX(0.4rem); } }
 
-/* Déblocage d'une planète */
+/* Déblocage d'un chapitre (et autres apparitions) */
 @keyframes planetAppear { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 
 /* Mascotte : le renard en coin pendant les exercices */
@@ -126,3 +126,6 @@
 .digit-arrow { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: var(--color-primary); }
 .digit-places { display: flex; gap: .3rem; margin-top: -.15rem; }
 .digit-places span { width: 2.6rem; text-align: center; font-size: .65rem; color: var(--color-text-light); font-weight: 600; }
+
+/* Entrée des personnages dans une vignette */
+@keyframes castIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
