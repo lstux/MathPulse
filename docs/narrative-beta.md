@@ -38,12 +38,12 @@ Aujourd'hui la progression est abstraite : des étoiles font avancer une fusée 
 
 ## 4. Les 10 chapitres (ébauche)
 
-Chaque chapitre est rattaché à une voie du parcours. Les titres et les seuils sont provisoires.
+Chaque chapitre est rattaché à une voie du parcours. Les titres et les seuils sont provisoires. Le détail des chapitres 1 à 3 et une proposition de seuils d'étoiles sont dans [`storyboard-narratif.md`](storyboard-narratif.md).
 
 | # | Chapitre | Voie et compétences | Enjeu narratif |
 |---|---|---|---|
 | 1 | Rencontre | Additions (test d'entrée) | Le 🦊 trouve la 🐰 dans les bois |
-| 2 | Le vaisseau | Premières réparations | Découverte de la panne |
+| 2 | Le vaisseau | Soustractions | Dégager les débris, découverte de la panne |
 | 3 | Les circuits | ×2, ×5, ×10 | Remettre les circuits en route |
 | 4 | Les tables qui s'allument | ×3, ×4 | Réparer les moteurs |
 | 5 | Partager et grouper | ÷2, ÷5, ÷10 | Répartir l'énergie entre les réservoirs |
