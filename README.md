@@ -53,6 +53,8 @@ Ajouter une compétence : une entrée dans `SKILLS` (skills.js), un cas dans `En
 
 À chaque push sur `main`, le workflow `.github/workflows/ci-pages.yml` lance les tests (unitaires + navigateur) puis publie le site sur **https://lstux.github.io/MathPulse/**. Seuls les fichiers de l'application sont publiés (pas `tests/` ni `docs/`), et l'étiquette du cache hors ligne (`CACHE_VERSION` dans `sw.js`) est remplacée automatiquement par l'identifiant du commit : pas besoin de l'incrémenter à la main.
 
+**Tester une branche en ligne** : onglet *Actions* → *Tests et déploiement* → *Run workflow* → choisir la branche → *Run workflow*. Les tests tournent, puis la branche est publiée à l'adresse ci-dessus. Attention : elle **remplace** la version en ligne jusqu'au prochain push sur `main` (le commit publié s'affiche dans l'espace parent, ligne « Version »). Si GitHub refuse le déploiement, autoriser la branche dans *Settings → Environments → github-pages → Deployment branches*.
+
 Réglage à faire **une seule fois** : *Settings → Pages → Build and deployment → Source : GitHub Actions*. Les chemins sont relatifs, l'application fonctionne telle quelle dans le sous-dossier `/MathPulse/`.
 
 Sur téléphone : ouvrir l'adresse dans Chrome (Android) puis « Installer l'application », ou dans Safari (iPhone/iPad) « Partager → Sur l'écran d'accueil ».
