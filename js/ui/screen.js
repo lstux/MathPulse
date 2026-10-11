@@ -184,10 +184,21 @@ class ScreenManager {
         const rapidBtn = screen.querySelector('#btn-rapid');
         if (rapidBtn) rapidBtn.addEventListener('click', () => this.show('rapidIntro'));
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
-        screen.querySelectorAll('[data-chapter]').forEach(btn => btn.addEventListener('click', () => {
+        // Carte du ciel : toucher une étoile affiche le chapitre ; « Revoir » rejoue sa scène
+        const detail = screen.querySelector('#sky-detail');
+        const bindReplay = () => detail.querySelectorAll('[data-chapter]').forEach(btn => btn.addEventListener('click', () => {
             const chapter = CHAPTERS.find(c => c.id === btn.dataset.chapter);
             this.show('scene', { chapter, replay: true, doneLabel: 'Retour', next: () => this.show('universe') });
         }));
+        bindReplay();
+        screen.querySelectorAll('.sky-star').forEach(star => star.addEventListener('click', () => {
+            screen.querySelectorAll('.sky-star').forEach(s => s.classList.toggle('selected', s === star));
+            detail.innerHTML = universe.renderChapter(CHAPTERS.find(c => c.id === star.dataset.star));
+            bindReplay();
+        }));
+        // La carte s'ouvre centrée sur le chapitre en cours
+        const scroller = screen.querySelector('#sky-scroll'), here = screen.querySelector('.sky-star.current');
+        if (scroller && here) this.later(() => { scroller.scrollTop = Math.max(0, here.offsetTop - scroller.clientHeight / 2); }, 0);
         return screen;
     }
 

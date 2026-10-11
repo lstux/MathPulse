@@ -26,6 +26,7 @@
 .mascot.hop { animation: foxHop .6s var(--easing-out) 1; }
 .mascot.tilt { animation: foxTilt .8s ease-in-out 1; }
 .mascot.nod { animation: foxNod .7s ease-in-out 1; }
+@keyframes skyPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 @keyframes foxHop { 0% { transform: translateY(0); } 35% { transform: translateY(-14px) scale(1.06); } 60% { transform: translateY(0) scale(.97); } 80% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
 @keyframes foxTilt { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-9deg); } 65% { transform: rotate(5deg); } }

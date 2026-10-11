@@ -320,6 +320,7 @@ Les scènes peuvent maintenant compter de 5 à 8 vignettes (50 mots au plus par 
    - Lot 3a ✅ : scènes, lignes et fins des chapitres 4 à 7, avec leurs 8 décors (salle des machines, soute, poste de pilotage).
    - Lot 3b ✅ : scènes des chapitres 8 à 10, 11 décors (sas, hublot, espace profond, balise, Terre, colline) et deux expressions (🐰 surprise, 🦊 ému).
    - Passe graphique 1 ✅ : pistons en 3 rangées, balise relais redessinée (satellite), 14 icônes SVG de chapitres (rond coloré par phase forêt, vaisseau, espace) à la place des émojis dans la liste de l'histoire. Reste à décider : remplacer aussi la bannière « fusée + renard » de l'écran Univers, héritée des planètes.
+   - Passe graphique 2 ✅ : bannière de l'écran Univers = décor du chapitre en cours (champ `banner`) ; « L'histoire » devient une carte du ciel verticale (forêt en bas, espace en haut) avec une étoile par chapitre ; personnages et décors légèrement animés (respiration, celui qui parle, étoiles, voyants, vapeur, astéroïdes).
    - Lot 3c ✅ : intro refaite, muette et courte (environ 4,6 s) : le vaisseau tombe, une petite lampe bleue s'allume. Le renard et la lapine ne figurent plus dans l'intro, ils arrivent dans la scène du chapitre 1.
 4. **Illustrations** en parallèle : décors (bois, clairière, intérieur du vaisseau), expression « inquiet » du 🦊, pièces et voyants. Émojis et SVG existants en attendant.
 5. **Ajuster les seuils** avec les données de la bêta.

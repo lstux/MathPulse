@@ -51,7 +51,7 @@ with sync_playwright() as p:
     pg.click('#btn-play')
     # histoire : la lapine dit une ligne à l'univers, puis la scène du chapitre 1 précède la toute première session
     assert pg.locator('#rabbit-line').count() == 1, 'ligne de la lapine attendue à l\'univers'
-    assert pg.locator('.chapter-card').count() == 13 and pg.locator('[data-chapter]').count() == 1, 'seul le chapitre 1 est ouvert (avec « Revoir »)'
+    assert pg.locator('.sky-star').count() == 13 and pg.locator('.sky-star.unlocked').count() == 1 and pg.locator('[data-chapter]').count() == 1, 'seul le chapitre 1 est ouvert (avec « Revoir »)'
     pg.click('#btn-start-session')
     assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 1' in pg.inner_text('.scene-chapter'), 'scène du chapitre 1 attendue avant la 1re session'
     for _ in range(4):
@@ -144,11 +144,12 @@ with sync_playwright() as p:
     assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
     # série rapide : bouton à l'univers, pas de coup de pouce, jauge, résultat avec bonus
     pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
-    assert pg.locator('.chapter-card').count() == 13, "13 chapitres attendus dans l'univers"
-    assert pg.locator('.chapter-card.unlocked').count() >= 1 and pg.locator('.chapter-card.current').count() == 1, 'chapitre en cours attendu'
+    assert pg.locator('.sky-star').count() == 13, "13 étoiles attendues sur la carte du ciel"
+    assert pg.locator('.sky-star.unlocked').count() >= 1 and pg.locator('.sky-star.current').count() == 1, 'chapitre en cours attendu'
     # scènes : « Revoir » rejoue sans rien changer ; une scène non lue passe avant la session suivante, et « Passer » la marque lue
-    assert pg.locator('[data-chapter]').count() == 3, 'chapitres 1 à 3 ouverts : trois boutons « Revoir »'
+    assert pg.locator('.sky-star.unlocked').count() == 3 and pg.locator('[data-chapter]').count() == 1, 'chapitres 1 à 3 ouverts, la fiche du chapitre en cours propose « Revoir »'
     assert pg.locator('#rabbit-line').count() == 1
+    pg.click('[data-star="vaisseau"]'); assert 'Le vaisseau en piteux état' in pg.inner_text('#sky-detail')
     pg.click('[data-chapter="vaisseau"]')
     assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 2' in pg.inner_text('.scene-chapter')
     assert pg.locator('.scene-stage img.cast').count() >= 1 and pg.locator('.scene-line, .scene-narr').count() >= 1

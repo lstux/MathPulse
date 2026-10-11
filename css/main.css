@@ -180,6 +180,19 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .chapter-banner { aspect-ratio: 2 / 1; }
 .chapter-banner .cast.small { height: 66%; }
 
+.sky-detail { position: relative; margin-bottom: var(--spacing-sm); }
+.sky-detail .chapter-card { min-height: 5.5rem; }
+.sky-scroll { position: relative; width: 100%; height: min(62vh, 440px); overflow-y: auto; border-radius: var(--radius-lg); border: 2px solid var(--color-border); overscroll-behavior: contain; background: #150f3a; }
+.sky-map { position: relative; width: 100%; }
+.sky-bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sky-star { position: absolute; transform: translate(-50%, -50%); width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.sky-star img { display: block; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,213,74,.9), 0 0 16px 4px rgba(255,213,74,.45); }
+.sky-star.selected img, .sky-star:focus-visible img { box-shadow: 0 0 0 3px #fff, 0 0 18px 6px rgba(255,255,255,.55); }
+.sky-star:focus-visible { outline: none; }
+.sky-star.current img { animation: skyPulse 2s ease-in-out infinite; }
+.sky-dot { width: 14px; height: 14px; border-radius: 50%; background: #aab2d4; opacity: .7; box-shadow: 0 0 8px 2px rgba(170,178,212,.35); }
+.sky-star.selected .sky-dot { opacity: 1; box-shadow: 0 0 0 3px #fff; }
+.sky-goal { position: absolute; top: 100%; left: 50%; transform: translate(-50%, -6px); white-space: nowrap; color: #cfd6f5; font-weight: 600; text-shadow: 0 1px 3px #0e0d2b; }
 .chapters-list { list-style: none; margin: 0 0 var(--spacing-lg); padding: 0; display: flex; flex-direction: column; gap: var(--spacing-sm); width: 100%; }
 .chapter-card { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border-radius: var(--radius-lg); border: 2px solid var(--color-border); background: var(--color-surface); }
 .chapter-card.unlocked { border-color: var(--color-primary); }

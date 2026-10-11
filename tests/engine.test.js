@@ -153,7 +153,8 @@ test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier
     const html = new Universe(progression).render();
     assert.ok(html.includes('Les circuits'), 'le chapitre 3 est ouvert');
     assert.ok(!html.includes('La salle des machines'), 'le titre du chapitre 4 reste caché');
-    assert.strictEqual((html.match(/chapter-card locked/g) || []).length, 10);
+    assert.strictEqual((html.match(/sky-star locked/g) || []).length, 10);
+    assert.strictEqual((html.match(/sky-star unlocked/g) || []).length, 3);
     assert.strictEqual((html.match(/aria-current="step"/g) || []).length, 1);
     assert.ok(html.includes('pour le chapitre 4'));
 });
