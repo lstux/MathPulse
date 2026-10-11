@@ -107,8 +107,9 @@ const CHAPTERS = [
     { id: 'nuit', number: 5, unlockAt: 38, emoji: '🌙', title: 'La nuit à bord', mission: 'Un jeu pour patienter',
         scene: [
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'rabbit', mood: 'content', text: "Les moteurs doivent refroidir avant le prochain réglage. Nous voilà posés ici pour la nuit." }] },
+                { who: 'rabbit', mood: 'content', text: "Le premier essai a fait chauffer les moteurs. Il faut les laisser refroidir avant le prochain réglage." }] },
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'narrator', text: "Depuis dix minutes, le 🦊 raconte tout ce qui lui passe par la tête." },
                 { who: 'rabbit', mood: 'content', text: "Comme tous les renards, tu parles beaucoup ! Mais ça va, je t'aime bien quand même !" }] },
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'content', text: "Ah ben ça tombe bien, parce qu'on est coincés au moins 1 h ici !" }] },
@@ -201,9 +202,9 @@ const CHAPTERS = [
     { id: 'fenetre', number: 9, unlockAt: 108, emoji: '⏰', title: 'La fenêtre de départ', mission: 'Trouver le bon moment',
         scene: [
             { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'rabbit', text: "La carte est prête. Il reste à découper le compte à rebours." }] },
+                { who: 'rabbit', text: "Sept fois huit, cinquante-six : voilà notre compte à rebours. Il faut le découper." }] },
             { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'rabbit', mood: 'think', text: "56 minutes en 8 étapes égales : 56 ÷ 8 ?" },
+                { who: 'rabbit', mood: 'think', text: "56 minutes, en 8 étapes égales. Chaque étape dure combien : 56 ÷ 8 ?" },
                 { who: 'fox', mood: 'bravo', text: "7 minutes !" }] },
             { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'worried', text: "Et si on rate la fenêtre ?" },
@@ -280,6 +281,8 @@ const CHAPTERS = [
                 { who: 'rabbit', mood: 'think', text: "Chaque tronçon ajoute sa distance : 38 plus 45 ?" },
                 { who: 'fox', mood: 'content', text: "83 !" }] },
             { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'narrator', text: "Un astéroïde frôle le hublot. Le 🦊 serre les pattes, mais continue de compter." }] },
+            { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Tu n'as plus peur ?" },
                 { who: 'fox', mood: 'worried', text: "Si. Mais je calcule quand même : 6 fois 7, quarante-deux !" }] },
             { art: 'space-beacon-on', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
@@ -306,7 +309,7 @@ const CHAPTERS = [
                 { who: 'fox', mood: 'comfort', text: "Tu vas me manquer." },
                 { who: 'rabbit', mood: 'content', text: "Et toi à moi." }] },
             { art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'rabbit', mood: 'content', text: "Un éclair pour dire bonne nuit, deux pour dire je pense à toi. Chaque soir, regarde le ciel." }] },
+                { who: 'rabbit', mood: 'content', text: "Garde ma petite lampe. Un éclair pour dire bonne nuit, deux pour dire je pense à toi. Chaque soir, regarde le ciel." }] },
             { art: 'hill-reply', cast: [{ who: 'fox', at: 'center' }], lines: [
                 { who: 'fox', mood: 'moved', text: "Deux éclairs… Et là-haut, une petite lueur me répond." },
                 { who: 'narrator', text: "Dans le carnet de la 🐰 : « Prochaine mission : à suivre. »" }] }
