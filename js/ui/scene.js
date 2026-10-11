@@ -37,9 +37,12 @@ const Scenes = {
 
         const draw = () => {
             const v = vignettes[index];
+            // Celui qui parle fait un petit saut, l'autre s'efface légèrement (personne ne parle : tout le monde est « actif »)
+            const speakers = v.lines.map(l => l.who).filter(w => w !== 'narrator');
+            const role = who => !speakers.length ? '' : (speakers.includes(who) ? ' speaking' : ' quiet');
             stage.innerHTML = `<img class="scene-bg" src="assets/story/scene/${v.art}.svg" alt="">`
                 + `<div class="scene-cast">${v.cast.map(m =>
-                    `<img class="cast ${m.at}${m.small ? ' small' : ''}" src="assets/story/${m.who}-full.svg" alt="">`).join('')}</div>`;
+                    `<img class="cast ${m.at}${m.small ? ' small' : ''}${role(m.who)}" src="assets/story/${m.who}-full.svg" alt="">`).join('')}</div>`;
             lines.innerHTML = v.lines.map(lineHtml).join('');
             dots.innerHTML = vignettes.map((_, i) => `<span class="scene-dot${i === index ? ' on' : ''}"></span>`).join('');
             next.textContent = index < vignettes.length - 1 ? 'Suite ›' : doneLabel;

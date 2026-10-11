@@ -1,4 +1,4 @@
-// MathPulse - Univers : fusée, renard 🦊, étoiles et chapitres de l'histoire (données dans chapters.js → CHAPTERS)
+// MathPulse - Univers : bannière du chapitre en cours, étoiles et chapitres de l'histoire (données dans chapters.js → CHAPTERS)
 
 class Universe {
     constructor(progression) {
@@ -11,6 +11,7 @@ class Universe {
     // Haut de l'écran : étoiles, fusée, progression et prochain objectif
     renderHeader() {
         const pct = Math.min(100, Math.round((this.stars / this.max) * 100));
+        const current = CHAPTERS.find(c => c.id === this.currentId);
         return `
             <div class="universe-container">
                 <div class="star-counter text-center mb-lg">
@@ -18,9 +19,9 @@ class Universe {
                     <strong>${this.stars}</strong> ${this.stars > 1 ? 'étoiles' : 'étoile'}
                 </div>
 
-                <div class="space-scene mb-lg" role="img" aria-label="La fusée du renard avance avec tes étoiles">
-                    <div class="rocket" style="bottom:${8 + pct * 0.62}%">🚀</div>
-                    <div class="fox" aria-hidden="true">🦊</div>
+                <div class="chapter-banner scene-stage mb-lg" role="img" aria-label="Chapitre ${current.number} : ${current.title}">
+                    <img class="scene-bg" src="assets/story/scene/${current.banner}.svg" alt="">
+                    <div class="scene-cast"><img class="cast left small" src="assets/story/fox-full.svg" alt=""><img class="cast right small" src="assets/story/rabbit-full.svg" alt=""></div>
                 </div>
 
                 <div class="progress-bar mb-md">

@@ -1,6 +1,6 @@
 // MathPulse - Chapitres de l'histoire (le renard 🦊 et la lapine 🐰)
 // Source : docs/storyboard-narratif.md. Un chapitre se débloque quand le total d'étoiles atteint `unlockAt`.
-// Chaque chapitre : titre, seuil, thème de la mission, et :
+// Chaque chapitre : titre, seuil, banner (décor affiché en bannière sur l'écran Univers quand c'est le chapitre en cours), thème de la mission, et :
 //   scene : vignettes { art, cast, lines } jouées au déblocage du chapitre (voir scene.js)
 //     art  : décor (forest, clearing, ship, ship-lit, engine…, cockpit…, space…, hill…), fichiers dans assets/story/scene/
 //     cast : personnages affichés { who: 'fox' | 'rabbit', at: 'left' | 'right' | 'center', small? }
@@ -11,7 +11,7 @@
 // Les émojis de la liste des chapitres sont provisoires, à remplacer par des SVG.
 
 const CHAPTERS = [
-    { id: 'lapine',      number: 1,  unlockAt: 0,   emoji: '🌲', title: 'Une drôle de lapine',        mission: 'Le test de la lapine',
+    { id: 'lapine',      number: 1,  unlockAt: 0, banner: 'forest',   emoji: '🌲', title: 'Une drôle de lapine',        mission: 'Le test de la lapine',
         scene: [
             { art: 'forest', cast: [{ who: 'fox', at: 'left', small: true }], lines: [
                 { who: 'narrator', text: "Une lueur entre les arbres… Tu t'approches, le cœur un peu rapide." }] },
@@ -32,7 +32,7 @@ const CHAPTERS = [
         ],
         end: { full: "Parfait ! La 🐰 est impressionnée.", some: "Bien joué ! La 🐰 te fait confiance.", none: "Pas grave, la 🐰 te laisse retenter." }
     },
-    { id: 'vaisseau',    number: 2,  unlockAt: 6,   emoji: '🛸', title: 'Le vaisseau en piteux état', mission: 'Dégager les débris',
+    { id: 'vaisseau',    number: 2,  unlockAt: 6, banner: 'clearing',   emoji: '🛸', title: 'Le vaisseau en piteux état', mission: 'Dégager les débris',
         scene: [
             { art: 'clearing', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Voilà mon vaisseau." }] },
@@ -60,7 +60,7 @@ const CHAPTERS = [
         ],
         end: { full: "Le panneau est presque propre !", some: "Tu as aidé la 🐰 à dégager le vaisseau." }
     },
-    { id: 'circuits',    number: 3,  unlockAt: 15,  emoji: '🔌', title: 'Les circuits',               mission: 'Doubler et grouper',
+    { id: 'circuits',    number: 3,  unlockAt: 15, banner: 'ship-lit',  emoji: '🔌', title: 'Les circuits',               mission: 'Doubler et grouper',
         scene: [
             { art: 'ship', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'think', text: "C'est… plus grand que je pensais." }] },
@@ -82,7 +82,7 @@ const CHAPTERS = [
         ],
         end: { some: "Un voyant de plus brille grâce à toi !" }
     },
-    { id: 'machines',    number: 4,  unlockAt: 28,  emoji: '⚙️', title: 'La salle des machines',      mission: 'Compter par groupes',
+    { id: 'machines',    number: 4,  unlockAt: 28, banner: 'engine-on',  emoji: '⚙️', title: 'La salle des machines',      mission: 'Compter par groupes',
         scene: [
             { art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Voici le cœur du vaisseau : les moteurs." }] },
@@ -104,7 +104,7 @@ const CHAPTERS = [
         ],
         end: { some: "Un moteur de plus tourne grâce à toi !" }
     },
-    { id: 'nuit', number: 5, unlockAt: 38, emoji: '🌙', title: 'La nuit à bord', mission: 'Un jeu pour patienter',
+    { id: 'nuit', number: 5, unlockAt: 38, banner: 'cockpit-night', emoji: '🌙', title: 'La nuit à bord', mission: 'Un jeu pour patienter',
         scene: [
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Le premier essai a fait chauffer les moteurs. Il faut les laisser refroidir avant le prochain réglage." }] },
@@ -132,7 +132,7 @@ const CHAPTERS = [
         ],
         end: { some: "La nuit passe plus vite avec toi !" }
     },
-    { id: 'energie',     number: 6,  unlockAt: 50,  emoji: '🔋', title: 'Partager l\'énergie',        mission: 'Répartir les cellules',
+    { id: 'energie',     number: 6,  unlockAt: 50, banner: 'tanks-full',  emoji: '🔋', title: 'Partager l\'énergie',        mission: 'Répartir les cellules',
         scene: [
             { art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Pour démarrer, il faut répartir l'énergie." }] },
@@ -154,7 +154,7 @@ const CHAPTERS = [
         ],
         end: { some: "Tu as aidé la 🐰 à répartir l'énergie." }
     },
-    { id: 'carnet',      number: 7,  unlockAt: 68,  emoji: '📒', title: 'Le carnet de mesures',       mission: 'Compléter les relevés',
+    { id: 'carnet',      number: 7,  unlockAt: 68, banner: 'cockpit',  emoji: '📒', title: 'Le carnet de mesures',       mission: 'Compléter les relevés',
         scene: [
             { art: 'cockpit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Voilà ma vraie mission : vérifier que la Terre est comme on l'avait mesurée de loin." }] },
@@ -176,7 +176,7 @@ const CHAPTERS = [
         ],
         end: { some: "Tu as aidé la 🐰 à compléter son carnet." }
     },
-    { id: 'carte', number: 8, unlockAt: 88, emoji: '🗺️', title: 'La carte du ciel', mission: 'Lire la carte',
+    { id: 'carte', number: 8, unlockAt: 88, banner: 'cockpit-chart', emoji: '🗺️', title: 'La carte du ciel', mission: 'Lire la carte',
         scene: [
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Pour quitter la Terre, il faut viser une fenêtre de départ : un moment précis." }] },
@@ -199,7 +199,7 @@ const CHAPTERS = [
         ],
         end: { some: "La carte du ciel est tracée grâce à toi !" }
     },
-    { id: 'fenetre', number: 9, unlockAt: 108, emoji: '⏰', title: 'La fenêtre de départ', mission: 'Trouver le bon moment',
+    { id: 'fenetre', number: 9, unlockAt: 108, banner: 'cockpit-lit', emoji: '⏰', title: 'La fenêtre de départ', mission: 'Trouver le bon moment',
         scene: [
             { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Sept fois huit, cinquante-six : voilà notre compte à rebours. Il faut le découper." }] },
@@ -223,7 +223,7 @@ const CHAPTERS = [
         ],
         end: { some: "La fenêtre de départ est calculée grâce à toi !" }
     },
-    { id: 'message', number: 10, unlockAt: 130, emoji: '📡', title: 'Un message de chez elle', mission: 'Décoder le signal',
+    { id: 'message', number: 10, unlockAt: 130, banner: 'cockpit-radio', emoji: '📡', title: 'Un message de chez elle', mission: 'Décoder le signal',
         scene: [
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'think', text: "Attends. Mon récepteur capte quelque chose… Un signal. De chez moi !" },
@@ -249,7 +249,7 @@ const CHAPTERS = [
         ],
         end: { some: "Tu as aidé la 🐰 à décoder le message de chez elle." }
     },
-    { id: 'embarquement', number: 11, unlockAt: 155, emoji: '🚪', title: 'Embarquement surprise',      mission: 'Vérifier le carburant',
+    { id: 'embarquement', number: 11, unlockAt: 155, banner: 'porthole-earth', emoji: '🚪', title: 'Embarquement surprise',      mission: 'Vérifier le carburant',
         scene: [
             { art: 'airlock', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Merci pour tout, renard. Sans toi, je serais encore là." }] },
@@ -273,7 +273,7 @@ const CHAPTERS = [
         ],
         end: { some: "Tu as aidé la 🐰 à vérifier le carburant." }
     },
-    { id: 'voyage',      number: 12,  unlockAt: 185, emoji: '☄️', title: 'Le voyage',                  mission: 'Naviguer entre les astéroïdes',
+    { id: 'voyage',      number: 12,  unlockAt: 185, banner: 'space-beacon-on', emoji: '☄️', title: 'Le voyage',                  mission: 'Naviguer entre les astéroïdes',
         scene: [
             { art: 'space-beacon', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "La balise relais est là-bas. Un chemin sûr passe entre ces rochers." }] },
@@ -297,7 +297,7 @@ const CHAPTERS = [
         ],
         end: { some: "Tu as aidé la 🐰 à guider le vaisseau jusqu'à la balise." }
     },
-    { id: 'retour',      number: 13, unlockAt: 225, emoji: '🔦', title: 'Le retour',                  mission: 'Atterrir en douceur',
+    { id: 'retour',      number: 13, unlockAt: 225, banner: 'hill', emoji: '🔦', title: 'Le retour',                  mission: 'Atterrir en douceur',
         scene: [
             { art: 'earth-top', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'think', text: "Pour se poser doucement, on divise la vitesse par deux. La moitié de 80 ?" },

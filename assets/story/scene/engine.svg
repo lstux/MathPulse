@@ -1,12 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" preserveAspectRatio="xMidYMid slice">
   <title>La salle des machines</title>
   <desc>Une salle de machines bleu nuit aux tuyaux de cuivre. Trois rangées de quatre pistons, à l'arrêt.</desc>
-  <defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1f3d"/><stop offset="1" stop-color="#33264a"/></linearGradient><linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2f55"/><stop offset="1" stop-color="#1b1f3d"/></linearGradient><linearGradient id="pipe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0a064"/><stop offset=".5" stop-color="#b87333"/><stop offset="1" stop-color="#7a4a22"/></linearGradient></defs>
+  <style>@keyframes tw{from{opacity:.25}to{opacity:1}}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes pulse{from{opacity:.55}to{opacity:1}}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-2.5px)}}
+@keyframes rise{0%{transform:translateY(8px);opacity:0}40%{opacity:1}100%{transform:translateY(-10px);opacity:0}}
+@keyframes flow{to{stroke-dashoffset:-20}}
+@keyframes drift{from{transform:translateX(-5px)}to{transform:translateX(5px)}}
+.tw circle{animation:tw 2.6s ease-in-out infinite alternate}.tw circle:nth-child(3n){animation-duration:3.4s;animation-delay:-1s}.tw circle:nth-child(3n+1){animation-duration:2.1s;animation-delay:-.4s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}.steam circle{animation:rise 3.4s ease-in-out infinite}.steam circle:nth-child(2){animation-delay:-1.2s}.steam circle:nth-child(3){animation-delay:-2.2s}</style><defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1f3d"/><stop offset="1" stop-color="#33264a"/></linearGradient><linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2f55"/><stop offset="1" stop-color="#1b1f3d"/></linearGradient><linearGradient id="pipe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0a064"/><stop offset=".5" stop-color="#b87333"/><stop offset="1" stop-color="#7a4a22"/></linearGradient></defs>
   <rect width="360" height="240" fill="url(#wall)"/>
   <rect y="190" width="360" height="50" fill="url(#floor)"/>
   <rect x="0" y="24" width="360" height="12" fill="url(#pipe)"/><rect x="0" y="44" width="360" height="8" fill="url(#pipe)"/>
   <g fill="#7a4a22"><rect x="60" y="22" width="6" height="16"/><rect x="180" y="22" width="6" height="16"/><rect x="300" y="22" width="6" height="16"/></g>
-  <g fill="#fff" opacity=".18"><circle cx="40" cy="14" r="9"/><circle cx="52" cy="4" r="7"/><circle cx="280" cy="16" r="8"/></g>
+  <g class="steam" fill="#fff" opacity=".18"><circle cx="40" cy="14" r="9"/><circle cx="52" cy="4" r="7"/><circle cx="280" cy="16" r="8"/></g>
   <circle cx="44" cy="96" r="18" fill="#12163a" stroke="#b87333" stroke-width="4"/><path d="M44 96 L54 86" stroke="#ffd54a" stroke-width="2.5" stroke-linecap="round"/>
   <circle cx="322" cy="40" r="9" fill="#2b3160" stroke="#4a5392" stroke-width="2"/>
   <rect x="96" y="40" width="168" height="4" rx="2" fill="#4a5392" opacity=".6"/>
