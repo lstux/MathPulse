@@ -291,7 +291,7 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 
 /* Bouton « Passer » / « Continuer › » : discret ; en fin d'animation, une jauge de 5 s se remplit avant le passage automatique */
 .btn-skip { position: absolute; overflow: hidden; background: rgba(255,255,255,.14); font-weight: 600; font-size: .9rem; }
-.btn-skip.counting::after { content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: rgba(255,255,255,.7); transform-origin: left; animation: skipCount 5s linear forwards; }
+.btn-skip.counting::after { content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: rgba(255,255,255,.7); transform-origin: left; animation: skipCount 3s linear forwards; }
 @keyframes skipCount { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 /* ----- Espace parent : voies et graphiques ----- */

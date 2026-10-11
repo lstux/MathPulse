@@ -1,8 +1,8 @@
 // MathPulse - Gestionnaire d'écrans : home, universe, discovery, game, result, parent
 
 // Intro animée : durée de l'animation, puis délai avant le passage automatique à l'accueil
-const INTRO_DURATION_MS = 7200;
-const INTRO_AUTO_SKIP_MS = 5000;
+const INTRO_DURATION_MS = 4600;
+const INTRO_AUTO_SKIP_MS = 3000;
 
 class ScreenManager {
     constructor(appContainer, engine, progression) {
@@ -77,7 +77,7 @@ class ScreenManager {
         `;
         const art = screen.querySelector('#intro-art');
         const skip = screen.querySelector('#btn-skip-intro');
-        // Fin de l'animation : le bouton devient « Continuer › » (discret, avec une jauge de 5 s) puis on passe à l'accueil tout seul
+        // Fin de l'animation : le bouton devient « Continuer › » (discret, avec une jauge de 3 s) puis on passe à l'accueil tout seul
         const ending = () => {
             skip.textContent = 'Continuer ›';
             skip.classList.add('counting');

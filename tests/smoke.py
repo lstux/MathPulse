@@ -40,12 +40,12 @@ with sync_playwright() as p:
     # premier lancement : intro animée (écran « toucher pour commencer », puis scène, puis accueil)
     assert pg.locator('#btn-intro-start').count() == 1, 'intro attendue au premier lancement'
     pg.click('#btn-intro-start'); pg.wait_for_selector('#ia-scene', timeout=4000)
-    pg.wait_for_timeout(300); assert pg.locator('.ia-fall').count() == 1 and pg.locator('.ia-rabin').count() == 1
+    pg.wait_for_timeout(300); assert pg.locator('.ia-fall').count() == 1 and pg.locator('.ia-lamp').count() == 1
     assert pg.inner_text('#btn-skip-intro') == 'Passer'
     pg.click('#btn-skip-intro'); assert pg.inner_text('h1') == 'MathPulse'
     pg.click('#btn-intro'); pg.wait_for_selector('#ia-scene', timeout=4000)   # « Revoir l'intro » : sans écran de lancement
     assert pg.locator('#btn-intro-start').count() == 0
-    # fin de l'animation : le bouton devient « Continuer › » puis l'accueil s'affiche tout seul 5 s plus tard
+    # fin de l'animation : le bouton devient « Continuer › » puis l'accueil s'affiche tout seul 3 s plus tard
     pg.wait_for_function("document.querySelector('#btn-skip-intro').textContent.includes('Continuer')", timeout=10000)
     pg.wait_for_selector('#btn-play', timeout=8000)
     pg.click('#btn-play')

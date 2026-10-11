@@ -319,6 +319,6 @@ Les scènes peuvent maintenant compter de 5 à 8 vignettes (50 mots au plus par 
      - **Écart avec le storyboard** : la ligne de la 🐰 s'affiche sur l'écran de l'univers, au-dessus de « C'est parti ! », et non pendant la session. Ainsi elle ne retarde aucune réponse (le temps de réflexion compte pour la maîtrise). Le message de fin de session du chapitre s'affiche sur l'écran de résultat, d'après le chapitre en cours avant la session.
    - Lot 3a ✅ : scènes, lignes et fins des chapitres 4 à 7, avec leurs 8 décors (salle des machines, soute, poste de pilotage).
    - Lot 3b ✅ : scènes des chapitres 8 à 10, 11 décors (sas, hublot, espace profond, balise, Terre, colline) et deux expressions (🐰 surprise, 🦊 ému).
-   - Lot 3c, la suite : refonte de l'intro (ouverture muette sur l'atterrissage).
+   - Lot 3c ✅ : intro refaite, muette et courte (environ 4,6 s) : le vaisseau tombe, une petite lampe bleue s'allume. Le renard et la lapine ne figurent plus dans l'intro, ils arrivent dans la scène du chapitre 1.
 4. **Illustrations** en parallèle : décors (bois, clairière, intérieur du vaisseau), expression « inquiet » du 🦊, pièces et voyants. Émojis et SVG existants en attendant.
 5. **Ajuster les seuils** avec les données de la bêta.
