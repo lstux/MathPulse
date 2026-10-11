@@ -131,6 +131,8 @@ with sync_playwright() as p:
     assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
     # série rapide : bouton à l'univers, pas de coup de pouce, jauge, résultat avec bonus
     pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
+    assert pg.locator('.chapter-card').count() == 10, "10 chapitres attendus dans l'univers"
+    assert pg.locator('.chapter-card.unlocked').count() >= 1 and pg.locator('.chapter-card.current').count() == 1, 'chapitre en cours attendu'
     assert pg.locator('#btn-rapid').count() == 1, 'bouton série rapide attendu (compétences au niveau 2)'
     pg.click('#btn-rapid'); pg.click('#btn-rapid-go')
     assert pg.locator('#countdown').count() == 1, 'décompte attendu avant la série'

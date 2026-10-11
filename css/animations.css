@@ -18,7 +18,7 @@
 @keyframes successPulse { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 @keyframes errorShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-0.4rem); } 75% { transform: translateX(0.4rem); } }
 
-/* Déblocage d'une planète */
+/* Déblocage d'un chapitre (et autres apparitions) */
 @keyframes planetAppear { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 
 /* Mascotte : le renard en coin pendant les exercices */

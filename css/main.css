@@ -194,13 +194,17 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .rocket { position: absolute; left: 50%; font-size: 3rem; transform: translateX(-50%) rotate(-12deg); transition: bottom 0.8s var(--easing-in-out); }
 .fox { position: absolute; left: 12%; bottom: 6%; font-size: 2.5rem; }
 
-.planets-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-md); width: 100%; }
-.planet-card { text-align: center; padding: var(--spacing-md) var(--spacing-sm); border-radius: var(--radius-lg); border: 2px solid var(--color-border); background: var(--color-surface); }
-.planet-card.unlocked { border-color: var(--color-primary); }
-.planet-card.locked { opacity: 0.75; }
-.planet-emoji { font-size: 2.25rem; }
-.planet-name { font-weight: 600; }
-.planet-goal { color: var(--color-text-light); }
+.chapters-list { list-style: none; margin: 0 0 var(--spacing-lg); padding: 0; display: flex; flex-direction: column; gap: var(--spacing-sm); width: 100%; }
+.chapter-card { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border-radius: var(--radius-lg); border: 2px solid var(--color-border); background: var(--color-surface); }
+.chapter-card.unlocked { border-color: var(--color-primary); }
+.chapter-card.current { box-shadow: 0 0 0 2px var(--color-primary); }
+.chapter-card.locked { opacity: 0.75; }
+.chapter-emoji { font-size: 2rem; flex: 0 0 auto; }
+.chapter-body { flex: 1 1 auto; min-width: 0; text-align: left; }
+.chapter-number, .chapter-mission, .chapter-goal { color: var(--color-text-light); }
+.chapter-title { font-weight: 600; }
+.chapter-goal { flex: 0 0 auto; white-space: nowrap; }
+.chapter-tag { flex: 0 0 auto; color: var(--color-primary); font-weight: 600; }
 
 .progress-bar { width: 100%; }
 .progress-track { height: 10px; background: var(--color-border); border-radius: var(--radius-full); overflow: hidden; }

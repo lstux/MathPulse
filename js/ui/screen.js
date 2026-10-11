@@ -402,9 +402,9 @@ class ScreenManager {
     createResultScreen(summary) {
         if (summary.rapid) return this.createRapidResultScreen(summary);
         const screen = this.screenEl();
-        const { correct, total, starsEarned, newPlanets, skill, capped, cleared } = summary;
+        const { correct, total, starsEarned, newChapters, skill, capped, cleared } = summary;
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
-        const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
+        const chapters = newChapters.map(c => `<p class="unlock text-lg font-bold">${c.emoji} Nouveau chapitre : ${c.title} !</p>`).join('');
         const mood = correct === total ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
         const line = { bravo: 'Tu pourrais piloter mon vaisseau !', content: 'Bien joué, on avance !', comfort: 'Pas grave, on réessaie ensemble !' }[mood];
         screen.innerHTML = `
@@ -420,7 +420,7 @@ class ScreenManager {
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
                     ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
                     ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
-                    ${planets}
+                    ${chapters}
                 </div>
             </div>
             <div class="flex flex-col gap-md btn-column">
@@ -428,11 +428,11 @@ class ScreenManager {
                 <button class="btn-secondary" id="btn-universe">Mon univers</button>
             </div>
         `;
-        // Sons de fin de session, échelonnés : étoiles, puis calcul acquis, puis planète
+        // Sons de fin de session, échelonnés : étoiles, puis calcul acquis, puis chapitre
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 3 ? 'stars3' : 'stars'), at); at += 1100; }
         if (cleared > 0) { this.later(() => Sound.play('cleared'), at); at += 1100; }
-        if (newPlanets.length) this.later(() => Sound.play('planet'), at);
+        if (newChapters.length) this.later(() => Sound.play('planet'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.startSession());
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
@@ -440,7 +440,7 @@ class ScreenManager {
 
     createRapidResultScreen(summary) {
         const screen = this.screenEl();
-        const { correct, total, fast, starsEarned, rewarded, newPlanets } = summary;
+        const { correct, total, fast, starsEarned, rewarded, newChapters } = summary;
         const mood = correct === total && fast >= total - 1 ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
         const line = { bravo: 'Décollage réussi ! Plus rapide que mon vaisseau !', content: 'Bien joué, tes réflexes progressent !', comfort: 'Pas grave, la prochaine série sera la bonne !' }[mood];
         const stars = !rewarded
@@ -448,7 +448,7 @@ class ScreenManager {
             : starsEarned > 0
                 ? `<p class="result-stars">${'⭐'.repeat(starsEarned)}</p><p class="muted">+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'} bonus</p>`
                 : '<p class="muted">Pas de bonus cette fois, la prochaine sera la bonne !</p>';
-        const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
+        const chapters = newChapters.map(c => `<p class="unlock text-lg font-bold">${c.emoji} Nouveau chapitre : ${c.title} !</p>`).join('');
         screen.innerHTML = `
             <div class="text-center" id="rapid-result">
                 <div class="rabbit-says" id="rabbit-says" data-mood="${mood}">
@@ -460,7 +460,7 @@ class ScreenManager {
                     <p class="text-lg">${correct} sur ${total} réussis · ${fast} ${fast > 1 ? 'réponses rapides' : 'réponse rapide'}</p>
                     ${this.elanGauge(Array.from({ length: total }, (_, i) => i < fast))}
                     ${stars}
-                    ${planets}
+                    ${chapters}
                 </div>
             </div>
             <div class="flex flex-col gap-md btn-column">
@@ -470,7 +470,7 @@ class ScreenManager {
         `;
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 2 ? 'stars3' : 'stars'), at); at += 1100; }
-        if (newPlanets.length) this.later(() => Sound.play('planet'), at);
+        if (newChapters.length) this.later(() => Sound.play('planet'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.show('rapidCountdown'));
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;

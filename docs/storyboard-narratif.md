@@ -293,7 +293,7 @@ Ce rythme donne 4 à 5 chapitres pendant les 2 semaines de bêta, puis un chapit
 1. ✅ Chapitres 1 à 3 validés (11 oct.).
 2. **Valider les chapitres 4 à 10** ci-dessus et l'arc d'ensemble.
 3. **Branche `feat/narrative-ux`**, en trois lots :
-   - Lot 1, structure : fichier de données des chapitres, remplacement de `PLANETS`, écran des chapitres débloqués ou verrouillés dans `universe.js`, déblocage au passage d'un seuil (le résultat de session fournit déjà `newPlanets`), chapitres lus mémorisés (`version` de `progression.js`).
+   - Lot 1, structure (✅ fait sur `feat/narrative-ux`, à relire) : fichier de données des chapitres (`js/content/chapters.js`), remplacement de `PLANETS`, écran des chapitres débloqués ou verrouillés dans `universe.js`, déblocage au passage d'un seuil (le résultat de session fournit `newChapters`). Reporté au lot 2 : mémoriser les chapitres lus (`version` de `progression.js`), car il n'y a rien à lire avant les scènes.
    - Lot 2, scènes : visionneuse de vignettes avec bouton « passer » et ligne de la 🐰 en début de session, accessible (lecteur d'écran, animations réduites), chapitres 1 à 3.
    - Lot 3, la suite : chapitres 4 à 10 et refonte de l'intro.
 4. **Illustrations** en parallèle : décors (bois, clairière, intérieur du vaisseau), expression « inquiet » du 🦊, pièces et voyants. Émojis et SVG existants en attendant.

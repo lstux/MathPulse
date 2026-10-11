@@ -12,6 +12,7 @@ const PRECACHE = [
     './css/animations.css',
     './css/responsive.css',
     './js/content/skills.js',
+    './js/content/chapters.js',
     './js/core/storage.js',
     './js/core/cheat.js',
     './js/core/progression.js',

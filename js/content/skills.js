@@ -409,9 +409,4 @@ const MIX = { recallPerSession: 2 };
 // l'enfant, une compétence au niveau 2 ayant déjà `relaxAfterSeen` réponses ne compte plus.
 const PROGRESS_CAP = { max: 3, relaxAfterSeen: 30 };
 
-// Planètes déverrouillées avec le total d'étoiles collectées
-const PLANETS = [
-    { name: 'Lune', emoji: '🌕', unlockAt: 10 },
-    { name: 'Mars', emoji: '🔴', unlockAt: 25 },
-    { name: 'Saturne', emoji: '🪐', unlockAt: 50 }
-];
+// Les chapitres de l'histoire (déblocage par total d'étoiles) sont dans chapters.js

@@ -63,7 +63,7 @@ Chaque chapitre est rattaché à une voie du parcours. Les titres et les seuils 
 
 Pas de refonte du moteur (`engine.js`, `session.js`, `progression.js` restent tels quels) : les étoiles (`totalStars`) et les compétences existent déjà. Ce qui changerait :
 
-- **`js/content/`** : un nouveau fichier de données décrivant les chapitres (identifiant, titre, palier d'étoiles, texte, illustration), sur le modèle de `PLANETS`. Les paliers actuels (10, 25 et 50 ⭐) seraient remplacés par ceux du découpage ci-dessus.
+- **`js/content/chapters.js`** (créé sur la branche `feat/narrative-ux`) : un fichier de données décrivant les chapitres (identifiant, titre, palier d'étoiles, texte, illustration), sur le modèle de `PLANETS`. Les paliers actuels (10, 25 et 50 ⭐) seraient remplacés par ceux du découpage ci-dessus.
 - **`js/ui/universe.js`** : afficher les chapitres débloqués ou verrouillés à la place des planètes.
 - **Stockage** : retenir quels chapitres ont été lus, comme `discovered` pour les compétences. Toute modification du format passe par la `version` de `progression.js`.
 - **Scènes** : une scène complète au déblocage, une ligne de texte sinon. Les deux doivent pouvoir être passées, et respecter les animations réduites et les lecteurs d'écran.

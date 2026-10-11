@@ -109,9 +109,9 @@ test('progression: persistance et reset sans toucher aux autres clés', () => {
     assert.strictEqual(localStorage.getItem('autre_app'), 'garder');
 });
 
-test('session: étoiles créditées une seule fois, planète débloquée à 10', () => {
+test('session: étoiles créditées une seule fois, chapitre 2 débloqué à 6', () => {
     const { engine, progression } = setup();
-    progression.addStars(8);
+    progression.addStars(4);
     const s = new Session(engine, progression);
     s.start();
     for (const ex of s.exercises) { s.beginQuestion(); s.submitAnswer(ex.answer); s.next(); }
@@ -119,11 +119,43 @@ test('session: étoiles créditées une seule fois, planète débloquée à 10',
     const sum = s.complete();
     assert.strictEqual(sum.correct, 5);
     assert.strictEqual(sum.starsEarned, 3);
-    assert.strictEqual(progression.getTotalStars(), 11);
-    assert.deepStrictEqual(sum.newPlanets.map(p => p.name), ['Lune']);
+    assert.strictEqual(progression.getTotalStars(), 7);
+    assert.deepStrictEqual(sum.newChapters.map(c => c.id), ['vaisseau']);
     s.complete();
-    assert.strictEqual(progression.getTotalStars(), 11, 'complete() doit être idempotent');
+    assert.strictEqual(progression.getTotalStars(), 7, 'complete() doit être idempotent');
     assert.strictEqual(storage.get(storage.KEYS.SESSION_HISTORY).length, 1);
+});
+
+test('chapitres: 10 chapitres, seuils croissants, le premier est ouvert dès le départ', () => {
+    assert.strictEqual(CHAPTERS.length, 10);
+    assert.deepStrictEqual(CHAPTERS.map(c => c.number), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert.strictEqual(new Set(CHAPTERS.map(c => c.id)).size, 10, 'identifiants uniques');
+    assert.strictEqual(CHAPTERS[0].unlockAt, 0);
+    for (let i = 1; i < CHAPTERS.length; i++) assert.ok(CHAPTERS[i].unlockAt > CHAPTERS[i - 1].unlockAt, `seuil croissant au chapitre ${i + 1}`);
+    for (const c of CHAPTERS) assert.ok(c.title && c.mission && c.emoji, `titre, mission et émoji au chapitre ${c.number}`);
+});
+
+test('chapitres: déblocage par seuil, plusieurs chapitres d\'un coup, fin de l\'histoire', () => {
+    assert.deepStrictEqual(chaptersUnlockedAt(0).map(c => c.number), [1]);
+    assert.deepStrictEqual(newChaptersBetween(5, 6).map(c => c.number), [2], 'le seuil est inclus');
+    assert.deepStrictEqual(newChaptersBetween(6, 7), [], 'pas de nouveau chapitre sans franchir un seuil');
+    assert.deepStrictEqual(newChaptersBetween(0, 0), [], 'le chapitre 1 est ouvert dès le départ, pas « nouveau »');
+    assert.deepStrictEqual(newChaptersBetween(14, 30).map(c => c.number), [3, 4]);
+    assert.strictEqual(nextChapter(0).number, 2);
+    assert.strictEqual(nextChapter(6).number, 3);
+    assert.strictEqual(nextChapter(195), null);
+    assert.strictEqual(chaptersUnlockedAt(500).length, 10);
+});
+
+test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier chapitre « en cours »', () => {
+    const { progression } = setup();
+    progression.addStars(16);
+    const html = new Universe(progression).render();
+    assert.ok(html.includes('Les circuits'), 'le chapitre 3 est ouvert');
+    assert.ok(!html.includes('La salle des machines'), 'le titre du chapitre 4 reste caché');
+    assert.strictEqual((html.match(/chapter-card locked/g) || []).length, 7);
+    assert.strictEqual((html.match(/aria-current="step"/g) || []).length, 1);
+    assert.ok(html.includes('pour le chapitre 4'));
 });
 
 test('session: barème d\'étoiles', () => {
