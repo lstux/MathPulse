@@ -158,10 +158,10 @@ test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier
     assert.ok(html.includes('pour le chapitre 4'));
 });
 
-test('scènes: chapitres 1 à 7 complets, vignettes courtes, décors et personnages connus', () => {
-    const ARTS = ['forest', 'clearing', 'ship', 'ship-lit', 'engine', 'engine-on', 'tanks', 'tanks-full', 'cockpit', 'cockpit-night', 'cockpit-chart', 'cockpit-lit'];
-    const MOODS = { fox: ['content', 'bravo', 'think', 'comfort', 'worried'], rabbit: ['content', 'bravo', 'think', 'comfort'] };
-    for (const c of CHAPTERS.slice(0, 7)) {
+test('scènes: chapitres 1 à 10 complets, vignettes courtes, décors et personnages connus', () => {
+    const ARTS = ['forest', 'clearing', 'ship', 'ship-lit', 'engine', 'engine-on', 'tanks', 'tanks-full', 'cockpit', 'cockpit-night', 'cockpit-chart', 'cockpit-lit', 'airlock', 'airlock-closed', 'porthole-earth', 'fuel', 'space-asteroids', 'space-beacon', 'space-beacon-on', 'space-home', 'earth-top', 'hill', 'hill-reply'];
+    const MOODS = { fox: ['content', 'bravo', 'think', 'comfort', 'worried', 'moved'], rabbit: ['content', 'bravo', 'think', 'comfort', 'surprise'] };
+    for (const c of CHAPTERS.slice(0, 10)) {
         assert.strictEqual(c.scene.length, 5, `5 vignettes au chapitre ${c.number}`);
         assert.strictEqual(c.lines.length, 3, `3 lignes de la lapine au chapitre ${c.number}`);
         assert.ok(c.end, `message de fin au chapitre ${c.number}`);
@@ -181,7 +181,6 @@ test('scènes: chapitres 1 à 7 complets, vignettes courtes, décors et personna
             assert.ok(words <= 40, `vignette trop longue au chapitre ${c.number} (${words} mots)`);
         }
     }
-    for (const c of CHAPTERS.slice(7)) assert.ok(!c.scene, `le chapitre ${c.number} n'a pas encore de scène`);
 });
 
 test('scènes: scène à lire = premier chapitre ouvert avec scène non lue', () => {
@@ -190,7 +189,7 @@ test('scènes: scène à lire = premier chapitre ouvert avec scène non lue', ()
     assert.strictEqual(pendingScene(7, { lapine: true }).id, 'vaisseau');
     assert.strictEqual(pendingScene(16, { lapine: true }).id, 'vaisseau', 'dans l\'ordre');
     assert.strictEqual(pendingScene(16, { lapine: true, vaisseau: true }).id, 'circuits');
-    assert.strictEqual(pendingScene(500, { lapine: true, vaisseau: true, circuits: true, machines: true, energie: true, carnet: true, fenetre: true }), null, 'les chapitres sans scène ne comptent pas');
+    assert.strictEqual(pendingScene(500, { lapine: true, vaisseau: true, circuits: true, machines: true, energie: true, carnet: true, fenetre: true, embarquement: true, voyage: true, retour: true }), null, 'les chapitres sans scène ne comptent pas');
     assert.strictEqual(pendingScene(0, undefined).id, 'lapine');
 });
 
@@ -198,7 +197,7 @@ test('scènes: ligne de la lapine au hasard et message de fin selon les étoiles
     const c = CHAPTERS[0];
     assert.strictEqual(randomLine(c, () => 0), c.lines[0]);
     assert.strictEqual(randomLine(c, () => 0.999), c.lines[2]);
-    assert.strictEqual(randomLine(CHAPTERS[7]), null, 'pas de ligne tant que le chapitre n\'est pas écrit');
+    assert.strictEqual(randomLine({ id: 'x' }), null, 'pas de ligne tant que le chapitre n\'est pas écrit');
     assert.strictEqual(currentChapter(14).number, 2);
     assert.strictEqual(currentChapter(15).number, 3);
     assert.ok(chapterEndLine(c, 3).includes('Parfait'));
@@ -207,7 +206,7 @@ test('scènes: ligne de la lapine au hasard et message de fin selon les étoiles
     const c3 = CHAPTERS[2];
     assert.strictEqual(chapterEndLine(c3, 3), c3.end.some, 'sans variante « full », on retombe sur le message courant');
     assert.strictEqual(chapterEndLine(c3, 0), null, 'rien à dire sans étoile');
-    assert.strictEqual(chapterEndLine(CHAPTERS[7], 3), null);
+    assert.strictEqual(chapterEndLine({ id: 'x' }, 3), null);
 });
 
 test('progression: chapitres lus mémorisés, anciennes données sans ce champ, réinitialisation', () => {

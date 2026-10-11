@@ -165,9 +165,73 @@ const CHAPTERS = [
         ],
         end: { some: "La fenêtre de départ est calculée grâce à toi !" }
     },
-    { id: 'embarquement', number: 8, unlockAt: 120, emoji: '🚪', title: 'Embarquement surprise',      mission: 'Vérifier le carburant' },
-    { id: 'voyage',      number: 9,  unlockAt: 155, emoji: '☄️', title: 'Le voyage',                  mission: 'Naviguer entre les astéroïdes' },
-    { id: 'retour',      number: 10, unlockAt: 195, emoji: '🔦', title: 'Le retour',                  mission: 'Atterrir en douceur' }
+    { id: 'embarquement', number: 8, unlockAt: 120, emoji: '🚪', title: 'Embarquement surprise',      mission: 'Vérifier le carburant',
+        scene: [
+            { art: 'airlock', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Merci pour tout, renard. Sans toi, je serais encore là." }] },
+            { art: 'airlock-closed', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'fox', mood: 'worried', text: "Euh… la porte ?" }] },
+            { art: 'porthole-earth', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'surprise', text: "Je n'avais pas prévu ça. Comment je rentre ?!" }] },
+            { art: 'fuel', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'comfort', text: "Respire. S'il reste assez pour revenir, je te ramène. 83 moins 27 ?" },
+                { who: 'fox', mood: 'think', text: "56 !" }] },
+            { art: 'fuel', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Assez pour le retour. Mais d'abord une escale : mon rapport doit partir par la balise relais." }] }
+        ],
+        lines: [
+            "Il en reste assez. Je te le promets, renard.",
+            "Calculer le retour, c'est la meilleure façon de se rassurer.",
+            "Regarde par le hublot : on n'est jamais perdu quand on sait compter."
+        ],
+        end: { some: "Tu as aidé la 🐰 à vérifier le carburant." }
+    },
+    { id: 'voyage',      number: 9,  unlockAt: 155, emoji: '☄️', title: 'Le voyage',                  mission: 'Naviguer entre les astéroïdes',
+        scene: [
+            { art: 'space-beacon', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', text: "La balise relais est là-bas. Un chemin sûr passe entre ces rochers." }] },
+            { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'think', text: "Chaque tronçon ajoute sa distance : 38 plus 45 ?" },
+                { who: 'fox', mood: 'content', text: "83 !" }] },
+            { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Tu n'as plus peur ?" },
+                { who: 'fox', mood: 'worried', text: "Si. Mais je calcule quand même : 6 fois 7, quarante-deux !" }] },
+            { art: 'space-beacon-on', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'bravo', text: "Mission accomplie. Regarde, la petite étoile jaune, là-bas : c'est chez moi." }] },
+            { art: 'space-home', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Maintenant, on te ramène." }] }
+        ],
+        lines: [
+            "Droit devant, puis à gauche : tu navigues comme un pro.",
+            "Chaque tronçon compte. Additionne, et on passe.",
+            "Ta peur est une bonne alliée : elle te rend prudent."
+        ],
+        end: { some: "Tu as aidé la 🐰 à guider le vaisseau jusqu'à la balise." }
+    },
+    { id: 'retour',      number: 10, unlockAt: 195, emoji: '🔦', title: 'Le retour',                  mission: 'Atterrir en douceur',
+        scene: [
+            { art: 'earth-top', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'think', text: "Pour se poser doucement, on divise la vitesse par deux. La moitié de 80 ?" },
+                { who: 'fox', mood: 'content', text: "40 !" }] },
+            { art: 'earth-top', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Et le double de 35 ? Pour les freins, 7 fois 100 ?" },
+                { who: 'fox', mood: 'bravo', text: "70 ! Et 700 !" }] },
+            { art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'fox', mood: 'comfort', text: "Tu vas me manquer." },
+                { who: 'rabbit', mood: 'content', text: "Et toi à moi." }] },
+            { art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+                { who: 'rabbit', mood: 'content', text: "Un éclair pour dire bonne nuit, deux pour dire je pense à toi. Chaque soir, regarde le ciel." }] },
+            { art: 'hill-reply', cast: [{ who: 'fox', at: 'center' }], lines: [
+                { who: 'fox', mood: 'moved', text: "Deux éclairs… Et là-haut, une petite lueur me répond." },
+                { who: 'narrator', text: "Dans le carnet de la 🐰 : « Prochaine mission : à suivre. »" }] }
+        ],
+        lines: [
+            "Chaque soir, une lumière dans le ciel : c'est moi.",
+            "Doubler, partager en deux : deux gestes pour atterrir en douceur.",
+            "Tu sais, renard, tu es un excellent copilote."
+        ],
+        end: { some: "Tu as aidé la 🐰 à rentrer… et à te ramener." }
+    }
 ];
 
 // Chapitres débloqués avec ce total d'étoiles

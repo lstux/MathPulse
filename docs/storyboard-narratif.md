@@ -297,6 +297,7 @@ Ce rythme donne 4 à 5 chapitres pendant les 2 semaines de bêta, puis un chapit
    - Lot 2, scènes (✅ fait sur `feat/narrative-ux`, à relire) : visionneuse de vignettes avec bouton « Passer » (`js/ui/scene.js`), accessible (texte lu par les lecteurs d'écran, animations réduites), chapitres 1 à 3. Une scène non lue passe avant la session suivante ; le résultat de session propose « Lire le chapitre N » ; « Revoir » dans la liste des chapitres rejoue la scène. Chapitres lus mémorisés (`chaptersSeen` dans la progression, sans changement de version : champ ajouté avec valeur par défaut). Décors SVG dans `assets/story/scene/` (bois, clairière, intérieur du vaisseau éteint et avec un voyant allumé) et expression « inquiet » du 🦊.
      - **Écart avec le storyboard** : la ligne de la 🐰 s'affiche sur l'écran de l'univers, au-dessus de « C'est parti ! », et non pendant la session. Ainsi elle ne retarde aucune réponse (le temps de réflexion compte pour la maîtrise). Le message de fin de session du chapitre s'affiche sur l'écran de résultat, d'après le chapitre en cours avant la session.
    - Lot 3a ✅ : scènes, lignes et fins des chapitres 4 à 7, avec leurs 8 décors (salle des machines, soute, poste de pilotage).
-   - Lot 3b, la suite : chapitres 8 à 10 (sas, espace) et refonte de l'intro.
+   - Lot 3b ✅ : scènes des chapitres 8 à 10, 11 décors (sas, hublot, espace profond, balise, Terre, colline) et deux expressions (🐰 surprise, 🦊 ému).
+   - Lot 3c, la suite : refonte de l'intro (ouverture muette sur l'atterrissage).
 4. **Illustrations** en parallèle : décors (bois, clairière, intérieur du vaisseau), expression « inquiet » du 🦊, pièces et voyants. Émojis et SVG existants en attendant.
 5. **Ajuster les seuils** avec les données de la bêta.
