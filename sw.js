@@ -94,6 +94,8 @@ const PRECACHE = [
     './assets/sounds/star-tap.mp3',
     './assets/sounds/beacon-ping.mp3',
     './assets/sounds/asteroid-pass.mp3',
+    './assets/sounds/radio-signal.mp3',
+    './assets/sounds/lamp-on.mp3',
     './assets/story/expr/fox-content.svg',
     './assets/story/expr/fox-bravo.svg',
     './assets/story/expr/fox-think.svg',

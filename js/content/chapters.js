@@ -227,7 +227,7 @@ const CHAPTERS = [
     },
     { id: 'message', number: 10, unlockAt: 130, ambience: 'ship', banner: 'cockpit-radio', emoji: '📡', title: 'Un message de chez elle', mission: 'Décoder le signal',
         scene: [
-            { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'radio-signal', art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'think', text: "Attends. Mon récepteur capte quelque chose… Un signal. De chez moi !" },
                 { who: 'fox', mood: 'content', text: "Le bip de l'autre nuit !" }] },
             { art: 'cockpit-radio', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [

@@ -5,7 +5,7 @@ _Liste de courses sonore pour l'histoire du renard 🦊 et de la lapine 🐰. R�
 ## État (12 octobre 2026)
 
 - **Reçus et câblés :** `amb-nature`, `amb-ship`, `amb-space` (fabriqué par MathPulse), `applause`, `scene-open`, `scene-next`, `chapter-unlock`, `airlock-close`, `launch`, `landing`.
-- **Fabriqués par MathPulse et câblés :** `star-tap`, `beacon-ping`, `asteroid-pass` (synthèse, voir `CREDITS.md`).
+- **Fabriqués par MathPulse et câblés :** `star-tap`, `beacon-ping`, `asteroid-pass`, `lamp-on`, `radio-signal` (synthèse, voir `CREDITS.md`).
 - **Abandonné :** `voice-blip` (pas de blip de voix pour l'instant).
 - **Priorité 1 : complète.** Priorité 2 et 3 à chercher plus tard.
 

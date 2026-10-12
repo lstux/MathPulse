@@ -41,6 +41,8 @@ Tous les effets sonores viennent de **Mixkit** et sont libres d'utilisation (gra
 | `launch.mp3` | `bank/mixkit-fast-rocket-whoosh-1714.mp3` (coupé à 4 s) | Fast rocket whoosh | Chapitre 11, décollage |
 | `landing.mp3` | `bank/mixkit-spaceship-landing-2735.mp3` (coupé à 3 s) | Spaceship landing | Chapitre 13, atterrissage sur la colline |
 | `star-tap.mp3` | **Généré par MathPulse** (synthèse : notes désaccordées, réverbération courte) | — | Toucher une étoile de la carte du ciel |
+| `lamp-on.mp3` | **Généré par MathPulse** (synthèse : deux notes désaccordées, brillance, écho) | — | Intro, la lampe bleue s'allume dans les bois |
+| `radio-signal.mp3` | **Généré par MathPulse** (synthèse : grésillement filtré, sept bips, écho léger) | — | Chapitre 10, le signal de la planète de la lapine |
 | `beacon-ping.mp3` | **Généré par MathPulse** (synthèse : deux pings qui montent, écho) | — | Chapitre 12, la balise envoie le rapport |
 | `asteroid-pass.mp3` | **Généré par MathPulse** (bruit rose filtré, fondu long) | — | Chapitre 12, un astéroïde frôle le hublot |
 | `amb-space.mp3` | **Généré par MathPulse** (synthèse : trois notes graves et un souffle, sans échantillon externe) | — | Ambiance espace (chapitres 11 et 12) |

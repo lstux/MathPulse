@@ -187,7 +187,7 @@ test('scènes: tous les chapitres complets, vignettes courtes, décors et person
 test('ambiances: chaque chapitre a une ambiance connue, applaudissements à la fin du chapitre 13', () => {
     for (const c of CHAPTERS) assert.ok(['nature', 'ship', 'space'].includes(c.ambience), `ambiance connue au chapitre ${c.number}`);
     assert.strictEqual(CHAPTERS[12].sfx, 'applause');
-    for (const c of CHAPTERS) for (const v of c.scene || []) if (v.sfx) assert.ok(['airlock-close', 'launch', 'landing', 'asteroid-pass', 'beacon-ping'].includes(v.sfx), `son de vignette connu : ${v.sfx}`);
+    for (const c of CHAPTERS) for (const v of c.scene || []) if (v.sfx) assert.ok(['airlock-close', 'launch', 'landing', 'asteroid-pass', 'beacon-ping', 'radio-signal'].includes(v.sfx), `son de vignette connu : ${v.sfx}`);
     assert.ok(CHAPTERS.slice(0, 12).every(c => !c.sfx), 'un seul son de fin, au dernier chapitre');
 });
 
