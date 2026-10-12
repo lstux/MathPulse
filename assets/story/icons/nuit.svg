@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img"><title>La nuit à bord</title>
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a5ad0"/><stop offset="1" stop-color="#2a1d6e"/></linearGradient></defs>
+<circle cx="24" cy="24" r="23" fill="url(#g)"/><circle cx="24" cy="24" r="22" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>
+<path d="M30 9 a15 15 0 1 0 9 22 a12 12 0 0 1 -9 -22Z" fill="#fdf1c4"/><path d="M33 12 l1.5 3.5 3.5 1.5 -3.5 1.5 -1.5 3.5 -1.5 -3.5 -3.5 -1.5 3.5 -1.5Z" fill="#ffd54a"/>
+</svg>

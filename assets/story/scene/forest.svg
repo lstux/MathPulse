@@ -1,14 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" preserveAspectRatio="xMidYMid slice">
   <title>Les bois au soir</title>
   <desc>Une forêt de sapins la nuit. Une petite lampe bleue brille à droite, et une forme métallique dépasse entre les arbres, à gauche.</desc>
-  <defs>
+  <style>@keyframes tw{from{opacity:.25}to{opacity:1}}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes pulse{from{opacity:.55}to{opacity:1}}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-2.5px)}}
+@keyframes rise{0%{transform:translateY(8px);opacity:0}40%{opacity:1}100%{transform:translateY(-10px);opacity:0}}
+@keyframes flow{to{stroke-dashoffset:-20}}
+@keyframes drift{from{transform:translateX(-5px)}to{transform:translateX(5px)}}
+.tw circle{animation:tw 2.6s ease-in-out infinite alternate}.tw circle:nth-child(3n){animation-duration:3.4s;animation-delay:-1s}.tw circle:nth-child(3n+1){animation-duration:2.1s;animation-delay:-.4s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}</style><defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e0d2b"/><stop offset=".6" stop-color="#2b2370"/><stop offset="1" stop-color="#4a4aa0"/></linearGradient>
     <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d6b4c"/><stop offset="1" stop-color="#16382c"/></linearGradient>
     <radialGradient id="lamp"><stop offset="0" stop-color="#bfe6ff" stop-opacity=".9"/><stop offset=".35" stop-color="#5aa9ff" stop-opacity=".4"/><stop offset="1" stop-color="#5aa9ff" stop-opacity="0"/></radialGradient>
     <path id="pine" d="M0 -62 L15 -32 H8 L21 -8 H10 L25 18 H-25 L-10 -8 H-21 L-8 -32 H-15Z M-4 18 H4 V34 H-4Z"/>
   </defs>
   <rect width="360" height="240" fill="url(#sky)"/>
-  <g fill="#fff" opacity=".9"><circle cx="24" cy="24" r="1.2"/><circle cx="70" cy="50" r="1"/><circle cx="112" cy="18" r="1.3"/><circle cx="160" cy="40" r="1"/><circle cx="205" cy="22" r="1.2"/><circle cx="250" cy="58" r="1"/><circle cx="330" cy="22" r="1.2"/><circle cx="344" cy="84" r="1"/><circle cx="36" cy="92" r="1"/><circle cx="140" cy="86" r="0.9"/></g>
+  <g class="tw" fill="#fff" opacity=".9"><circle cx="24" cy="24" r="1.2"/><circle cx="70" cy="50" r="1"/><circle cx="112" cy="18" r="1.3"/><circle cx="160" cy="40" r="1"/><circle cx="205" cy="22" r="1.2"/><circle cx="250" cy="58" r="1"/><circle cx="330" cy="22" r="1.2"/><circle cx="344" cy="84" r="1"/><circle cx="36" cy="92" r="1"/><circle cx="140" cy="86" r="0.9"/></g>
   <circle cx="302" cy="44" r="36" fill="#fdf1c4" opacity=".1"/><circle cx="302" cy="44" r="17" fill="#fdf1c4"/><circle cx="296" cy="40" r="4" fill="#eadca0" opacity=".7"/>
   <g><use href="#pine" transform="translate(10 200) scale(1.05)" fill="#1c3b48"/><use href="#pine" transform="translate(52 200) scale(1.05)" fill="#1c3b48"/><use href="#pine" transform="translate(96 200) scale(1.05)" fill="#1c3b48"/><use href="#pine" transform="translate(140 200) scale(1.05)" fill="#1c3b48"/><use href="#pine" transform="translate(196 200) scale(1.05)" fill="#1c3b48"/><use href="#pine" transform="translate(246 200) scale(1.05)" fill="#1c3b48"/><use href="#pine" transform="translate(300 200) scale(1.05)" fill="#1c3b48"/><use href="#pine" transform="translate(346 200) scale(1.05)" fill="#1c3b48"/></g>
   <!-- vaisseau entre les arbres (silhouette) -->

@@ -26,6 +26,7 @@
 .mascot.hop { animation: foxHop .6s var(--easing-out) 1; }
 .mascot.tilt { animation: foxTilt .8s ease-in-out 1; }
 .mascot.nod { animation: foxNod .7s ease-in-out 1; }
+@keyframes skyPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 @keyframes foxHop { 0% { transform: translateY(0); } 35% { transform: translateY(-14px) scale(1.06); } 60% { transform: translateY(0) scale(.97); } 80% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
 @keyframes foxTilt { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-9deg); } 65% { transform: rotate(5deg); } }
@@ -128,4 +129,6 @@
 .digit-places span { width: 2.6rem; text-align: center; font-size: .65rem; color: var(--color-text-light); font-weight: 600; }
 
 /* Entrée des personnages dans une vignette */
+@keyframes breathe { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.02); } }
+@keyframes speak { 0% { transform: translateY(0); } 35% { transform: translateY(-3.5%); } 100% { transform: translateY(0); } }
 @keyframes castIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }

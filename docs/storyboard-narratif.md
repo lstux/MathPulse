@@ -20,6 +20,27 @@ Dans le code actuel, une session rapporte 0 à 3 ⭐ (3 pour 5/5, 2 pour 4/5, 1 
 
 Ce rythme donne 4 à 5 chapitres pendant les 2 semaines de bêta, puis un chapitre toutes les une à deux semaines. Les écarts grandissent pour que l'histoire dure. **Valeurs à ajuster avec les données de la bêta.**
 
+
+## Version à 13 chapitres (mise à jour du 11 octobre 2026)
+
+Le découpage ci-dessous a été étendu à **13 chapitres**. Les textes de référence sont désormais dans `js/content/chapters.js` ; les sections « Chapitre N » plus bas décrivent la première version à 10 chapitres, avec l'ancienne numérotation.
+
+| # | Chapitre | Seuil (⭐) | Changement |
+|---|---|---|---|
+| 1 à 4 | Une drôle de lapine, Le vaisseau en piteux état, Les circuits, La salle des machines | 0, 6, 15, 28 | Le chapitre 2 gagne un dialogue (« vous les renards… extraterrestres ») |
+| 5 | La nuit à bord 🌙 | 38 | **Nouveau.** Dialogue « tu parles beaucoup… Chut ! », le petit bip sur la console, jeu des compléments à 10 |
+| 6 | Partager l'énergie | 50 | ancien 5 |
+| 7 | Le carnet de mesures | 68 | ancien 6 |
+| 8 | La carte du ciel 🗺️ | 88 | **Nouveau**, première moitié de l'ancien 7 (tables ×6 à ×9) |
+| 9 | La fenêtre de départ | 108 | seconde moitié de l'ancien 7 (divisions) |
+| 10 | Un message de chez elle 📡 | 130 | **Nouveau.** Le signal de la planète de la 🐰 (doubles, ×100) ; répond au bip du chapitre 5 |
+| 11 | Embarquement surprise | 155 | ancien 8, avec écho du dialogue du chapitre 2 |
+| 12 | Le voyage | 185 | ancien 9 |
+| 13 | Le retour | 225 | ancien 10, fin ouverte inchangée |
+
+Les scènes peuvent maintenant compter de 5 à 8 vignettes (50 mots au plus par vignette). Au rythme d'environ 4 ⭐ par jour, la bêta (18 jours) atteint le chapitre 7.
+
+---
 ---
 
 ## Chapitre 1 — « Une drôle de lapine »
@@ -298,6 +319,8 @@ Ce rythme donne 4 à 5 chapitres pendant les 2 semaines de bêta, puis un chapit
      - **Écart avec le storyboard** : la ligne de la 🐰 s'affiche sur l'écran de l'univers, au-dessus de « C'est parti ! », et non pendant la session. Ainsi elle ne retarde aucune réponse (le temps de réflexion compte pour la maîtrise). Le message de fin de session du chapitre s'affiche sur l'écran de résultat, d'après le chapitre en cours avant la session.
    - Lot 3a ✅ : scènes, lignes et fins des chapitres 4 à 7, avec leurs 8 décors (salle des machines, soute, poste de pilotage).
    - Lot 3b ✅ : scènes des chapitres 8 à 10, 11 décors (sas, hublot, espace profond, balise, Terre, colline) et deux expressions (🐰 surprise, 🦊 ému).
-   - Lot 3c, la suite : refonte de l'intro (ouverture muette sur l'atterrissage).
+   - Passe graphique 1 ✅ : pistons en 3 rangées, balise relais redessinée (satellite), 14 icônes SVG de chapitres (rond coloré par phase forêt, vaisseau, espace) à la place des émojis dans la liste de l'histoire. Reste à décider : remplacer aussi la bannière « fusée + renard » de l'écran Univers, héritée des planètes.
+   - Passe graphique 2 ✅ : bannière de l'écran Univers = décor du chapitre en cours (champ `banner`) ; « L'histoire » devient une carte du ciel verticale (forêt en bas, espace en haut) avec une étoile par chapitre ; personnages et décors légèrement animés (respiration, celui qui parle, étoiles, voyants, vapeur, astéroïdes).
+   - Lot 3c ✅ : intro refaite, muette et courte (environ 4,6 s) : le vaisseau tombe, une petite lampe bleue s'allume. Le renard et la lapine ne figurent plus dans l'intro, ils arrivent dans la scène du chapitre 1.
 4. **Illustrations** en parallèle : décors (bois, clairière, intérieur du vaisseau), expression « inquiet » du 🦊, pièces et voyants. Émojis et SVG existants en attendant.
 5. **Ajuster les seuils** avec les données de la bêta.

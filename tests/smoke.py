@@ -40,18 +40,18 @@ with sync_playwright() as p:
     # premier lancement : intro animée (écran « toucher pour commencer », puis scène, puis accueil)
     assert pg.locator('#btn-intro-start').count() == 1, 'intro attendue au premier lancement'
     pg.click('#btn-intro-start'); pg.wait_for_selector('#ia-scene', timeout=4000)
-    pg.wait_for_timeout(300); assert pg.locator('.ia-fall').count() == 1 and pg.locator('.ia-rabin').count() == 1
+    pg.wait_for_timeout(300); assert pg.locator('.ia-fall').count() == 1 and pg.locator('.ia-lamp').count() == 1
     assert pg.inner_text('#btn-skip-intro') == 'Passer'
     pg.click('#btn-skip-intro'); assert pg.inner_text('h1') == 'MathPulse'
     pg.click('#btn-intro'); pg.wait_for_selector('#ia-scene', timeout=4000)   # « Revoir l'intro » : sans écran de lancement
     assert pg.locator('#btn-intro-start').count() == 0
-    # fin de l'animation : le bouton devient « Continuer › » puis l'accueil s'affiche tout seul 5 s plus tard
+    # fin de l'animation : le bouton devient « Continuer › » puis l'accueil s'affiche tout seul 3 s plus tard
     pg.wait_for_function("document.querySelector('#btn-skip-intro').textContent.includes('Continuer')", timeout=10000)
     pg.wait_for_selector('#btn-play', timeout=8000)
     pg.click('#btn-play')
     # histoire : la lapine dit une ligne à l'univers, puis la scène du chapitre 1 précède la toute première session
     assert pg.locator('#rabbit-line').count() == 1, 'ligne de la lapine attendue à l\'univers'
-    assert pg.locator('.chapter-card').count() == 10 and pg.locator('[data-chapter]').count() == 1, 'seul le chapitre 1 est ouvert (avec « Revoir »)'
+    assert pg.locator('.sky-star').count() == 13 and pg.locator('.sky-star.unlocked').count() == 1 and pg.locator('[data-chapter]').count() == 1, 'seul le chapitre 1 est ouvert (avec « Revoir »)'
     pg.click('#btn-start-session')
     assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 1' in pg.inner_text('.scene-chapter'), 'scène du chapitre 1 attendue avant la 1re session'
     for _ in range(4):
@@ -144,11 +144,12 @@ with sync_playwright() as p:
     assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
     # série rapide : bouton à l'univers, pas de coup de pouce, jauge, résultat avec bonus
     pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
-    assert pg.locator('.chapter-card').count() == 10, "10 chapitres attendus dans l'univers"
-    assert pg.locator('.chapter-card.unlocked').count() >= 1 and pg.locator('.chapter-card.current').count() == 1, 'chapitre en cours attendu'
+    assert pg.locator('.sky-star').count() == 13, "13 étoiles attendues sur la carte du ciel"
+    assert pg.locator('.sky-star.unlocked').count() >= 1 and pg.locator('.sky-star.current').count() == 1, 'chapitre en cours attendu'
     # scènes : « Revoir » rejoue sans rien changer ; une scène non lue passe avant la session suivante, et « Passer » la marque lue
-    assert pg.locator('[data-chapter]').count() == 3, 'chapitres 1 à 3 ouverts : trois boutons « Revoir »'
+    assert pg.locator('.sky-star.unlocked').count() == 3 and pg.locator('[data-chapter]').count() == 1, 'chapitres 1 à 3 ouverts, la fiche du chapitre en cours propose « Revoir »'
     assert pg.locator('#rabbit-line').count() == 1
+    pg.click('[data-star="vaisseau"]'); assert 'Le vaisseau en piteux état' in pg.inner_text('#sky-detail')
     pg.click('[data-chapter="vaisseau"]')
     assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 2' in pg.inner_text('.scene-chapter')
     assert pg.locator('.scene-stage img.cast').count() >= 1 and pg.locator('.scene-line, .scene-narr').count() >= 1

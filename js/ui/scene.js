@@ -2,6 +2,11 @@
 // Données : chapters.js (chapitre.scene). Décors : assets/story/scene/<art>.svg. Personnages : assets/story/*-full.svg.
 
 const Scenes = {
+    // Typographie française : espace insécable avant « : ; ? ! » et dans les guillemets, pour qu'un signe ne reste pas seul en fin de ligne
+    fr(text) {
+        return text.replace(/« /g, '«\u00a0').replace(/ ([»:;?!])/g, '\u00a0$1');
+    },
+
     NAMES: { fox: 'Le renard', rabbit: 'La lapine' },
 
     create(chapter, { onDone, doneLabel = 'Continuer' } = {}) {
@@ -15,7 +20,10 @@ const Scenes = {
         screen.innerHTML = `
             <div class="scene-top">
                 <p class="scene-chapter">Chapitre ${chapter.number} · ${chapter.title}</p>
-                <button class="btn-scene-skip" id="btn-scene-skip">Passer</button>
+                <div class="scene-top-actions">
+                    <button class="btn-sound" id="btn-sound-scene"></button>
+                    <button class="btn-scene-skip" id="btn-scene-skip">Passer</button>
+                </div>
             </div>
             <div class="scene-stage" id="scene-stage" aria-hidden="true"></div>
             <div class="scene-lines" id="scene-lines" aria-live="polite"></div>
@@ -28,19 +36,23 @@ const Scenes = {
         const next = screen.querySelector('#btn-scene-next');
 
         const lineHtml = l => {
-            if (l.who === 'narrator') return `<p class="scene-narr">${l.text}</p>`;
+            if (l.who === 'narrator') return `<p class="scene-narr">${Scenes.fr(l.text)}</p>`;
             return `<div class="scene-line scene-line-${l.who}">
                 <img class="face" src="assets/story/expr/${l.who}-${l.mood || 'content'}.svg" alt="" width="56" height="56">
-                <p class="speech"><span class="sr-only">${Scenes.NAMES[l.who]} : </span>${l.text}</p>
+                <p class="speech"><span class="sr-only">${Scenes.NAMES[l.who]} : </span>${Scenes.fr(l.text)}</p>
             </div>`;
         };
 
         const draw = () => {
             const v = vignettes[index];
+            // Celui qui parle fait un petit saut, l'autre s'efface légèrement (personne ne parle : tout le monde est « actif »)
+            const speakers = v.lines.map(l => l.who).filter(w => w !== 'narrator');
+            const role = who => !speakers.length ? '' : (speakers.includes(who) ? ' speaking' : ' quiet');
             stage.innerHTML = `<img class="scene-bg" src="assets/story/scene/${v.art}.svg" alt="">`
                 + `<div class="scene-cast">${v.cast.map(m =>
-                    `<img class="cast ${m.at}${m.small ? ' small' : ''}" src="assets/story/${m.who}-full.svg" alt="">`).join('')}</div>`;
+                    `<img class="cast ${m.at}${m.small ? ' small' : ''}${role(m.who)}" src="assets/story/${m.who}-full.svg" alt="">`).join('')}</div>`;
             lines.innerHTML = v.lines.map(lineHtml).join('');
+            if (v.sfx) Sound.play(v.sfx);
             dots.innerHTML = vignettes.map((_, i) => `<span class="scene-dot${i === index ? ' on' : ''}"></span>`).join('');
             next.textContent = index < vignettes.length - 1 ? 'Suite ›' : doneLabel;
         };
@@ -52,9 +64,11 @@ const Scenes = {
         };
 
         next.addEventListener('click', () => {
-            if (index < vignettes.length - 1) { index++; draw(); } else finish();
+            if (index < vignettes.length - 1) { index++; Sound.play('scene-next'); draw(); } else { if (chapter.sfx) Sound.play(chapter.sfx); finish(); }
         });
         screen.querySelector('#btn-scene-skip').addEventListener('click', finish);
+        Sound.bindButton(screen.querySelector('#btn-sound-scene'));
+        Sound.play('scene-open');
         draw();
         return screen;
     }

@@ -177,29 +177,29 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 
 .star-counter { font-size: var(--font-size-xl); }
 
-.space-scene {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    background:
-        radial-gradient(2px 2px at 20% 30%, #fff, transparent),
-        radial-gradient(2px 2px at 70% 20%, #fff, transparent),
-        radial-gradient(1.5px 1.5px at 40% 70%, #fff, transparent),
-        radial-gradient(1.5px 1.5px at 85% 60%, #fff, transparent),
-        radial-gradient(1px 1px at 10% 80%, #fff, transparent),
-        linear-gradient(180deg, #1a1a2e 0%, #3b2f7a 100%);
-}
-.rocket { position: absolute; left: 50%; font-size: 3rem; transform: translateX(-50%) rotate(-12deg); transition: bottom 0.8s var(--easing-in-out); }
-.fox { position: absolute; left: 12%; bottom: 6%; font-size: 2.5rem; }
+.chapter-banner { aspect-ratio: 2 / 1; }
+.chapter-banner .cast.small { height: 66%; }
 
+.sky-detail { position: relative; margin-bottom: var(--spacing-sm); }
+.sky-detail .chapter-card { min-height: 5.5rem; }
+.sky-scroll { position: relative; width: 100%; height: min(62vh, 440px); overflow-y: auto; border-radius: var(--radius-lg); border: 2px solid var(--color-border); overscroll-behavior: contain; background: #150f3a; }
+.sky-map { position: relative; width: 100%; }
+.sky-bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sky-star { position: absolute; transform: translate(-50%, -50%); width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.sky-star img { display: block; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,213,74,.9), 0 0 16px 4px rgba(255,213,74,.45); }
+.sky-star.selected img, .sky-star:focus-visible img { box-shadow: 0 0 0 3px #fff, 0 0 18px 6px rgba(255,255,255,.55); }
+.sky-star:focus-visible { outline: none; }
+.sky-star.current img { animation: skyPulse 2s ease-in-out infinite; }
+.sky-dot { width: 14px; height: 14px; border-radius: 50%; background: #aab2d4; opacity: .7; box-shadow: 0 0 8px 2px rgba(170,178,212,.35); }
+.sky-star.selected .sky-dot { opacity: 1; box-shadow: 0 0 0 3px #fff; }
+.sky-goal { position: absolute; top: 100%; left: 50%; transform: translate(-50%, -6px); white-space: nowrap; color: #cfd6f5; font-weight: 600; text-shadow: 0 1px 3px #0e0d2b; }
 .chapters-list { list-style: none; margin: 0 0 var(--spacing-lg); padding: 0; display: flex; flex-direction: column; gap: var(--spacing-sm); width: 100%; }
 .chapter-card { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border-radius: var(--radius-lg); border: 2px solid var(--color-border); background: var(--color-surface); }
 .chapter-card.unlocked { border-color: var(--color-primary); }
 .chapter-card.current { box-shadow: 0 0 0 2px var(--color-primary); }
 .chapter-card.locked { opacity: 0.75; }
-.chapter-emoji { font-size: 2rem; flex: 0 0 auto; }
+.chapter-icon { width: 44px; height: 44px; flex: 0 0 auto; }
+.chapter-card.locked .chapter-icon { opacity: .75; }
 .chapter-body { flex: 1 1 auto; min-width: 0; text-align: left; }
 .chapter-number, .chapter-mission, .chapter-goal { color: var(--color-text-light); }
 .chapter-title { font-weight: 600; }
@@ -291,7 +291,7 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 
 /* Bouton « Passer » / « Continuer › » : discret ; en fin d'animation, une jauge de 5 s se remplit avant le passage automatique */
 .btn-skip { position: absolute; overflow: hidden; background: rgba(255,255,255,.14); font-weight: 600; font-size: .9rem; }
-.btn-skip.counting::after { content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: rgba(255,255,255,.7); transform-origin: left; animation: skipCount 5s linear forwards; }
+.btn-skip.counting::after { content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: rgba(255,255,255,.7); transform-origin: left; animation: skipCount 3s linear forwards; }
 @keyframes skipCount { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 /* ----- Espace parent : voies et graphiques ----- */
@@ -326,9 +326,12 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .scene-chapter { margin: 0; color: var(--color-text-light); font-weight: 600; }
 .btn-scene-skip { flex: 0 0 auto; min-height: 44px; padding: .4rem 1rem; border: 2px solid var(--color-border); border-radius: 999px; background: transparent; color: var(--color-text-light); font-weight: 600; cursor: pointer; }
 .scene-stage { position: relative; width: 100%; aspect-ratio: 3 / 2; border-radius: var(--radius-lg); overflow: hidden; background: #0e0d2b; }
-.scene-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.scene-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: fadeIn .45s ease backwards; }
 .scene-cast { position: absolute; inset: 0; pointer-events: none; }
-.cast { position: absolute; bottom: 1%; height: 74%; width: auto; animation: castIn .5s var(--easing-out) backwards; }
+.cast { position: absolute; bottom: 1%; height: 74%; width: auto; transform-origin: 50% 100%; animation: castIn .5s var(--easing-out) backwards, breathe 4.2s ease-in-out .6s infinite; transition: filter .3s, opacity .3s; }
+.cast + .cast { animation-delay: 0s, 1.4s; }
+.cast.quiet { filter: brightness(.82); }
+.cast.speaking { animation: castIn .5s var(--easing-out) backwards, speak .5s var(--easing-out) 1, breathe 4.2s ease-in-out .6s infinite; }
 .cast.left { left: 3%; }
 .cast.right { right: 3%; }
 .cast.center { left: 0; right: 0; margin: 0 auto; }
@@ -346,3 +349,10 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .universe-wrap .rabbit-says { margin-top: var(--spacing-lg); }
 .universe-wrap .rabbit-says .speech { max-width: 15rem; }
 .chapter-replay { flex: 0 0 auto; min-height: 44px; padding: .3rem .9rem; border: 2px solid var(--color-primary); border-radius: 999px; background: transparent; color: var(--color-primary); font-weight: 600; cursor: pointer; }
+
+/* Bouton son (scènes et univers) : une cible tactile facile à atteindre */
+.btn-sound { min-width: 44px; min-height: 44px; padding: 0 .6rem; border-radius: 999px; border: 2px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+.btn-sound:focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
+.btn-sound[aria-pressed="false"] { opacity: .75; }
+.sound-row { display: flex; justify-content: flex-end; width: 100%; }
+.scene-top-actions { display: flex; align-items: center; gap: var(--spacing-sm); flex: 0 0 auto; }

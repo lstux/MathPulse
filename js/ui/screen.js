@@ -1,8 +1,8 @@
 // MathPulse - Gestionnaire d'écrans : home, universe, discovery, game, result, parent
 
 // Intro animée : durée de l'animation, puis délai avant le passage automatique à l'accueil
-const INTRO_DURATION_MS = 7200;
-const INTRO_AUTO_SKIP_MS = 5000;
+const INTRO_DURATION_MS = 4600;
+const INTRO_AUTO_SKIP_MS = 3000;
 
 class ScreenManager {
     constructor(appContainer, engine, progression) {
@@ -20,6 +20,8 @@ class ScreenManager {
     }
 
     show(name, data = {}) {
+        // Ambiance sonore de l'écran : celle du chapitre (scène ou univers), silence ailleurs
+        Sound.ambience(this.ambienceFor(name, data));
         this.timers.forEach(clearTimeout);
         this.timers = [];
         if (this.keyHandler) {
@@ -46,6 +48,15 @@ class ScreenManager {
         this.appContainer.appendChild(screen);
         this.currentScreen = name;
         window.scrollTo(0, 0);
+    }
+
+    ambienceFor(name, data = {}) {
+        if (name === 'scene' && data.chapter) return data.chapter.ambience || null;
+        if (name === 'universe') {
+            const chapter = currentChapter(this.progression.getTotalStars());
+            return chapter ? chapter.ambience || null : null;
+        }
+        return null;
     }
 
     screenEl(extraClass = '') {
@@ -77,7 +88,7 @@ class ScreenManager {
         `;
         const art = screen.querySelector('#intro-art');
         const skip = screen.querySelector('#btn-skip-intro');
-        // Fin de l'animation : le bouton devient « Continuer › » (discret, avec une jauge de 5 s) puis on passe à l'accueil tout seul
+        // Fin de l'animation : le bouton devient « Continuer › » (discret, avec une jauge de 3 s) puis on passe à l'accueil tout seul
         const ending = () => {
             skip.textContent = 'Continuer ›';
             skip.classList.add('counting');
@@ -90,6 +101,8 @@ class ScreenManager {
                 if (this.currentScreen !== 'intro') return;
                 art.innerHTML = svg;
                 if (reduced) return ending();
+                this.later(() => Sound.play('intro-fall'), 200);
+                this.later(() => Sound.play('lamp-on'), 3000);
                 this.later(() => Sound.play('crash'), 2050);
                 this.later(ending, INTRO_DURATION_MS);
             }).catch(ending);
@@ -167,8 +180,9 @@ class ScreenManager {
         const line = randomLine(currentChapter(this.progression.getTotalStars()));
         screen.innerHTML = `
             <div class="universe-wrap">
+                <div class="sound-row"><button class="btn-sound" id="btn-sound-universe"></button></div>
                 ${universe.renderHeader()}
-                ${line ? `<div class="rabbit-says" id="rabbit-line">${this.face('rabbit', 'content')}<p class="speech">${line}</p></div>` : ''}
+                ${line ? `<div class="rabbit-says" id="rabbit-line">${this.face('rabbit', 'content')}<p class="speech">${Scenes.fr(line)}</p></div>` : ''}
             </div>
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-start-session">C'est parti !</button>
@@ -180,14 +194,27 @@ class ScreenManager {
                 ${universe.renderChapters()}
             </div>
         `;
+        Sound.bindButton(screen.querySelector('#btn-sound-universe'));
         screen.querySelector('#btn-start-session').addEventListener('click', () => this.startSession());
         const rapidBtn = screen.querySelector('#btn-rapid');
         if (rapidBtn) rapidBtn.addEventListener('click', () => this.show('rapidIntro'));
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
-        screen.querySelectorAll('[data-chapter]').forEach(btn => btn.addEventListener('click', () => {
+        // Carte du ciel : toucher une étoile affiche le chapitre ; « Revoir » rejoue sa scène
+        const detail = screen.querySelector('#sky-detail');
+        const bindReplay = () => detail.querySelectorAll('[data-chapter]').forEach(btn => btn.addEventListener('click', () => {
             const chapter = CHAPTERS.find(c => c.id === btn.dataset.chapter);
             this.show('scene', { chapter, replay: true, doneLabel: 'Retour', next: () => this.show('universe') });
         }));
+        bindReplay();
+        screen.querySelectorAll('.sky-star').forEach(star => star.addEventListener('click', () => {
+            screen.querySelectorAll('.sky-star').forEach(s => s.classList.toggle('selected', s === star));
+            Sound.play('star-tap');
+            detail.innerHTML = universe.renderChapter(CHAPTERS.find(c => c.id === star.dataset.star));
+            bindReplay();
+        }));
+        // La carte s'ouvre centrée sur le chapitre en cours
+        const scroller = screen.querySelector('#sky-scroll'), here = screen.querySelector('.sky-star.current');
+        if (scroller && here) this.later(() => { scroller.scrollTop = Math.max(0, here.offsetTop - scroller.clientHeight / 2); }, 0);
         return screen;
     }
 
@@ -460,7 +487,7 @@ class ScreenManager {
                     <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
-                    ${endLine ? `<p class="story-line text-lg">${endLine}</p>` : ''}
+                    ${endLine ? `<p class="story-line text-lg">${Scenes.fr(endLine)}</p>` : ''}
                     ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
                     ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
                     ${chapters}
@@ -477,7 +504,7 @@ class ScreenManager {
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 3 ? 'stars3' : 'stars'), at); at += 1100; }
         if (cleared > 0) { this.later(() => Sound.play('cleared'), at); at += 1100; }
-        if (newChapters.length) this.later(() => Sound.play('planet'), at);
+        if (newChapters.length) this.later(() => Sound.play('chapter-unlock'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.startSession());
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
@@ -518,7 +545,7 @@ class ScreenManager {
         this.bindReadChapter(screen, pending);
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 2 ? 'stars3' : 'stars'), at); at += 1100; }
-        if (newChapters.length) this.later(() => Sound.play('planet'), at);
+        if (newChapters.length) this.later(() => Sound.play('chapter-unlock'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.show('rapidCountdown'));
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
