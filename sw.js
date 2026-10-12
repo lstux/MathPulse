@@ -2,7 +2,7 @@
 // Chemins relatifs : l'app peut être servie à la racine ou dans un sous-dossier (GitHub Pages).
 // Pensez à incrémenter CACHE_VERSION à chaque livraison.
 
-const CACHE_VERSION = 'mathpulse-v17';
+const CACHE_VERSION = 'mathpulse-v18';
 
 const PRECACHE = [
     './',
@@ -96,6 +96,11 @@ const PRECACHE = [
     './assets/sounds/asteroid-pass.mp3',
     './assets/sounds/radio-signal.mp3',
     './assets/sounds/lamp-on.mp3',
+    './assets/sounds/power-on.mp3',
+    './assets/sounds/engine-start.mp3',
+    './assets/sounds/tank-fill.mp3',
+    './assets/sounds/intro-fall.mp3',
+    './assets/sounds/flashlight-click.mp3',
     './assets/story/expr/fox-content.svg',
     './assets/story/expr/fox-bravo.svg',
     './assets/story/expr/fox-think.svg',

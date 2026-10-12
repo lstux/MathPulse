@@ -101,6 +101,7 @@ class ScreenManager {
                 if (this.currentScreen !== 'intro') return;
                 art.innerHTML = svg;
                 if (reduced) return ending();
+                this.later(() => Sound.play('intro-fall'), 200);
                 this.later(() => Sound.play('lamp-on'), 3000);
                 this.later(() => Sound.play('crash'), 2050);
                 this.later(ending, INTRO_DURATION_MS);

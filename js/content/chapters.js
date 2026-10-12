@@ -64,7 +64,7 @@ const CHAPTERS = [
     },
     { id: 'circuits',    number: 3,  unlockAt: 15, ambience: 'ship', banner: 'ship-lit',  emoji: '🔌', title: 'Les circuits',               mission: 'Doubler et grouper',
         scene: [
-            { art: 'ship', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'power-on', art: 'ship', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'think', text: "C'est… plus grand que je pensais." }] },
             { art: 'ship', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Le circuit principal est mort. Mais les circuits de secours peuvent le remplacer, si on les double." }] },
@@ -86,7 +86,7 @@ const CHAPTERS = [
     },
     { id: 'machines',    number: 4,  unlockAt: 28, ambience: 'ship', banner: 'engine-on',  emoji: '⚙️', title: 'La salle des machines',      mission: 'Compter par groupes',
         scene: [
-            { art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'engine-start', art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Voici le cœur du vaisseau : les moteurs." }] },
             { art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Pour les relancer, je dois savoir combien il y a de pistons en tout." }] },
@@ -136,7 +136,7 @@ const CHAPTERS = [
     },
     { id: 'energie',     number: 6,  unlockAt: 50, ambience: 'ship', banner: 'tanks-full',  emoji: '🔋', title: 'Partager l\'énergie',        mission: 'Répartir les cellules',
         scene: [
-            { art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'tank-fill', art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Pour démarrer, il faut répartir l'énergie." }] },
             { art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Douze cellules, trois réservoirs, autant dans chacun. Combien ?" },
@@ -310,7 +310,7 @@ const CHAPTERS = [
             { sfx: 'landing', art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'comfort', text: "Tu vas me manquer." },
                 { who: 'rabbit', mood: 'content', text: "Et toi à moi." }] },
-            { art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'flashlight-click', art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Garde ma petite lampe. Un éclair pour dire bonne nuit, deux pour dire je pense à toi. Chaque soir, regarde le ciel." }] },
             { art: 'hill-reply', cast: [{ who: 'fox', at: 'center' }], lines: [
                 { who: 'fox', mood: 'moved', text: "Deux éclairs… Et là-haut, une petite lueur me répond." },
