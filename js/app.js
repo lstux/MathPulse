@@ -10,6 +10,8 @@ class MathPulse {
         try {
             this.registerServiceWorker();
             storage.init();
+            const cheatParam = new URLSearchParams(location.search).get('cheat');   // ?cheat=1 / ?cheat=0 : mode test
+            if (cheatParam !== null) Cheat.set(cheatParam === '1');
             this.requestPersistentStorage();
             Sound.init();
 
@@ -17,7 +19,7 @@ class MathPulse {
             this.progression.load();
             this.engine = new Engine(this.progression);
             this.screenManager = new ScreenManager(this.appContainer, this.engine, this.progression);
-            this.screenManager.show('home');
+            this.screenManager.show(this.screenManager.introSeen() ? 'home' : 'intro');
         } catch (error) {
             console.error('Échec du démarrage de MathPulse:', error);
             this.showError();

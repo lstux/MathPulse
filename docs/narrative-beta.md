@@ -1,59 +1,75 @@
 # MathPulse — Fil narratif (chapitres) pour la bêta
 
-_Rédigé le 7 octobre 2026. Document d'orientation : il explique la direction prise pour que l'équipe technique sache à quoi s'attendre. **Aucun chapitre n'est encore écrit** et rien n'est à développer avant que le scénario soit verrouillé. Les calendriers restent ceux de [`plan-beta-rc.md`](plan-beta-rc.md)._
+_Document d'orientation, mis à jour le 11 octobre 2026. Il dit à l'équipe technique ce qui est décidé pour l'histoire. Les calendriers restent ceux de [`plan-beta-rc.md`](plan-beta-rc.md), et le parcours des compétences est décrit dans [`parcours-etendu.md`](parcours-etendu.md)._
 
 ## 1. Pourquoi une histoire
 
-Aujourd'hui la progression est abstraite : des étoiles qui font avancer une fusée vers trois planètes (`PLANETS` dans `js/content/skills.js`, affichées par `js/ui/universe.js`). L'idée est de remplacer ce décor par **une vraie histoire en chapitres** :
+Aujourd'hui la progression est abstraite : des étoiles font avancer une fusée vers trois planètes (`PLANETS` dans `js/content/skills.js`, affichées par `js/ui/universe.js`). L'histoire remplace ce décor par une suite de **chapitres** :
 
 - chaque palier d'étoiles atteint **débloque le chapitre suivant** ;
-- les maths deviennent des **quêtes pour aider un personnage**, pas des exercices isolés ;
-- la motivation passe de « je dois progresser » à « je veux savoir la suite ».
+- les maths deviennent des **missions** pour aider un personnage, pas des exercices isolés ;
+- l'enfant joue pour **savoir la suite**, et la fin reste ouverte.
 
-C'est cohérent avec la ligne du projet (pédagogique **et** ludique) et avec le chantier « Identité visuelle » de la bêta (fusée et renard en SVG).
+## 2. Le scénario
 
-## 2. Idée de départ (provisoire)
+**Le 🦊 est l'enfant.** Il est tutoyé dans le texte.
 
-Le 🦊 (l'enfant) rencontre dans les bois une 🐰 qui prétend être une lapine extraterrestre. Son vaisseau est en panne : elle veut bien le montrer à qui prouve qu'il est assez malin pour réussir son test de maths. Ensuite : réparation du vaisseau, calcul du meilleur moment de départ, 🦊 embarqué par accident, retour sur Terre, promesse de s'envoyer des signaux de lampe de poche à travers la galaxie.
+**La 🐰 vient d'une planète qui tourne autour d'une étoile visible depuis la Terre, dans la même galaxie.** Elle est exploratrice scientifique. Sa mission : explorer le système solaire, vérifier que les mesures faites depuis sa planète étaient bonnes, et que la Terre était potentiellement habitable. Une micro-météorite a détruit un circuit de navigation, et elle a dû se poser en urgence sur Terre. La Terre n'était pas prévue au programme.
 
-Ce n'est qu'une première esquisse. Les grandes lignes (origine de la 🐰, ton, fin, enchaînement exact) restent à définir.
+**Son ton** : elle est sereine, méthodique, un peu rassurante. C'est le 🦊 qui s'inquiète, ce qui donne un contraste utile.
 
-## 3. Cadrage décidé
+**Les maths** : elles sont le vrai problème de l'histoire, pas un prétexte. Réparer le vaisseau et vérifier des mesures demandent des calculs. Quand un calcul est trop compliqué pour l'histoire, on simplifie le problème plutôt que de l'abandonner.
+
+**La fin** est ouverte : une suite reste possible.
+
+**La 🐰 est un compagnon visuel**, présent à la fin de chaque session.
+
+## 3. Cadrage
 
 | Sujet | Décision |
 |---|---|
 | Échéance | Contenu prêt pour la **bêta v0.9** (19 oct. – 6 nov. dans le plan actuel) |
-| Longueur | **8 chapitres minimum, une dizaine en objectif** ; la durée de vie du jeu compte, pas besoin de tout livrer d'un coup |
-| Visuels | SVG simples, plus les émojis 🦊 et 🐰 dans un premier temps |
-| Mécanique | Palier d'étoiles atteint → chapitre débloqué |
-| Lien avec les maths | Chaque chapitre est rattaché à une ou plusieurs compétences ; le détail est à écrire avec le scénario |
+| Longueur | **10 chapitres**, la durée de vie du jeu compte ; pas besoin de tout livrer d'un coup |
+| Mécanique | Palier d'étoiles atteint → chapitre débloqué ; les seuils sont croissants et seront calculés à partir de l'économie réelle d'étoiles |
+| Rythme des scènes | Une **scène complète** seulement au déblocage d'un chapitre, soit une fois toutes les quelques sessions. Les autres sessions ont une **ligne de texte** de la 🐰, qu'on peut passer |
+| Visuels | SVG simples. Renard et lapine existent déjà en SVG (4 expressions chacun) |
+| Palette | Forêt (vert mousse, brun) au début, puis vaisseau (gris métal, bleu nuit), puis espace (indigo, violet, touches d'or) |
+| Intro | Le quick draft actuel (`assets/story/intro*.svg`, `js/ui/animations.js`) est provisoire ; il sera refait une fois les chapitres écrits |
 
-## 4. Impact technique prévu
+## 4. Les 10 chapitres (ébauche)
+
+Chaque chapitre est rattaché à une voie du parcours. Les titres et les seuils sont provisoires. Le détail des chapitres (scènes, textes, illustrations) et une proposition de seuils d'étoiles sont dans [`storyboard-narratif.md`](storyboard-narratif.md).
+
+| # | Chapitre | Voie et compétences | Enjeu narratif |
+|---|---|---|---|
+| 1 | Une drôle de lapine | Additions (test d'entrée) | Le 🦊 trouve la 🐰 dans les bois |
+| 2 | Le vaisseau en piteux état | Soustractions | Dégager les débris, découverte de la panne |
+| 3 | Les circuits | ×2, ×5, ×10 | Remettre les circuits en route |
+| 4 | La salle des machines | ×3, ×4 | Réparer les moteurs |
+| 5 | Partager l'énergie | ÷2, ÷5, ÷10 | Répartir l'énergie entre les réservoirs |
+| 6 | Le carnet de mesures | Compléments, dizaines | Vérifier les relevés de la 🐰 |
+| 7 | La fenêtre de départ | Tables ×6 à ×9, ÷3 à ÷9 | Calculer le meilleur moment de départ |
+| 8 | Embarquement surprise | Soustractions à deux chiffres | Le 🦊 monte à bord par accident |
+| 9 | Le voyage | Tables mélangées, additions étendues | Un vrai problème de navigation dans l'espace |
+| 10 | Le retour | Doubles, moitiés, ×100 | Adieux et signaux de lampe de poche |
+
+## 5. Ce qui reste ouvert
+
+- Affiner les titres, les seuils d'étoiles et le contenu de chaque chapitre (storyboard).
+- Les textes de la 🐰, à écrire avec le storyboard.
+- La palette exacte, à valider sur les SVG.
+
+## 6. Impact technique prévu
 
 Pas de refonte du moteur (`engine.js`, `session.js`, `progression.js` restent tels quels) : les étoiles (`totalStars`) et les compétences existent déjà. Ce qui changerait :
 
-- **`js/content/`** : un nouveau fichier de données décrivant les chapitres (identifiant, titre, palier d'étoiles, texte, illustration), sur le modèle de `PLANETS` ; les paliers actuels (10, 25 et 50 ⭐) seraient redéfinis à partir de ce découpage ;
-- **`js/ui/universe.js`** : afficher les chapitres débloqués ou verrouillés à la place des planètes ;
-- **stockage** : retenir quels chapitres ont déjà été lus (comme `discovered` pour les compétences). Toute modification du format de données doit passer par la `version` déjà présente dans `progression.js` ;
-- **styles** : vignettes ou panneaux d'histoire, à intégrer au thème clair/sombre existant.
+- **`js/content/chapters.js`** (créé sur la branche `feat/narrative-ux`) : un fichier de données décrivant les chapitres (identifiant, titre, palier d'étoiles, texte, illustration), sur le modèle de `PLANETS`. Les paliers actuels (10, 25 et 50 ⭐) seraient remplacés par ceux du découpage ci-dessus.
+- **`js/ui/universe.js`** : afficher les chapitres débloqués ou verrouillés à la place des planètes.
+- **Stockage** : retenir quels chapitres ont été lus, comme `discovered` pour les compétences. Toute modification du format passe par la `version` de `progression.js`.
+- **Scènes** : une scène complète au déblocage, une ligne de texte sinon. Les deux doivent pouvoir être passées, et respecter les animations réduites et les lecteurs d'écran.
 
-Côté accessibilité, le texte de l'histoire doit rester lisible par un lecteur d'écran et respecter les animations réduites, comme le reste de l'interface.
+## 7. Suite
 
-## 5. Questions ouvertes (à trancher avant d'écrire les chapitres)
-
-1. D'où vient la 🐰, pourquoi est-elle sur Terre, quel est son but ?
-2. Sa personnalité : joyeuse, curieuse, stressée par la panne ?
-3. Le 🦊 est-il l'enfant lui-même ou un personnage incarné (« tu » ou « il ») ?
-4. Fin fermée, ou ouverte avec une suite possible ?
-5. Nombre exact de chapitres, donc paliers d'étoiles intermédiaires (à relier au rythme visé, voir Q7 de [`revue-mvp.md`](revue-mvp.md)).
-6. Chaque compétence résout-elle un vrai problème de l'histoire, ou sert-elle de prétexte ?
-7. La 🐰 est-elle un compagnon visuel présent après chaque session ?
-8. Palette : forêt, puis vaisseau, puis espace ?
-9. Faut-il une courte scène d'histoire avant les 5 questions, et jusqu'à quelle durée ?
-10. Retour de fin de session : « tu as aidé la 🐰 à… » plutôt qu'un simple « +2 ⭐ » ?
-
-## 6. Suite
-
-1. Verrouiller les questions ci-dessus (travail de scénario, pas de code).
-2. Écrire un storyboard détaillé : un chapitre = titre, enjeu, compétence travaillée, palier, illustration.
-3. Seulement ensuite : fichier de données des chapitres, adaptation de l'univers, illustrations SVG.
+1. Écrire le storyboard : pour chaque chapitre, titre, enjeu, compétence, seuil, illustration.
+2. Refaire l'intro une fois le storyboard prêt.
+3. Ensuite seulement : fichier de données des chapitres, adaptation de l'univers, illustrations SVG.

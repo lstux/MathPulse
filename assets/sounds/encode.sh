@@ -3,7 +3,9 @@
 #
 #   ./encode.sh                      réencode bank/*.wav en bank/*.mp3 (léger, mono, volume homogène)
 #   ./encode.sh --clean              idem, puis supprime les .wav réencodés (ils restent dans l'historique git)
-#   ./encode.sh pick <bank> <court>  copie bank/<bank>.mp3 vers ./<court>.mp3 (le son « utilisé par l'app »)
+#   ./encode.sh pick <bank> <court> [secondes]
+#                                    copie bank/<bank>.mp3 vers ./<court>.mp3 (le son « utilisé par l'app »),
+#                                    en le coupant à <secondes> (petit fondu final) si précisé
 #                                    ex. : ./encode.sh pick mixkit-correct-answer-notification-947 good
 #
 # bank/ = tous les sons disponibles (noms Mixkit d'origine) ; ce dossier = les sons choisis (noms courts).
@@ -30,10 +32,15 @@ encode() {
 
 case "${1:-}" in
   pick)
-    [ $# -eq 3 ] || { echo "usage : $0 pick <nom-dans-bank> <nom-court>" >&2; exit 1; }
+    [ $# -ge 3 ] && [ $# -le 4 ] || { echo "usage : $0 pick <nom-dans-bank> <nom-court> [secondes]" >&2; exit 1; }
     src="bank/${2%.mp3}.mp3"
     [ -f "$src" ] || { echo "introuvable : $src (lancez d'abord ./encode.sh)" >&2; exit 1; }
-    cp "$src" "${3%.mp3}.mp3"; echo "${3%.mp3}.mp3 ← $src" ;;
+    if [ -n "${4:-}" ]; then
+      ffmpeg -y -loglevel error -i "$src" -t "$4" -af "afade=t=out:st=$(awk "BEGIN{print $4-0.08}"):d=0.08" -c:a libmp3lame -b:a 96k "${3%.mp3}.mp3"
+      echo "${3%.mp3}.mp3 ← $src (coupé à ${4} s)"
+    else
+      cp "$src" "${3%.mp3}.mp3"; echo "${3%.mp3}.mp3 ← $src"
+    fi ;;
   ""|--clean) encode "${1:-}" ;;
   *) echo "usage : $0 [--clean] | pick <bank> <court>" >&2; exit 1 ;;
 esac

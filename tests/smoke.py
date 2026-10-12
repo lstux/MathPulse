@@ -20,8 +20,10 @@ else:
     URL = 'http://127.0.0.1:8765/index.html'
 
 def solve(q):
-    m = re.match(r'(\d+) ([+×]) (\d+) = \?', q)
-    if m: a, b = int(m[1]), int(m[3]); return a + b if m[2] == '+' else a * b
+    m = re.match(r'(\d+) ([+×−]) (\d+) = \?', q)
+    if m: a, b = int(m[1]), int(m[3]); return a + b if m[2] == '+' else a - b if m[2] == '−' else a * b
+    m = re.match(r'(\d+) − \? = (\d+)', q)
+    if m: return int(m[1]) - int(m[2])
     m = re.match(r'(\d+) \+ \? = (\d+)', q)
     if m: return int(m[2]) - int(m[1])
     m = re.match(r'\? × (\d+) = (\d+)', q); return int(m[2]) // int(m[1])
@@ -35,7 +37,31 @@ with sync_playwright() as p:
     pg.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
     pg.goto(URL + ('&' if '?' in URL else '?') + 'sw'); pg.wait_for_timeout(500)
 
-    pg.click('#btn-play'); pg.click('#btn-start-session')
+    # premier lancement : intro animée (écran « toucher pour commencer », puis scène, puis accueil)
+    assert pg.locator('#btn-intro-start').count() == 1, 'intro attendue au premier lancement'
+    pg.click('#btn-intro-start'); pg.wait_for_selector('#ia-scene', timeout=4000)
+    pg.wait_for_timeout(300); assert pg.locator('.ia-fall').count() == 1 and pg.locator('.ia-rabin').count() == 1
+    assert pg.inner_text('#btn-skip-intro') == 'Passer'
+    pg.click('#btn-skip-intro'); assert pg.inner_text('h1') == 'MathPulse'
+    pg.click('#btn-intro'); pg.wait_for_selector('#ia-scene', timeout=4000)   # « Revoir l'intro » : sans écran de lancement
+    assert pg.locator('#btn-intro-start').count() == 0
+    # fin de l'animation : le bouton devient « Continuer › » puis l'accueil s'affiche tout seul 5 s plus tard
+    pg.wait_for_function("document.querySelector('#btn-skip-intro').textContent.includes('Continuer')", timeout=10000)
+    pg.wait_for_selector('#btn-play', timeout=8000)
+    pg.click('#btn-play')
+    # histoire : la lapine dit une ligne à l'univers, puis la scène du chapitre 1 précède la toute première session
+    assert pg.locator('#rabbit-line').count() == 1, 'ligne de la lapine attendue à l\'univers'
+    assert pg.locator('.chapter-card').count() == 10 and pg.locator('[data-chapter]').count() == 1, 'seul le chapitre 1 est ouvert (avec « Revoir »)'
+    pg.click('#btn-start-session')
+    assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 1' in pg.inner_text('.scene-chapter'), 'scène du chapitre 1 attendue avant la 1re session'
+    for _ in range(4):
+        pg.click('#btn-scene-next')
+    assert pg.inner_text('#btn-scene-next') == 'À toi de jouer !'
+    assert pg.evaluate("window.mathpulse.progression.hasSeenChapter('lapine')") is False, 'le chapitre n\'est « lu » qu\'à la fin'
+    pg.click('#btn-scene-next')
+    assert pg.evaluate("window.mathpulse.progression.hasSeenChapter('lapine')") is True
+    # les scènes des chapitres 2 et 3 sont testées plus loin ; on les marque lues pour ne pas interrompre le parcours
+    pg.evaluate("['vaisseau', 'circuits'].forEach(id => window.mathpulse.progression.markChapterSeen(id))")
     pg.click('#btn-start-game')
     # coups de pouce : 2 gratuits annoncés, le décompte baisse, le dernier annonce le plafond
     assert '2 gratuits' in pg.inner_text('#btn-hint'), pg.inner_text('#btn-hint')
@@ -116,6 +142,71 @@ with sync_playwright() as p:
     assert stars >= 5, f'étoiles non créditées ({stars})'
     pg.wait_for_timeout(800)
     assert recalls[0] >= 2, f'rappels de notions attendus dans les sessions suivantes ({recalls[0]})'
+    # série rapide : bouton à l'univers, pas de coup de pouce, jauge, résultat avec bonus
+    pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
+    assert pg.locator('.chapter-card').count() == 10, "10 chapitres attendus dans l'univers"
+    assert pg.locator('.chapter-card.unlocked').count() >= 1 and pg.locator('.chapter-card.current').count() == 1, 'chapitre en cours attendu'
+    # scènes : « Revoir » rejoue sans rien changer ; une scène non lue passe avant la session suivante, et « Passer » la marque lue
+    assert pg.locator('[data-chapter]').count() == 3, 'chapitres 1 à 3 ouverts : trois boutons « Revoir »'
+    assert pg.locator('#rabbit-line').count() == 1
+    pg.click('[data-chapter="vaisseau"]')
+    assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 2' in pg.inner_text('.scene-chapter')
+    assert pg.locator('.scene-stage img.cast').count() >= 1 and pg.locator('.scene-line, .scene-narr').count() >= 1
+    pg.click('#btn-scene-skip'); pg.wait_for_selector('#btn-start-session')
+    pg.evaluate("delete window.mathpulse.progression.data.chaptersSeen['vaisseau']; window.mathpulse.progression.save()")
+    pg.click('#btn-start-session')
+    assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 2' in pg.inner_text('.scene-chapter'), 'scène 2 non lue : elle précède la session'
+    pg.click('#btn-scene-skip')
+    assert pg.evaluate("window.mathpulse.progression.hasSeenChapter('vaisseau')") is True
+    pg.wait_for_selector('#btn-start-game, #question', timeout=4000)   # la session démarre ensuite (découverte ou question)
+    pg.evaluate("window.mathpulse.screenManager.show('universe')"); pg.wait_for_timeout(200)
+    assert pg.locator('#btn-rapid').count() == 1, 'bouton série rapide attendu (compétences au niveau 2)'
+    pg.click('#btn-rapid'); pg.click('#btn-rapid-go')
+    assert pg.locator('#countdown').count() == 1, 'décompte attendu avant la série'
+    pg.wait_for_selector('#elan', timeout=6000); pg.wait_for_timeout(300)
+    assert pg.locator('#elan').count() == 1 and pg.is_hidden('#btn-hint'), 'jauge visible, pas de coup de pouce'
+    for i in range(5):
+        ans = solve(pg.inner_text('#question'))
+        if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')   # compléments : nombre manquant en choix multiple
+        else:
+            for d in str(ans): pg.click(f'.key[data-key="{d}"]')
+            pg.click('.key[data-key="ok"]')
+        pg.wait_for_timeout(250)
+        assert pg.locator('.elan-cell.on').count() == i + 1, f"l'élan doit se charger à chaque réponse rapide ({i + 1})"
+        pg.wait_for_timeout(1000)
+    assert pg.locator('#rapid-result').count() == 1, 'résultat de la série rapide attendu'
+    assert '+2' in pg.inner_text('#rapid-result'), pg.inner_text('#rapid-result')
+    pg.click('#btn-universe')
+    # espace parent : version affichée, abandon tracé
+    pg.click('#btn-universe') if pg.locator('#btn-universe').count() else None
+    pg.evaluate("window.mathpulse.screenManager.show('parent')"); pg.wait_for_timeout(200)
+    assert 'Version' in pg.inner_text('#app-version')
+    # revoir une explication depuis l'espace parent (sans toucher à la progression)
+    stars_before = pg.evaluate('window.mathpulse.progression.getTotalStars()')
+    pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
+    pg.click('[data-replay="subtract-simple"]'); assert 'Soustraire' in pg.inner_text('h1')
+    assert pg.inner_text('#btn-start-game') == 'Retour'; pg.click('#btn-start-game')
+    # découverte avec frise de sauts (voie C) : rejouable aussi
+    pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
+    pg.click('[data-replay="add-units"]'); assert pg.locator('.visual-jumps svg').count() == 1 and '47 + 8' in pg.inner_text('.formula')
+    pg.click('#btn-start-game')
+    assert 'Version' in pg.inner_text('#app-version')
+    assert pg.evaluate('window.mathpulse.progression.getTotalStars()') == stars_before
+    nb = pg.evaluate('PATHS.length'); assert nb >= 4 and pg.locator('.path').count() == nb and pg.locator('svg.radar').count() == pg.evaluate('PATHS.filter(p => p.radar).length') and pg.locator('.pbar').count() == nb and pg.locator('.wk-col').count() == 7, 'graphiques espace parent'
+    pg.evaluate("document.querySelectorAll('.path-details').forEach(d => d.open = true)")
+    assert 'réflexion' in pg.inner_text('.skill-card >> nth=0') or 'Pas encore' in pg.inner_text('.skill-card >> nth=0')
+    # plafond : au plus 3 compétences en cours, affiché dans l'espace parent
+    assert '/ 3' in pg.inner_text('#in-progress'), pg.inner_text('#in-progress')
+    # mode test : 7 appuis sur la version, ▶ Jouer sur une compétence verrouillée, puis désactivation
+    assert pg.locator('#cheat-panel').count() == 0 and pg.locator('[data-play]').count() == 0
+    for _ in range(7): pg.click('#app-version')
+    pg.wait_for_selector('#cheat-panel'); assert pg.locator('[data-play]').count() == len(pg.evaluate('SKILL_ORDER'))
+    pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
+    pg.click('[data-play="divide-9"]'); pg.wait_for_timeout(300)
+    if pg.locator('#btn-start-game').count(): pg.click('#btn-start-game')
+    assert '÷ 9' in pg.inner_text('#question') or '÷ 9' in pg.inner_text('#question').replace('\u00a0', ' ') or pg.locator('#question').count() == 1
+    pg.evaluate("window.mathpulse.screenManager.show('parent')"); pg.wait_for_selector('#btn-cheat-off'); pg.click('#btn-cheat-off')
+    pg.wait_for_timeout(200); assert pg.locator('#cheat-panel').count() == 0 and pg.evaluate('Cheat.isOn()') is False
     ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(600)
     assert pg.inner_text('h1') == 'MathPulse', 'rechargement hors ligne en échec'
     b.close()

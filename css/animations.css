@@ -18,7 +18,7 @@
 @keyframes successPulse { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 @keyframes errorShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-0.4rem); } 75% { transform: translateX(0.4rem); } }
 
-/* Déblocage d'une planète */
+/* Déblocage d'un chapitre (et autres apparitions) */
 @keyframes planetAppear { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 
 /* Mascotte : le renard en coin pendant les exercices */
@@ -36,3 +36,96 @@
 .rabbit-says .face { animation: rabbitIn .7s var(--easing-out) backwards; }
 .rabbit-says .speech { animation: fadeIn .5s ease .35s backwards; }
 @keyframes rabbitIn { 0% { transform: translateX(-40px) scale(.7); opacity: 0; } 65% { transform: translateX(6px) scale(1.05); opacity: 1; } 100% { transform: translateX(0) scale(1); } }
+
+/* Soustraction : les blocs enlevés s'estompent après leur apparition */
+.block.removed { animation: blockAppear var(--duration-base) var(--easing-out) backwards, blockCross .5s ease var(--cross-delay, 1s) forwards; }
+@keyframes blockCross { to { background: transparent; box-shadow: none; outline: 2px dashed currentColor; outline-offset: -2px; opacity: .45; transform: scale(.85); } }
+
+/* ×10 : paquets de 10 */
+.visual-tens { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 20rem; }
+.ten-bar { display: inline-flex; align-items: center; justify-content: center; min-width: 3.2rem; padding: .35rem .5rem; border-radius: var(--radius-sm); background: var(--color-space-purple); color: #fff; font-weight: 800; box-shadow: var(--shadow-md); }
+
+.visual-takeaway { flex-direction: column; align-items: center; }
+.visual-takeaway .block-row { max-width: 14.5rem; justify-content: center; flex-wrap: wrap; }
+.visual-tens .ten-bar { border: 0; background: var(--color-space-purple); color: #fff; }
+
+/* Série rapide : jauge « élan de la fusée » (se remplit, ne se vide jamais) */
+.elan { display: flex; align-items: center; justify-content: center; gap: .35rem; margin: .25rem 0; }
+.elan-label { font-size: 1.1rem; }
+.elan-cell { width: 2.2rem; height: .7rem; border-radius: 999px; background: var(--color-border); }
+.elan-cell.on { background: linear-gradient(90deg, #fbbf24, #f97316); box-shadow: 0 0 8px rgba(249, 115, 22, .55); animation: elanPop .45s var(--easing-out); }
+@keyframes elanPop { 0% { transform: scaleX(.3); opacity: .3; } 60% { transform: scaleX(1.15); } 100% { transform: scaleX(1); opacity: 1; } }
+.game-screen .elan { padding-left: 3.2rem; }
+
+/* Décompte de la série rapide */
+.countdown-screen { text-align: center; }
+.countdown { font-size: 7rem; font-weight: 900; line-height: 1; color: var(--color-primary); min-height: 8rem; display: flex; align-items: center; justify-content: center; }
+.countdown.go { font-size: 3.2rem; color: #f97316; }
+.countdown.beat { animation: countBeat .9s var(--easing-out); }
+@keyframes countBeat { 0% { transform: scale(1.8); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 100% { transform: scale(.92); opacity: 1; } }
+.replay-list { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+
+/* Tableau de points (×3, ×4) : a colonnes × n lignes, le « double » en bleu puis le reste en violet */
+.visual-array { display: flex; flex-direction: column; align-items: center; gap: .35rem; }
+.dot-row { display: flex; gap: .35rem; animation: groupAppear var(--duration-base) var(--easing-out) backwards; }
+.dot-item { width: 1.15rem; height: 1.15rem; border-radius: 50%; }
+.dbl-1 .dot-item { background: var(--color-space-blue); }
+.dbl-2 .dot-item { background: var(--color-space-purple); }
+
+/* Partage (÷2) : des paniers pleins */
+.visual-share { gap: var(--spacing-md); }
+.visual-share .basket { border-style: solid; border-color: var(--color-warning, #d99a3d); border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: rgba(217, 154, 61, 0.12); max-width: 120px; }
+
+/* Tableaux par colonnes (×6 à ×9, tables mélangées) */
+.dbl-blue { background: var(--color-space-blue); }
+.dbl-violet { background: var(--color-space-purple); }
+.dot-out { background: transparent; border: 2px dashed var(--color-text-muted, #9aa3b5); box-sizing: border-box; opacity: .7; }
+@media (max-width: 380px) { .dot-item { width: 1rem; height: 1rem; } .dot-row { gap: .3rem; } }
+
+/* Dizaines (additions/soustractions de dizaines, compléments à 100) */
+.tens-compact { max-width: 19rem; }
+.tens-compact .ten-bar { min-width: 2.7rem; padding: .3rem .2rem; }
+.ten-bar.ten-first { background: var(--color-space-blue); color: #fff; }
+.ten-bar.ten-second { background: var(--color-space-purple); color: #fff; }
+.ten-bar.ten-missing { background: transparent !important; color: var(--color-primary); border: 2px dashed var(--color-primary) !important; box-shadow: none; }
+.ten-bar.ten-removed { background: var(--color-space-blue); color: #fff; animation: groupAppear var(--duration-base) var(--easing-out) backwards, tenCross .5s ease var(--cross-delay, 1s) forwards; }
+@keyframes tenCross { to { background: transparent; color: var(--color-text-light); box-shadow: none; outline: 2px dashed currentColor; outline-offset: -2px; opacity: .45; transform: scale(.88); } }
+
+/* Frise de sauts (47 + 8, 83 − 27…) */
+.visual-jumps svg { width: 100%; max-width: 20rem; height: auto; overflow: visible; }
+.jump-line { stroke: var(--color-border); stroke-width: 3; stroke-linecap: round; }
+.jump-dot { fill: var(--color-primary); }
+.jump-num { font-size: 15px; font-weight: 800; fill: var(--color-text, #1a1a2e); }
+.jump-arc { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: jumpDraw .6s ease forwards; }
+.jump-arc.first, .jump-label.first { stroke: var(--color-space-blue); fill: none; }
+.jump-arc.second, .jump-label.second { stroke: var(--color-space-purple); fill: none; }
+.jump-label { font-size: 15px; font-weight: 800; stroke: none !important; opacity: 0; animation: jumpLabel .3s ease forwards; }
+.jump-label.first { fill: var(--color-space-blue); }
+.jump-label.second { fill: var(--color-space-purple); }
+@keyframes jumpDraw { to { stroke-dashoffset: 0; } }
+@keyframes jumpLabel { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .jump-arc { stroke-dashoffset: 0; animation: none; } .jump-label { opacity: 1; animation: none; } .ten-bar.ten-removed { animation: none; opacity: .45; } }
+
+/* ×100 : les zéros glissent */
+.visual-zeros { display: flex; align-items: center; justify-content: center; gap: .25rem; font-size: 3rem; font-weight: 800; }
+.zeros-num { color: var(--color-space-blue); }
+.zero-chip { color: #fff; background: var(--color-space-purple); border-radius: .6rem; padding: 0 .55rem; animation: zeroSlide .55s var(--easing-out, ease-out) backwards; }
+@keyframes zeroSlide { from { opacity: 0; transform: translateX(-1.8rem) scale(.6); } }
+
+/* Doubles et moitiés : deux piles identiques */
+.visual-piles { display: flex; align-items: center; justify-content: center; gap: .75rem; flex-wrap: wrap; }
+.pile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem; max-width: 11rem; padding: .5rem; border-radius: var(--radius-md); border: 2px dashed var(--color-border); animation: groupAppear var(--duration-base) var(--easing-out) backwards; }
+.pile .ten-bar { min-width: 2.2rem; padding: .25rem .1rem; }
+
+/* Chiffres d'un nombre (calcul sur un rang) */
+.visual-digits { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.digit-row { display: flex; gap: .3rem; }
+.digit { width: 2.6rem; height: 3.2rem; display: inline-flex; align-items: center; justify-content: center; font-size: 1.9rem; font-weight: 800; border-radius: .6rem; background: var(--color-surface); border: 2px solid var(--color-border); }
+.digit.hl { background: var(--color-space-purple); border-color: var(--color-space-purple); color: #fff; }
+.digit-row.to .digit.hl { background: var(--color-space-blue); border-color: var(--color-space-blue); animation: groupAppear .5s var(--easing-out, ease-out) .4s backwards; }
+.digit-arrow { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: var(--color-primary); }
+.digit-places { display: flex; gap: .3rem; margin-top: -.15rem; }
+.digit-places span { width: 2.6rem; text-align: center; font-size: .65rem; color: var(--color-text-light); font-weight: 600; }
+
+/* Entrée des personnages dans une vignette */
+@keyframes castIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }

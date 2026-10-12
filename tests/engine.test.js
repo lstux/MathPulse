@@ -15,9 +15,9 @@ test('engine: toutes les sessions ont 5 exercices corrects (500 tirages / compé
             assert.strictEqual(session.length, 5);
             for (const ex of session) {
                 const [a, b] = ex.operands;
-                const total = ex.operation === '+' ? a + b : a * b;
+                const total = ex.operation === '+' ? a + b : ex.operation === '−' ? a - b : ex.operation === '÷' ? a / b : a * b;
                 assert.strictEqual(ex.total, total);
-                if (ex.type === 'missing') assert.strictEqual(ex.answer, ex.operation === '+' ? b : a);
+                if (ex.type === 'missing') assert.strictEqual(ex.answer, (ex.operation === '×' || ex.operation === '÷') ? a : b);
                 else assert.strictEqual(ex.answer, total);
             }
         }
@@ -109,9 +109,9 @@ test('progression: persistance et reset sans toucher aux autres clés', () => {
     assert.strictEqual(localStorage.getItem('autre_app'), 'garder');
 });
 
-test('session: étoiles créditées une seule fois, planète débloquée à 10', () => {
+test('session: étoiles créditées une seule fois, chapitre 2 débloqué à 6', () => {
     const { engine, progression } = setup();
-    progression.addStars(8);
+    progression.addStars(4);
     const s = new Session(engine, progression);
     s.start();
     for (const ex of s.exercises) { s.beginQuestion(); s.submitAnswer(ex.answer); s.next(); }
@@ -119,11 +119,108 @@ test('session: étoiles créditées une seule fois, planète débloquée à 10',
     const sum = s.complete();
     assert.strictEqual(sum.correct, 5);
     assert.strictEqual(sum.starsEarned, 3);
-    assert.strictEqual(progression.getTotalStars(), 11);
-    assert.deepStrictEqual(sum.newPlanets.map(p => p.name), ['Lune']);
+    assert.strictEqual(progression.getTotalStars(), 7);
+    assert.deepStrictEqual(sum.newChapters.map(c => c.id), ['vaisseau']);
     s.complete();
-    assert.strictEqual(progression.getTotalStars(), 11, 'complete() doit être idempotent');
+    assert.strictEqual(progression.getTotalStars(), 7, 'complete() doit être idempotent');
     assert.strictEqual(storage.get(storage.KEYS.SESSION_HISTORY).length, 1);
+});
+
+test('chapitres: 10 chapitres, seuils croissants, le premier est ouvert dès le départ', () => {
+    assert.strictEqual(CHAPTERS.length, 10);
+    assert.deepStrictEqual(CHAPTERS.map(c => c.number), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert.strictEqual(new Set(CHAPTERS.map(c => c.id)).size, 10, 'identifiants uniques');
+    assert.strictEqual(CHAPTERS[0].unlockAt, 0);
+    for (let i = 1; i < CHAPTERS.length; i++) assert.ok(CHAPTERS[i].unlockAt > CHAPTERS[i - 1].unlockAt, `seuil croissant au chapitre ${i + 1}`);
+    for (const c of CHAPTERS) assert.ok(c.title && c.mission && c.emoji, `titre, mission et émoji au chapitre ${c.number}`);
+});
+
+test('chapitres: déblocage par seuil, plusieurs chapitres d\'un coup, fin de l\'histoire', () => {
+    assert.deepStrictEqual(chaptersUnlockedAt(0).map(c => c.number), [1]);
+    assert.deepStrictEqual(newChaptersBetween(5, 6).map(c => c.number), [2], 'le seuil est inclus');
+    assert.deepStrictEqual(newChaptersBetween(6, 7), [], 'pas de nouveau chapitre sans franchir un seuil');
+    assert.deepStrictEqual(newChaptersBetween(0, 0), [], 'le chapitre 1 est ouvert dès le départ, pas « nouveau »');
+    assert.deepStrictEqual(newChaptersBetween(14, 30).map(c => c.number), [3, 4]);
+    assert.strictEqual(nextChapter(0).number, 2);
+    assert.strictEqual(nextChapter(6).number, 3);
+    assert.strictEqual(nextChapter(195), null);
+    assert.strictEqual(chaptersUnlockedAt(500).length, 10);
+});
+
+test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier chapitre « en cours »', () => {
+    const { progression } = setup();
+    progression.addStars(16);
+    const html = new Universe(progression).render();
+    assert.ok(html.includes('Les circuits'), 'le chapitre 3 est ouvert');
+    assert.ok(!html.includes('La salle des machines'), 'le titre du chapitre 4 reste caché');
+    assert.strictEqual((html.match(/chapter-card locked/g) || []).length, 7);
+    assert.strictEqual((html.match(/aria-current="step"/g) || []).length, 1);
+    assert.ok(html.includes('pour le chapitre 4'));
+});
+
+test('scènes: chapitres 1 à 10 complets, vignettes courtes, décors et personnages connus', () => {
+    const ARTS = ['forest', 'clearing', 'ship', 'ship-lit', 'engine', 'engine-on', 'tanks', 'tanks-full', 'cockpit', 'cockpit-night', 'cockpit-chart', 'cockpit-lit', 'airlock', 'airlock-closed', 'porthole-earth', 'fuel', 'space-asteroids', 'space-beacon', 'space-beacon-on', 'space-home', 'earth-top', 'hill', 'hill-reply'];
+    const MOODS = { fox: ['content', 'bravo', 'think', 'comfort', 'worried', 'moved'], rabbit: ['content', 'bravo', 'think', 'comfort', 'surprise'] };
+    for (const c of CHAPTERS.slice(0, 10)) {
+        assert.strictEqual(c.scene.length, 5, `5 vignettes au chapitre ${c.number}`);
+        assert.strictEqual(c.lines.length, 3, `3 lignes de la lapine au chapitre ${c.number}`);
+        assert.ok(c.end, `message de fin au chapitre ${c.number}`);
+        for (const v of c.scene) {
+            assert.ok(ARTS.includes(v.art), `décor connu : ${v.art}`);
+            assert.ok(v.cast.length >= 1);
+            for (const m of v.cast) {
+                assert.ok(['fox', 'rabbit'].includes(m.who) && ['left', 'right', 'center'].includes(m.at));
+            }
+            assert.ok(v.lines.length >= 1 && v.lines.length <= 2);
+            let words = 0;
+            for (const l of v.lines) {
+                assert.ok(['narrator', 'fox', 'rabbit'].includes(l.who));
+                if (l.who !== 'narrator') assert.ok(!l.mood || MOODS[l.who].includes(l.mood), `expression connue : ${l.who} ${l.mood}`);
+                words += l.text.split(/\s+/).length;
+            }
+            assert.ok(words <= 40, `vignette trop longue au chapitre ${c.number} (${words} mots)`);
+        }
+    }
+});
+
+test('scènes: scène à lire = premier chapitre ouvert avec scène non lue', () => {
+    assert.strictEqual(pendingScene(0, {}).id, 'lapine');
+    assert.strictEqual(pendingScene(0, { lapine: true }), null, 'au départ, seul le chapitre 1 est ouvert');
+    assert.strictEqual(pendingScene(7, { lapine: true }).id, 'vaisseau');
+    assert.strictEqual(pendingScene(16, { lapine: true }).id, 'vaisseau', 'dans l\'ordre');
+    assert.strictEqual(pendingScene(16, { lapine: true, vaisseau: true }).id, 'circuits');
+    assert.strictEqual(pendingScene(500, { lapine: true, vaisseau: true, circuits: true, machines: true, energie: true, carnet: true, fenetre: true, embarquement: true, voyage: true, retour: true }), null, 'les chapitres sans scène ne comptent pas');
+    assert.strictEqual(pendingScene(0, undefined).id, 'lapine');
+});
+
+test('scènes: ligne de la lapine au hasard et message de fin selon les étoiles', () => {
+    const c = CHAPTERS[0];
+    assert.strictEqual(randomLine(c, () => 0), c.lines[0]);
+    assert.strictEqual(randomLine(c, () => 0.999), c.lines[2]);
+    assert.strictEqual(randomLine({ id: 'x' }), null, 'pas de ligne tant que le chapitre n\'est pas écrit');
+    assert.strictEqual(currentChapter(14).number, 2);
+    assert.strictEqual(currentChapter(15).number, 3);
+    assert.ok(chapterEndLine(c, 3).includes('Parfait'));
+    assert.ok(chapterEndLine(c, 2).includes('Bien joué'));
+    assert.ok(chapterEndLine(c, 0).includes('Pas grave'));
+    const c3 = CHAPTERS[2];
+    assert.strictEqual(chapterEndLine(c3, 3), c3.end.some, 'sans variante « full », on retombe sur le message courant');
+    assert.strictEqual(chapterEndLine(c3, 0), null, 'rien à dire sans étoile');
+    assert.strictEqual(chapterEndLine({ id: 'x' }, 3), null);
+});
+
+test('progression: chapitres lus mémorisés, anciennes données sans ce champ, réinitialisation', () => {
+    const { progression } = setup();
+    assert.ok(!progression.hasSeenChapter('lapine'));
+    progression.markChapterSeen('lapine');
+    const again = new Progression(); again.load();
+    assert.ok(again.hasSeenChapter('lapine') && !again.hasSeenChapter('vaisseau'));
+    storage.set(storage.KEYS.PROGRESSION, { version: 1, skills: {}, totalStars: 3, discovered: {} });   // données d'avant l'histoire
+    const old = new Progression(); old.load();
+    assert.ok(!old.hasSeenChapter('lapine'));
+    assert.strictEqual(old.getTotalStars(), 3);
+    again.reset();
+    assert.ok(!again.hasSeenChapter('lapine'));
 });
 
 test('session: barème d\'étoiles', () => {
@@ -367,4 +464,361 @@ test('mélange: les calculs à revoir passent avant les rappels', () => {
     assert.strictEqual(session.filter(e => e.recall).length, 1);
     assert.strictEqual(session[1].review, true, 'le calcul raté prend la première place de rappel (question 2)');
     assert.strictEqual(session[3].recall, true);
+});
+
+test('temps: la maîtrise utilise le temps de réflexion (premier chiffre), le total reste dans le journal', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start();
+    s.beginQuestion();
+    s.questionStart = Date.now() - 6000;           // 6 s au total...
+    s.noteInput(s.questionStart + 1800);           // ...dont 1,8 s avant le premier chiffre
+    s.noteInput(s.questionStart + 4000);           // un second chiffre ne change rien
+    const ex = s.getCurrentExercise();
+    s.submitAnswer(ex.answer);
+    const r = s.results[0];
+    assert.strictEqual(r.think_ms, 1800);
+    assert.ok(r.time_ms >= 6000);
+    assert.strictEqual(progression.getSkillStats(ex.skill).recent[0].t, 1800);
+});
+
+test('temps: réponse à choix → temps de réflexion = temps total', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start(); s.beginQuestion();
+    s.questionStart = Date.now() - 2500;
+    s.submitAnswer(s.getCurrentExercise().answer);
+    assert.ok(Math.abs(s.results[0].think_ms - s.results[0].time_ms) < 5);
+});
+
+test('journal: une ligne par question dans l\'historique, abandon tracé une seule fois', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression);
+    s.start();
+    s.exercises.forEach(() => { s.beginQuestion(); s.submitAnswer(s.getCurrentExercise().answer); s.next(); });
+    s.complete();
+    const last = storage.get(storage.KEYS.SESSION_HISTORY).slice(-1)[0];
+    assert.strictEqual(last.answers.length, 5);
+    assert.ok(last.answers.every(a => typeof a.think_ms === 'number' && typeof a.total_ms === 'number' && a.ok === true));
+
+    const s2 = new Session(engine, progression);
+    s2.start(); s2.beginQuestion(); s2.submitAnswer(s2.getCurrentExercise().answer); s2.next();
+    s2.abandon(); s2.abandon();
+    const hist = storage.get(storage.KEYS.SESSION_HISTORY);
+    assert.strictEqual(hist.filter(h => h.abandoned).length, 1);
+    assert.strictEqual(hist.slice(-1)[0].answered, 1);
+    assert.strictEqual(hist.slice(-1)[0].at_question, 2);
+});
+
+test('soustraction: résultat toujours ≥ 1, jamais négatif, question et explication', () => {
+    const { engine } = setup();
+    for (let n = 0; n < 500; n++) for (const ex of engine.generateSession('subtract-simple')) {
+        const [a, b] = ex.operands;
+        assert.ok(a >= 3 && a <= 18 && b >= 1 && b <= 9 && a - b >= 1, `${a} − ${b}`);
+        assert.strictEqual(ex.total, a - b);
+        assert.ok(ex.type === 'missing' ? ex.question === `${a} − ? = ${a - b}` : ex.question === `${a} − ${b} = ?`, ex.question);
+    }
+    assert.match(engine.getExplanation({ operation: '−', operands: [8, 3], total: 5 }), /enlève 3 de 8, il en reste 5/);
+});
+
+test('×10: réponses jusqu\'à 100, explication « un zéro de plus »', () => {
+    const { engine } = setup();
+    const seen = new Set();
+    for (let n = 0; n < 500; n++) for (const ex of engine.generateSession('multiply-10')) { assert.strictEqual(ex.operands[1], 10); seen.add(ex.total); }
+    assert.ok(seen.has(100) && seen.has(10));
+    assert.match(engine.getExplanation({ operation: '×', operands: [7, 10], total: 70 }), /ajouter un zéro : 7 × 10 = 70/);
+});
+
+test('déblocage: soustractions après additions niveau 2, ×10 après ×2 niveau 2', () => {
+    const { engine, progression } = setup();
+    assert.ok(!engine.isUnlocked('subtract-simple') && !engine.isUnlocked('multiply-10'));
+    for (let i = 0; i < 5; i++) engine.selectSkillForSession(), assert.ok(!['subtract-simple', 'multiply-10'].includes(engine.selectSkillForSession()));
+    for (let i = 0; i < 4; i++) progression.recordAnswer('addition-simple', true, 2000);
+    assert.ok(engine.isUnlocked('subtract-simple') && !engine.isUnlocked('multiply-10'));
+    assert.strictEqual(engine.selectSkillForSession(), 'subtract-simple', 'nouvelle compétence (niveau 0) prioritaire');
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    assert.ok(engine.isUnlocked('multiply-10'));
+});
+
+test('série rapide: indisponible tant qu\'aucune compétence n\'est au niveau 2, puis 5 calculs numériques éligibles', () => {
+    const { engine, progression } = setup();
+    assert.ok(!engine.rapidAvailable());
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    assert.ok(engine.rapidAvailable());
+    progression.recordAnswer('addition-simple', true, 2000);   // niveau 1 seulement : exclue
+    for (let n = 0; n < 50; n++) {
+        const ex = engine.generateRapid();
+        assert.strictEqual(ex.length, 5);
+        assert.ok(ex.every(e => e.skill === 'multiply-2' && e.type === 'numeric' && !e.choices));
+    }
+});
+
+test('série rapide: étoiles bonus (5/5 + ≥ 4 rapides), sans coup de pouce, erreurs mémorisées', () => {
+    assert.strictEqual(Session.rapidStars(5, 5, 5), 2);
+    assert.strictEqual(Session.rapidStars(5, 5, 4), 2);
+    assert.strictEqual(Session.rapidStars(5, 5, 3), 1);
+    assert.strictEqual(Session.rapidStars(4, 5, 4), 1);
+    assert.strictEqual(Session.rapidStars(3, 5, 2), 0);
+    const { engine, progression } = setup();
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    const s = new Session(engine, progression);
+    s.start({ rapid: true });
+    assert.strictEqual(s.skill, 'rapid');
+    s.exercises.forEach((ex, i) => {
+        s.beginQuestion();
+        s.questionStart = Date.now() - 1000;
+        s.noteInput(s.questionStart + 800);
+        const r = s.submitAnswer(i === 0 ? ex.answer + 1 : ex.answer);
+        assert.strictEqual(r.fast, i !== 0);
+        s.next();
+    });
+    const sum = s.complete();
+    assert.strictEqual(sum.rapid, true);
+    assert.strictEqual(sum.correct, 4);
+    assert.strictEqual(sum.fast, 4);
+    assert.strictEqual(sum.starsEarned, 1, '4 sur 5 : pas le bonus 5/5, mais 4 réponses rapides');
+    assert.strictEqual(progression.getPendingErrors().length, 1, 'l\'erreur de la série revient dans les rappels');
+});
+
+test('série rapide: seules les 2 premières séries du jour rapportent des étoiles', () => {
+    const { engine, progression } = setup();
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    const stars = [];
+    for (let n = 0; n < 4; n++) {
+        const s = new Session(engine, progression);
+        s.start({ rapid: true });
+        s.exercises.forEach(ex => { s.beginQuestion(); s.questionStart = Date.now() - 500; s.submitAnswer(ex.answer); s.next(); });
+        const sum = s.complete();
+        stars.push(sum.starsEarned);
+        assert.strictEqual(sum.rewarded, n < RAPID.maxRewardedPerDay);
+    }
+    assert.deepStrictEqual(stars, [2, 2, 0, 0]);
+});
+
+test('tables ×3 et ×4: a × n avec a de 1 à 10, explication « double », QCM sur les résultats voisins', () => {
+    const { engine } = setup();
+    for (const [id, n] of [['multiply-3', 3], ['multiply-4', 4]]) {
+        const seen = new Set();
+        for (let k = 0; k < 400; k++) for (const ex of engine.generateSession(id)) {
+            assert.strictEqual(ex.operands[1], n);
+            assert.ok(ex.operands[0] >= 1 && ex.operands[0] <= 10);
+            assert.strictEqual(ex.total, ex.operands[0] * n);
+            seen.add(ex.operands[0]);
+            if (ex.type === 'multiple') assert.ok(ex.choices.length === 4 && ex.choices.includes(ex.total));
+        }
+        assert.strictEqual(seen.size, 10, `${id}: tous les facteurs de 1 à 10 sont tirés`);
+    }
+    assert.match(engine.getExplanation({ skill: 'multiply-3', operation: '×', operands: [7, 3], total: 21 }), /double de 7, c'est 14, et encore 7 de plus, ça fait 21/);
+    assert.match(engine.getExplanation({ skill: 'multiply-4', operation: '×', operands: [7, 4], total: 28 }), /double de 7, c'est 14, et le double de 14, c'est 28/);
+});
+
+test('tables ×3 et ×4: débloquées par ×2 niveau 2 ; seuil de temps propre à une compétence', () => {
+    const { engine, progression } = setup();
+    assert.ok(!engine.isUnlocked('multiply-3') && !engine.isUnlocked('multiply-4'));
+    for (let i = 0; i < 4; i++) progression.recordAnswer('multiply-2', true, 2000);
+    assert.ok(engine.isUnlocked('multiply-3') && engine.isUnlocked('multiply-4'));
+    // seuil spécifique : avec maxAvgMs = 3000 sur une compétence, 4 s de moyenne ne donne que le niveau 2
+    SKILLS['multiply-4'].maxAvgMs = 3000;
+    try {
+        for (let i = 0; i < 6; i++) progression.recordAnswer('multiply-4', true, 4000);
+        assert.strictEqual(progression.getMasteryLevel('multiply-4'), 2);
+    } finally { delete SKILLS['multiply-4'].maxAvgMs; }
+    for (let i = 0; i < 6; i++) progression.recordAnswer('multiply-3', true, 4000);
+    assert.strictEqual(progression.getMasteryLevel('multiply-3'), 3, 'seuil général (5 s) : 4 s suffit');
+});
+
+test('divisions ÷2, ÷5, ÷10: divisions exactes, QCM valides, explications, déblocage par la table', () => {
+    for (const [id, n, table] of [['divide-2', 2, 'multiply-2'], ['divide-5', 5, 'multiply-5'], ['divide-10', 10, 'multiply-10']]) {
+        const { engine, progression } = setup();
+        if (id === 'divide-2') assert.ok(!engine.isUnlocked(id), 'verrouillée au départ');
+        for (let i = 0; i < 4; i++) progression.recordAnswer(table, true, 2000);   // débloque la division
+        assert.ok(engine.isUnlocked(id), `${id} débloquée par ${table} niveau 2`);
+        const seen = new Set();
+        for (let k = 0; k < 400; k++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;   // rappels de la table déjà pratiquée
+            const [a, b] = ex.operands;
+            assert.strictEqual(b, n);
+            assert.strictEqual(a % n, 0);
+            assert.ok(a / n >= 1 && a / n <= 10);
+            assert.strictEqual(ex.total, a / n);
+            if (ex.type === 'missing') { assert.strictEqual(ex.answer, a); assert.strictEqual(ex.question, `? ÷ ${n} = ${a / n}`); }
+            else { assert.strictEqual(ex.answer, a / n); assert.strictEqual(ex.question, `${a} ÷ ${n} = ?`); }
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && new Set(ex.choices).size === 4 && ex.choices.includes(ex.answer));
+            seen.add(a / n);
+        }
+        assert.strictEqual(seen.size, 10, `${id}: tous les quotients de 1 à 10`);
+    }
+    const { engine } = setup();
+    assert.match(engine.getExplanation({ skill: 'divide-5', operation: '÷', operands: [35, 5], total: 7 }), /Il y en a 7, car 7 × 5 = 35/);
+    assert.match(engine.getExplanation({ skill: 'divide-2', operation: '÷', operands: [14, 2], total: 7 }), /7 dans chaque part/);
+});
+
+test('tables ×6 à ×9 et mélange: opérandes, explications, chaîne de déblocage, seuil ×7', () => {
+    const { engine, progression } = setup();
+    const chain = [['multiply-6', 6, 'multiply-5'], ['multiply-8', 8, 'multiply-4'], ['multiply-9', 9, 'multiply-10'], ['multiply-7', 7, 'multiply-8'], ['multiply-mix', 0, 'multiply-7']];
+    for (const [id, n] of chain) {
+        const { engine: e } = setup();
+        for (let k = 0; k < 300; k++) for (const ex of e.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            const [a, b] = ex.operands;
+            if (n) { assert.strictEqual(b, n); assert.ok(a >= 1 && a <= 10); }
+            else { assert.ok(a >= 2 && a <= 9 && b >= 2 && b <= 9); }
+            assert.strictEqual(ex.total, a * b);
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && ex.choices.includes(ex.answer));
+        }
+    }
+    for (const [id, , req] of chain) {
+        assert.strictEqual(SKILLS[id].requires.skill, req);
+    }
+    assert.match(engine.getExplanation({ skill: 'multiply-9', operation: '×', operands: [7, 9], total: 63 }), /7 × 10 = 70, moins 7, ça fait 63/);
+    assert.match(engine.getExplanation({ skill: 'multiply-6', operation: '×', operands: [7, 6], total: 42 }), /7 × 5 = 35, et encore 7, ça fait 42/);
+    assert.match(engine.getExplanation({ skill: 'multiply-7', operation: '×', operands: [6, 7], total: 42 }), /30 \+ 12 = 42/);
+    assert.match(engine.getExplanation({ skill: 'multiply-8', operation: '×', operands: [6, 8], total: 48 }), /24, et le double de 24, c'est 48/);
+    assert.strictEqual(SKILLS['multiply-7'].maxAvgMs, 6000);
+});
+
+test('divisions ÷3 à ÷9: exactes, débloquées par la table, explication « car q × n = a »', () => {
+    for (const n of [3, 4, 6, 7, 8, 9]) {
+        const id = `divide-${n}`;
+        assert.strictEqual(SKILLS[id].requires.skill, `multiply-${n}`);
+        const { engine, progression } = setup();
+        for (let i = 0; i < 4; i++) progression.recordAnswer(`multiply-${n}`, true, 2000);
+        assert.ok(engine.isUnlocked(id));
+        const seen = new Set();
+        for (let k = 0; k < 300; k++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            assert.strictEqual(ex.operands[1], n);
+            assert.strictEqual(ex.operands[0] % n, 0);
+            assert.strictEqual(ex.total, ex.operands[0] / n);
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && ex.choices.includes(ex.answer));
+            seen.add(ex.total);
+        }
+        assert.strictEqual(seen.size, 10);
+        assert.match(engine.getExplanation({ skill: id, operation: '÷', operands: [6 * n, n], total: 6 }), new RegExp(`car 6 × ${n} = ${6 * n}`));
+    }
+});
+
+test('voie C : bornes des nombres, compléments en « nombre manquant », explications', () => {
+    const { engine } = setup();
+    const check = {
+        'complement-10': (a, b) => a + b === 10 && a >= 1 && b >= 1,
+        'complement-100': (a, b) => a + b === 100 && a % 10 === 0 && b % 10 === 0,
+        'tens-add': (a, b) => a % 10 === 0 && b % 10 === 0 && a + b <= 100,
+        'tens-sub': (a, b) => a % 10 === 0 && b % 10 === 0 && a > b,
+        'add-units': (a, b) => a % 10 !== 0 && b >= 2 && b <= 9 && a + b <= 99,
+        'sub-units': (a, b) => a % 10 !== 0 && b >= 2 && b <= 9 && a > b,
+        'add-2digits': (a, b) => b >= 11 && b % 10 !== 0 && a + b <= 99,
+        'sub-2digits': (a, b) => b >= 11 && b % 10 !== 0 && a > b && a <= 99
+    };
+    for (const id of Object.keys(check)) {
+        for (let k = 0; k < 300; k++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            assert.ok(check[id](...ex.operands), `${id}: ${ex.operands}`);
+            assert.ok(ex.total >= 1 && ex.total <= 100);
+            if (SKILLS[id].noNumeric) assert.notStrictEqual(ex.type, 'numeric', `${id}: jamais « a + b = ? »`);
+            assert.ok(ex.type !== 'multiple' || (ex.choices.length === 4 && ex.choices.includes(ex.answer)));
+            assert.strictEqual(typeof engine.getExplanation(ex), 'string');
+        }
+    }
+    // série rapide et rappels : les compléments restent des « nombres manquants »
+    assert.strictEqual(engine.generateExercise('complement-10', 'numeric').type, 'missing');
+    const ex = (skill, op, a, b, t) => engine.getExplanation({ skill, operation: op, operands: [a, b], total: t });
+    assert.match(ex('add-units', '+', 47, 8, 55), /on va jusqu'à 50 \(\+3\), puis on ajoute encore 5 : 55/);
+    assert.match(ex('add-units', '+', 42, 5, 47), /2 \+ 5 = 7, donc 47/);
+    assert.match(ex('sub-units', '−', 52, 7, 45), /on descend à 50 \(−2\), puis on enlève encore 5 : 45/);
+    assert.match(ex('add-2digits', '+', 38, 45, 83), /38 \+ 40 = 78, puis \+ 5 = 83/);
+    assert.match(ex('sub-2digits', '−', 83, 27, 56), /83 − 20 = 63, puis − 7 = 56/);
+    assert.match(ex('tens-add', '+', 30, 40, 70), /3 dizaines \+ 4 dizaines = 7 dizaines, soit 70/);
+    assert.match(ex('complement-100', '+', 60, 40, 100), /il manque 40/);
+});
+
+test('voie C : chaîne de déblocage', () => {
+    const chain = { 'complement-10': 'addition-simple', 'tens-add': 'complement-10', 'tens-sub': 'subtract-simple', 'complement-100': 'tens-add',
+        'add-units': 'tens-add', 'sub-units': 'tens-sub', 'add-2digits': 'add-units', 'sub-2digits': 'sub-units' };
+    for (const [id, req] of Object.entries(chain)) assert.strictEqual(SKILLS[id].requires.skill, req, id);
+    assert.ok(SKILL_ORDER.every(id => SKILLS[id]) && new Set(SKILL_ORDER).size === SKILL_ORDER.length);
+    assert.ok(PATHS.every(p => p.skills.every(id => SKILLS[id])));
+    assert.strictEqual([].concat(...PATHS.map(p => p.skills)).length, SKILL_ORDER.length, 'chaque compétence est dans une voie');
+});
+
+test('plafond de 3 compétences en cours : les nouvelles attendent, une place se libère à la maîtrise', () => {
+    localStorage.clear();
+    const { engine, progression } = setup();
+    const good = (id, n = 4, ms = 2000) => { for (let i = 0; i < n; i++) progression.recordAnswer(id, true, ms); };
+    good('addition-simple'); good('subtract-simple');                 // niveau 2 : débloque complement-10, tens-add, tens-sub, multiply-3… (÷ 2 aussi via ×2)
+    good('multiply-2');
+    // 3 compétences en cours (niveau 2)
+    assert.strictEqual(engine.inProgressSkills().length, 3);
+    assert.ok(engine.isUnlocked('multiply-3') && engine.isWaiting('multiply-3'), 'une 4e compétence attend');
+    for (let k = 0; k < 200; k++) assert.ok(engine.inProgressSkills().includes(engine.selectSkillForSession()), 'seules les compétences en cours sont proposées');
+    // l'une est maîtrisée (niveau 3) : une place se libère
+    good('multiply-2', 6);
+    assert.strictEqual(progression.getMasteryLevel('multiply-2'), 3);
+    assert.strictEqual(engine.inProgressSkills().length, 2);
+    assert.ok(!engine.isWaiting('multiply-3'));
+    // une compétence qui stagne au niveau 2 avec beaucoup de réponses ne bloque plus personne
+    localStorage.clear();
+    const { engine: e2, progression: p2 } = setup();
+    for (let i = 0; i < 4; i++) { p2.recordAnswer('addition-simple', true, 2000); p2.recordAnswer('subtract-simple', true, 2000); p2.recordAnswer('multiply-2', true, 2000); }
+    for (let i = 0; i < PROGRESS_CAP.relaxAfterSeen; i++) p2.recordAnswer('subtract-simple', true, 9000);   // juste mais lent : reste au niveau 2
+    assert.strictEqual(p2.getMasteryLevel('subtract-simple'), 2);
+    assert.ok(!e2.inProgressSkills().includes('subtract-simple'), 'ne compte plus après 30 réponses au niveau 2');
+});
+
+test('mode test : seuils réduits, tout débloqué, plafond levé, compétence imposée', () => {
+    localStorage.clear();
+    const { engine, progression } = setup();
+    assert.ok(!Cheat.isOn() && !engine.isUnlocked('divide-9'));
+    progression.recordAnswer('multiply-5', true, 9000); progression.recordAnswer('multiply-5', true, 9000);
+    assert.strictEqual(progression.getMasteryLevel('multiply-5'), 1, 'seuils normaux : 2 réponses lentes ne suffisent pas');
+    Cheat.set(true); progression.recomputeAll();
+    assert.ok(Cheat.isOn() && engine.isUnlocked('divide-9') && !engine.isWaiting('sub-2digits'));
+    assert.strictEqual(progression.getMasteryLevel('multiply-5'), 3, 'mode test : 2 bonnes réponses = maîtrisé, temps ignoré');
+    progression.recordAnswer('divide-7', true, 9000);
+    assert.strictEqual(progression.getMasteryLevel('divide-7'), 2, 'niveau 2 dès la première bonne réponse');
+    const session = new Session(engine, progression);
+    session.start({ skill: 'add-2digits' });
+    assert.strictEqual(session.skill, 'add-2digits');
+    Cheat.set(false); progression.recomputeAll();
+    assert.ok(!engine.isUnlocked('divide-9'));
+    assert.strictEqual(progression.getMasteryLevel('multiply-5'), 1, 'retour aux seuils normaux');
+});
+
+test('voie D : ×100, doubles, moitiés, dizaines/centaines/milliers ronds', () => {
+    localStorage.clear();
+    const { engine } = setup();
+    const digitAt = (n, k) => Math.floor(n / 10 ** k) % 10;
+    const check = {
+        'multiply-100': (a, b, t) => b === 100 && a >= 2 && a <= 99 && t === a * 100,
+        'double-100': (a, b, t) => b === 2 && a >= 6 && a <= 50 && t === 2 * a,
+        'half-100': (a, b, t) => b === 2 && a % 2 === 0 && a >= 12 && a <= 100 && t === a / 2,
+        'add-round': (a, b, t) => { const k = String(b).length - 1; return a >= 100 && a <= 9999 && b / 10 ** k >= 1 && b / 10 ** k <= 9 && k >= 1 && digitAt(a, k) + b / 10 ** k <= 9 && t === a + b && t <= 9999; },
+        'sub-round': (a, b, t) => { const k = String(b).length - 1; return a >= 100 && b / 10 ** k >= 1 && digitAt(a, k) >= b / 10 ** k && t === a - b && String(t).length === String(a).length; }
+    };
+    for (const id of Object.keys(check)) {
+        for (let n = 0; n < 300; n++) for (const ex of engine.generateSession(id)) {
+            if (ex.skill !== id) continue;
+            assert.ok(check[id](ex.operands[0], ex.operands[1], ex.total), `${id}: ${ex.operands}`);
+            if (ex.type === 'missing') assert.strictEqual(ex.answer, (SKILLS[id].operation === '×' || SKILLS[id].operation === '÷') ? ex.operands[0] : ex.operands[1]);
+            else assert.strictEqual(ex.answer, ex.total);
+            if (ex.type !== 'numeric') assert.ok(ex.choices.length === 4 && new Set(ex.choices).size === 4 && ex.choices.includes(ex.answer), `${id} ${ex.question} ${ex.choices}`);
+            assert.ok(ex.answer >= 0 && String(ex.answer).length <= 4, 'tient sur le pavé de 4 chiffres');
+        }
+    }
+    // formulations et grands nombres avec espace fine
+    const q = (id, t, a, b) => engine.buildExercise(id, t, a, b).question;
+    assert.strictEqual(q('double-100', 'numeric', 35, 2), 'double de 35 = ?');
+    assert.strictEqual(q('double-100', 'missing', 35, 2), 'double de ? = 70');
+    assert.strictEqual(q('half-100', 'numeric', 70, 2), 'moitié de 70 = ?');
+    assert.strictEqual(q('add-round', 'numeric', 3204, 70), '3 204 + 70 = ?');
+    assert.strictEqual(q('multiply-100', 'missing', 37, 100), '? × 100 = 3 700');
+    const ex = (skill, op, a, b, t) => engine.getExplanation({ skill, operation: op, operands: [a, b], total: t });
+    assert.match(ex('multiply-100', '×', 37, 100, 3700), /deux zéros à 37, ça fait 3 700/);
+    assert.match(ex('double-100', '×', 35, 2, 70), /double de 30 est 60, le double de 5 est 10, et 60 \+ 10 = 70/);
+    assert.match(ex('add-round', '+', 3204, 70, 3274), /on ajoute 7 dizaines ; le chiffre des dizaines passe de 0 à 7 : 3 274/);
+    assert.match(ex('sub-round', '−', 8756, 5000, 3756), /on enlève 5 milliers ; le chiffre des milliers passe de 8 à 3 : 3 756/);
+    assert.strictEqual(fmtNum(999), '999'); assert.strictEqual(fmtNum(10000), '10 000');
+    // déblocage
+    const req = { 'multiply-100': 'multiply-10', 'double-100': 'multiply-2', 'half-100': 'double-100', 'add-round': 'tens-add', 'sub-round': 'tens-sub' };
+    for (const [id, r] of Object.entries(req)) assert.strictEqual(SKILLS[id].requires.skill, r, id);
 });

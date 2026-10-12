@@ -8,8 +8,58 @@ class Engine {
 
     // ---------- Choix de la compétence ----------
     // Priorité : maîtrise la plus basse, puis pratiquée il y a le plus longtemps, puis ordre du catalogue.
+    // Une compétence est disponible quand son prérequis (autre compétence, niveau de maîtrise) est atteint
+    isUnlocked(id) {
+        if (Cheat.isOn()) return true;   // mode test : tout est débloqué
+        const req = SKILLS[id] && SKILLS[id].requires;
+        return !req || this.progression.getMasteryLevel(req.skill) >= req.level;
+    }
+
+    // Compétences « en cours » : commencées, pas encore maîtrisées (une compétence qui stagne au niveau 2 finit par ne plus compter)
+    inProgressSkills() {
+        return SKILL_ORDER.filter(id => {
+            const st = this.progression.getSkillStats(id);
+            if (!st) return false;
+            const level = this.progression.getMasteryLevel(id);
+            return level < 3 && !(level >= 2 && st.seen >= PROGRESS_CAP.relaxAfterSeen);
+        });
+    }
+
+    // Débloquée, jamais pratiquée, mais le plafond de compétences en cours est atteint : elle attend sa place
+    isWaiting(id) {
+        return !Cheat.isOn() && this.isUnlocked(id) && !this.progression.getSkillStats(id)
+            && this.inProgressSkills().length >= PROGRESS_CAP.max;
+    }
+
+    // ---------- Série rapide ----------
+    rapidSkills() {
+        return SKILL_ORDER.filter(id => this.progression.getMasteryLevel(id) >= RAPID.minLevel);
+    }
+
+    rapidAvailable() {
+        return this.rapidSkills().length > 0;
+    }
+
+    // 5 calculs à saisie numérique, en alternant les compétences éligibles
+    generateRapid() {
+        const pool = this.rapidSkills();
+        if (!pool.length) throw new Error('Aucune compétence éligible à la série rapide');
+        const order = this.shuffle(pool);
+        const exercises = [], seen = new Set();
+        for (let i = 0; i < RAPID.length; i++) {
+            let ex = null;
+            for (let tries = 0; tries < 30; tries++) {
+                ex = this.generateExercise(order[i % order.length], 'numeric');
+                if (!seen.has(ex.key)) break;
+            }
+            seen.add(ex.key);
+            exercises.push(ex);
+        }
+        return exercises;
+    }
+
     selectSkillForSession() {
-        const ranked = SKILL_ORDER.map((id, order) => {
+        const ranked = SKILL_ORDER.filter(id => this.isUnlocked(id) && !this.isWaiting(id)).map((id, order) => {
             const stats = this.progression.getSkillStats(id);
             return {
                 id, order,
@@ -81,19 +131,23 @@ class Engine {
     }
 
     generateExercise(skillId, type = 'numeric') {
+        const skill = SKILLS[skillId];
+        if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
+        if (skill.noNumeric && type === 'numeric') type = 'missing';   // ex. compléments : « 7 + ? = 10 »
         let a, b;
-        switch (skillId) {
-            case 'addition-simple': a = this.randInt(1, 9); b = this.randInt(1, 9); break;
-            case 'multiply-2': a = this.randInt(1, 10); b = 2; break;
-            case 'multiply-5': a = this.randInt(1, 10); b = 5; break;
-            default: throw new Error(`Compétence inconnue : ${skillId}`);
-        }
+        if (skill.generate) [a, b] = skill.generate((lo, hi) => this.randInt(lo, hi));
+        else if (skill.factor) { a = this.randInt(1, 10); b = skill.factor; }          // table de multiplication : a × n
+        else if (skill.mixed) { a = this.randInt(...skill.mixed); b = this.randInt(...skill.mixed); }   // tables mélangées
+        else if (skill.divisor) { b = skill.divisor; a = this.randInt(1, 10) * b; }   // division exacte : a ÷ n
+        else if (skillId === 'addition-simple') { a = this.randInt(1, 9); b = this.randInt(1, 9); }
+        else if (skillId === 'subtract-simple') { a = this.randInt(3, 18); b = this.randInt(1, Math.min(9, a - 1)); }   // reste toujours ≥ 1
+        else throw new Error(`Compétence inconnue : ${skillId}`);
         return this.buildExercise(skillId, type, a, b);
     }
 
     buildExercise(skillId, type, a, b) {
         const op = SKILLS[skillId].operation;
-        const total = op === '+' ? a + b : a * b;
+        const total = op === '+' ? a + b : op === '−' ? a - b : op === '÷' ? a / b : a * b;
         const ex = {
             skill: skillId, type, operation: op,
             operands: [a, b], total,
@@ -101,19 +155,24 @@ class Engine {
             key: `${op}:${a}:${b}`          // sert à éviter les doublons dans une session
         };
 
+        const sk = SKILLS[skillId];
+        const fmt = (n) => (typeof fmtNum === 'function' ? fmtNum(n) : String(n));   // 3 204 : espace fine pour les grands nombres
         if (type === 'missing') {
-            // le nombre manquant est le premier opérande en ×, le second en +
-            const hidden = op === '+' ? b : a;
+            // le nombre manquant est le premier opérande en × et en ÷, le second en + et en −
+            const hidden = (op === '×' || op === '÷') ? a : b;
             ex.answer = hidden;
-            ex.question = op === '+' ? `${a} + ? = ${total}` : `? × ${b} = ${total}`;
-            ex.choices = this.makeChoices(hidden, [-3, -2, -1, 1, 2, 3]);
+            ex.question = sk.ask ? sk.ask(a, b, total, true)
+                : (op === '×' || op === '÷') ? `? ${op} ${fmt(b)} = ${fmt(total)}` : `${fmt(a)} ${op} ? = ${fmt(total)}`;
+            ex.choices = this.makeChoices(hidden, sk.offsetsFor ? sk.offsetsFor(a, b) : sk.missingOffsets || sk.choiceOffsets
+                || (op === '÷' ? [-2 * b, -b, b, 2 * b, -1, 1, 2] : [-3, -2, -1, 1, 2, 3]));
         } else if (type === 'multiple') {
             ex.answer = total;
-            ex.question = `${a} ${op} ${b} = ?`;
-            ex.choices = this.makeChoices(total, op === '×' ? [-10, -5, 5, 10, -1, 1, 2] : [-2, -1, 1, 2, 3]);
+            ex.question = sk.ask ? sk.ask(a, b, total, false) : `${fmt(a)} ${op} ${fmt(b)} = ?`;
+            ex.choices = this.makeChoices(total, sk.offsetsFor ? sk.offsetsFor(a, b) : sk.choiceOffsets
+                || (op === '÷' ? [-3, -2, -1, 1, 2, 3] : op === '×' ? (b === 10 ? [-20, -10, 10, 20, -1, 1, 100] : [-2 * b, -b, b, 2 * b, -1, 1, 2]) : [-2, -1, 1, 2, 3]));
         } else {
             ex.answer = total;
-            ex.question = `${a} ${op} ${b} = ?`;
+            ex.question = sk.ask ? sk.ask(a, b, total, false) : `${fmt(a)} ${op} ${fmt(b)} = ?`;
         }
         return ex;
     }
@@ -137,7 +196,11 @@ class Engine {
     getExplanation(exercise) {
         const [a, b] = exercise.operands;
         const t = exercise.total;
+        const custom = SKILLS[exercise.skill] && SKILLS[exercise.skill].explain;
+        if (custom) return custom(a, b, t);
         if (exercise.operation === '+') return `${a} et ${b} font ${t} ensemble.`;
+        if (exercise.operation === '−') return `Si on enlève ${b} de ${a}, il en reste ${t}.`;
+        if (b === 10) return `Multiplier par 10, c'est ajouter un zéro : ${a} × 10 = ${t}.`;
         if (b === 2) return `Le double de ${a}, c'est ${a} + ${a} = ${t}.`;
         return `${a} groupes de ${b} font ${t}.`;
     }

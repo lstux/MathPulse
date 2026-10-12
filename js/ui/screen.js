@@ -1,5 +1,9 @@
 // MathPulse - Gestionnaire d'écrans : home, universe, discovery, game, result, parent
 
+// Intro animée : durée de l'animation, puis délai avant le passage automatique à l'accueil
+const INTRO_DURATION_MS = 7200;
+const INTRO_AUTO_SKIP_MS = 5000;
+
 class ScreenManager {
     constructor(appContainer, engine, progression) {
         this.appContainer = appContainer;
@@ -24,9 +28,15 @@ class ScreenManager {
         }
 
         const builders = {
+            intro: () => this.createIntroScreen(data),
             home: () => this.createHomeScreen(),
             universe: () => this.createUniverseScreen(),
-            discovery: () => Discovery.create(data.skillId, () => this.show('game')),
+            scene: () => this.createSceneScreen(data),
+            rapidIntro: () => this.createRapidIntroScreen(),
+            rapidCountdown: () => this.createRapidCountdownScreen(),
+            discovery: () => data.replay
+                ? Discovery.create(data.skillId, () => this.show('parent'), 'Retour')
+                : Discovery.create(data.skillId, () => this.show('game')),
             game: () => this.createGameScreen(),
             result: () => this.createResultScreen(data.summary),
             parent: () => this.createParentScreen()
@@ -44,6 +54,54 @@ class ScreenManager {
         return el;
     }
 
+    // ---------- Intro animée (premier lancement, ou « Revoir l'intro » depuis l'accueil) ----------
+    introSeen() {
+        return !!(storage.get(storage.KEYS.USER_PREFS) || {}).introSeen;
+    }
+
+    markIntroSeen() {
+        const prefs = storage.get(storage.KEYS.USER_PREFS) || {};
+        if (!prefs.introSeen) storage.set(storage.KEYS.USER_PREFS, { ...prefs, introSeen: true });
+    }
+
+    createIntroScreen(data = {}) {
+        const screen = document.createElement('main');
+        screen.className = 'screen active intro-screen';
+        const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.markIntroSeen();
+        const finish = () => this.show('home');
+        screen.innerHTML = `
+            <div class="intro-art" id="intro-art" aria-live="polite"></div>
+            <button class="btn-skip" id="btn-skip-intro">Passer</button>
+            ${data.replay ? '' : '<button class="intro-cover" id="btn-intro-start"><span class="intro-cover-icon" aria-hidden="true">🚀</span><span class="text-xl font-bold">Touche pour commencer</span></button>'}
+        `;
+        const art = screen.querySelector('#intro-art');
+        const skip = screen.querySelector('#btn-skip-intro');
+        // Fin de l'animation : le bouton devient « Continuer › » (discret, avec une jauge de 5 s) puis on passe à l'accueil tout seul
+        const ending = () => {
+            skip.textContent = 'Continuer ›';
+            skip.classList.add('counting');
+            this.later(finish, INTRO_AUTO_SKIP_MS);
+        };
+
+        // Le décor est chargé en ligne (et non en <img>) : l'animation redémarre à chaque affichage
+        const play = () => {
+            fetch('assets/story/intro-anim.svg').then(r => r.text()).then(svg => {
+                if (this.currentScreen !== 'intro') return;
+                art.innerHTML = svg;
+                if (reduced) return ending();
+                this.later(() => Sound.play('crash'), 2050);
+                this.later(ending, INTRO_DURATION_MS);
+            }).catch(ending);
+        };
+        const cover = screen.querySelector('#btn-intro-start');
+        if (cover) cover.addEventListener('click', () => { cover.remove(); play(); });
+        else play();
+
+        skip.addEventListener('click', finish);
+        return screen;
+    }
+
     // Tête d'un personnage (fox | rabbit) dans une expression : content | bravo | think | comfort
     face(who, mood, alt = '') {
         return `<img class="face face-${who}" src="assets/story/expr/${who}-${mood}.svg" alt="${alt}" width="96" height="96">`;
@@ -54,7 +112,7 @@ class ScreenManager {
         const box = screen.querySelector('#mascot');
         if (!box) return;
         const img = box.querySelector('img');
-        img.src = `assets/story/expr/fox-${mood}.svg`;
+        img.src = `assets/story/expr/${this.session && this.session.rapid ? 'rabbit' : 'fox'}-${mood}.svg`;
         box.dataset.mood = mood;
         box.classList.remove('hop', 'tilt', 'nod');
         void box.offsetWidth; // relance l'animation
@@ -91,32 +149,131 @@ class ScreenManager {
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-play">Jouer</button>
                 <button class="btn-secondary" id="btn-parent">Espace parent</button>
+                <button class="btn-secondary" id="btn-intro">🎬 Revoir l'intro</button>
             </div>
-            <p class="text-sm muted">⭐ ${this.progression.getTotalStars()}</p>
+            <p class="text-sm muted">⭐ ${this.progression.getTotalStars()}${Cheat.isOn() ? ' · 🧪 mode test' : ''}</p>
         `;
         screen.querySelector('#btn-play').addEventListener('click', () => this.show('universe'));
         screen.querySelector('#btn-parent').addEventListener('click', () => this.show('parent'));
+        screen.querySelector('#btn-intro').addEventListener('click', () => this.show('intro', { replay: true }));
         return screen;
     }
 
     // ---------- Univers ----------
     createUniverseScreen() {
         const screen = this.screenEl();
+        const universe = new Universe(this.progression);
+        // Une ligne de la lapine avant « C'est parti » (ici et pas pendant la session : elle ne retarde aucune réponse)
+        const line = randomLine(currentChapter(this.progression.getTotalStars()));
         screen.innerHTML = `
-            <div class="universe-wrap">${new Universe(this.progression).render()}</div>
+            <div class="universe-wrap">
+                ${universe.renderHeader()}
+                ${line ? `<div class="rabbit-says" id="rabbit-line">${this.face('rabbit', 'content')}<p class="speech">${line}</p></div>` : ''}
+            </div>
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-start-session">C'est parti !</button>
+                ${this.engine.rapidAvailable() ? '<button class="btn-secondary" id="btn-rapid">⚡ Série rapide</button>' : ''}
                 <button class="btn-secondary" id="btn-back-home">Retour</button>
+            </div>
+            <div class="universe-wrap">
+                <h2 class="text-lg font-bold mb-md">L'histoire</h2>
+                ${universe.renderChapters()}
             </div>
         `;
         screen.querySelector('#btn-start-session').addEventListener('click', () => this.startSession());
+        const rapidBtn = screen.querySelector('#btn-rapid');
+        if (rapidBtn) rapidBtn.addEventListener('click', () => this.show('rapidIntro'));
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
+        screen.querySelectorAll('[data-chapter]').forEach(btn => btn.addEventListener('click', () => {
+            const chapter = CHAPTERS.find(c => c.id === btn.dataset.chapter);
+            this.show('scene', { chapter, replay: true, doneLabel: 'Retour', next: () => this.show('universe') });
+        }));
         return screen;
     }
 
-    startSession() {
+    // Scène d'histoire d'un chapitre ; la première lecture est mémorisée (pas une relecture)
+    createSceneScreen({ chapter, next, doneLabel, replay }) {
+        const done = () => {
+            if (!replay) this.progression.markChapterSeen(chapter.id);
+            next();
+        };
+        return Scenes.create(chapter, { onDone: done, doneLabel });
+    }
+
+    // Bouton « Lire le chapitre » : propose la scène en attente (chapitre ouvert, pas encore lu)
+    readChapterButton(pending) {
+        return pending ? `<button class="btn-primary btn-large" id="btn-read">📖 Lire le chapitre ${pending.number}</button>` : '';
+    }
+
+    bindReadChapter(screen, pending) {
+        const btn = screen.querySelector('#btn-read');
+        if (btn) btn.addEventListener('click', () => this.show('scene', { chapter: pending, doneLabel: 'Continuer', next: () => this.show('universe') }));
+    }
+
+    startRapid() {
         this.session = new Session(this.engine, this.progression);
-        this.session.start();
+        this.session.start({ rapid: true });
+        this.show('game');
+    }
+
+    // Décompte 3 · 2 · 1 · partez ! synchronisé avec le son (bips à 0, 1 et 2 s, son final à 3 s)
+    createRapidCountdownScreen() {
+        const screen = this.screenEl('countdown-screen');
+        screen.innerHTML = `
+            <p class="text-lg muted">Prépare-toi…</p>
+            <div class="countdown" id="countdown" role="status" aria-live="assertive">3</div>
+        `;
+        const el = screen.querySelector('#countdown');
+        const step = (txt, cls) => { el.textContent = txt; el.className = 'countdown ' + (cls || ''); void el.offsetWidth; el.classList.add('beat'); };
+        Sound.play('countdown');
+        el.classList.add('beat');
+        this.later(() => step('2'), 1000);
+        this.later(() => step('1'), 2000);
+        this.later(() => step('Partez !', 'go'), 3000);
+        this.later(() => this.startRapid(), 3400);
+        return screen;
+    }
+
+    // Écran de départ de la série rapide : la lapine explique, sans pression
+    createRapidIntroScreen() {
+        const screen = this.screenEl();
+        screen.innerHTML = `
+            <div class="text-center">
+                <div class="rabbit-says">
+                    ${this.face('rabbit', 'content')}
+                    <p class="speech">Teste tes réflexes !</p>
+                </div>
+                <h1 class="text-2xl font-bold mb-md">⚡ Série rapide</h1>
+                <p class="text-lg muted">5 calculs à la suite. Réponds à ton rythme : chaque réponse rapide charge l'élan de la fusée et peut rapporter des étoiles bonus.</p>
+            </div>
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-rapid-go">Décollage !</button>
+                <button class="btn-secondary" id="btn-back-universe">Retour</button>
+            </div>
+        `;
+        screen.querySelector('#btn-rapid-go').addEventListener('click', () => this.show('rapidCountdown'));
+        screen.querySelector('#btn-back-universe').addEventListener('click', () => this.show('universe'));
+        return screen;
+    }
+
+    // Jauge « élan de la fusée » : une case allumée par réponse rapide
+    elanGauge(fastFlags) {
+        const n = fastFlags.filter(Boolean).length;
+        return `<div class="elan" id="elan" role="img" aria-label="Élan de la fusée : ${n} sur ${RAPID.length}">
+            <span class="elan-label" aria-hidden="true">⚡</span>
+            ${Array.from({ length: RAPID.length }, (_, i) => `<span class="elan-cell${fastFlags[i] ? ' on' : ''}" data-i="${i}"></span>`).join('')}
+        </div>`;
+    }
+
+    startSession(forcedSkill = null) {
+        // Scène d'histoire à lire avant la session (chapitre ouvert, pas encore lu) ; pas en mode test (compétence imposée)
+        const pending = forcedSkill ? null : pendingScene(this.progression.getTotalStars(), this.progression.data.chaptersSeen);
+        if (pending) {
+            this.show('scene', { chapter: pending, doneLabel: 'À toi de jouer !', next: () => this.startSession() });
+            return;
+        }
+        this.session = new Session(this.engine, this.progression);
+        this.session.start(forcedSkill ? { skill: forcedSkill } : {});
         Sound.play('start');
         const skillId = this.session.skill;
         if (!this.progression.hasSeenDiscovery(skillId)) {
@@ -146,7 +303,7 @@ class ScreenManager {
             `<span class="dot ${i < s.currentIndex ? 'done' : i === s.currentIndex ? 'current' : ''}"></span>`).join('');
 
         const answerArea = ex.choices
-            ? `<div class="choices">${ex.choices.map(c => `<button class="choice" data-value="${c}">${c}</button>`).join('')}</div>`
+            ? `<div class="choices">${ex.choices.map(c => `<button class="choice" data-value="${c}">${fmtNum(c)}</button>`).join('')}</div>`
             : `<output class="answer-display empty" id="answer-display" aria-live="polite" aria-label="Ta réponse">?</output>
                <div class="keypad" id="keypad">
                    ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button class="key" data-key="${n}">${n}</button>`).join('')}
@@ -162,13 +319,14 @@ class ScreenManager {
                 <div class="game-top-right"><span class="text-sm">⭐ ${this.progression.getTotalStars()}</span>
                 <button class="btn-sound" id="btn-sound"></button></div>
             </div>
-            <div class="mascot" id="mascot" data-mood="content">${this.face('fox', 'content')}</div>
+            <div class="mascot" id="mascot" data-mood="content">${this.face(s.rapid ? 'rabbit' : 'fox', 'content')}</div>
+            ${s.rapid ? this.elanGauge(s.results.map(r => r.fast)) : ''}
             ${ex.review ? '<p class="review-tag" id="review-tag">🔁 Un calcul à retenter</p>' : ''}
             ${ex.recall ? '<p class="review-tag" id="recall-tag">🔙 Un petit rappel</p>' : ''}
             <div class="question" id="question">${ex.question}</div>
             <div id="visual-slot"></div>
             ${answerArea}
-            <button class="btn-hint" id="btn-hint">${hintLabel()}</button>
+            <button class="btn-hint" id="btn-hint"${s.rapid ? ' hidden' : ''}>${hintLabel()}</button>
             <div id="feedback" class="feedback-container" aria-live="polite"></div>
         `;
 
@@ -203,6 +361,19 @@ class ScreenManager {
             const fb = screen.querySelector('#feedback');
             this.reactFox(screen, result.correct ? 'bravo' : 'comfort', result.correct ? 'hop' : 'tilt');
             Sound.play(result.correct ? 'good' : 'wrong');
+            if (s.rapid) {
+                // Série rapide : retour très court, enchaînement automatique, pas d'explication (les erreurs reviendront en rappel)
+                if (result.fast) {
+                    screen.querySelector(`.elan-cell[data-i="${s.currentIndex}"]`).classList.add('on');
+                    screen.querySelector('#elan').setAttribute('aria-label', `Élan de la fusée : ${s.results.filter(r => r.fast).length} sur ${RAPID.length}`);
+                    this.later(() => Sound.play('fast'), 180);
+                }
+                fb.innerHTML = result.correct
+                    ? `<div class="feedback-success"><p class="text-lg font-bold">${result.fast ? 'Rapide !' : 'Bravo !'}</p></div>`
+                    : `<div class="feedback-error"><p class="text-lg font-bold">Presque ! C'était ${result.answer}.</p></div>`;
+                this.later(advance, result.correct ? 850 : 1700);
+                return;
+            }
             if (result.correct) {
                 fb.innerHTML = `<div class="feedback-success"><p class="text-lg font-bold">Bravo !</p></div>`;
                 this.later(advance, 1100);
@@ -226,9 +397,10 @@ class ScreenManager {
             const display = screen.querySelector('#answer-display');
             const press = key => {
                 if (answered) return;
+                if (/^\d$/.test(key)) s.noteInput();
                 if (key === 'ok') return submit(typed);
                 if (key === 'del') typed = typed.slice(0, -1);
-                else if (typed.length < 3) typed = (typed + key).replace(/^0+(?=\d)/, '');
+                else if (typed.length < 4) typed = (typed + key).replace(/^0+(?=\d)/, '');
                 display.textContent = typed || '?';
                 display.classList.toggle('empty', !typed);
             };
@@ -261,17 +433,20 @@ class ScreenManager {
             screen.querySelector('#visual-slot').innerHTML = Animations.forExercise(ex);
             e.currentTarget.hidden = true;
         });
-        screen.querySelector('#btn-quit').addEventListener('click', () => this.show('universe'));
+        screen.querySelector('#btn-quit').addEventListener('click', () => { s.abandon(); this.show('universe'); });
         this.bindSoundButton(screen.querySelector('#btn-sound'));
         return screen;
     }
 
     // ---------- Résultat ----------
     createResultScreen(summary) {
+        if (summary.rapid) return this.createRapidResultScreen(summary);
         const screen = this.screenEl();
-        const { correct, total, starsEarned, newPlanets, skill, capped, cleared } = summary;
+        const { correct, total, starsEarned, newChapters, skill, capped, cleared, totalStars } = summary;
+        const endLine = chapterEndLine(currentChapter(Math.max(0, totalStars - starsEarned)), starsEarned);
+        const pending = pendingScene(totalStars, this.progression.data.chaptersSeen);
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
-        const planets = newPlanets.map(p => `<p class="unlock text-lg font-bold">${p.emoji} Nouvelle planète : ${p.name} !</p>`).join('');
+        const chapters = newChapters.map(c => `<p class="unlock text-lg font-bold">${c.emoji} Nouveau chapitre : ${c.title} !</p>`).join('');
         const mood = correct === total ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
         const line = { bravo: 'Tu pourrais piloter mon vaisseau !', content: 'Bien joué, on avance !', comfort: 'Pas grave, on réessaie ensemble !' }[mood];
         screen.innerHTML = `
@@ -285,22 +460,66 @@ class ScreenManager {
                     <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
                     <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
+                    ${endLine ? `<p class="story-line text-lg">${endLine}</p>` : ''}
                     ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
                     ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
-                    ${planets}
+                    ${chapters}
                 </div>
             </div>
             <div class="flex flex-col gap-md btn-column">
-                <button class="btn-primary btn-large" id="btn-again">Encore !</button>
+                ${this.readChapterButton(pending)}
+                <button class="${pending ? 'btn-secondary' : 'btn-primary btn-large'}" id="btn-again">Encore !</button>
                 <button class="btn-secondary" id="btn-universe">Mon univers</button>
             </div>
         `;
-        // Sons de fin de session, échelonnés : étoiles, puis calcul acquis, puis planète
+        this.bindReadChapter(screen, pending);
+        // Sons de fin de session, échelonnés : étoiles, puis calcul acquis, puis chapitre
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 3 ? 'stars3' : 'stars'), at); at += 1100; }
         if (cleared > 0) { this.later(() => Sound.play('cleared'), at); at += 1100; }
-        if (newPlanets.length) this.later(() => Sound.play('planet'), at);
+        if (newChapters.length) this.later(() => Sound.play('planet'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.startSession());
+        screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
+        return screen;
+    }
+
+    createRapidResultScreen(summary) {
+        const screen = this.screenEl();
+        const { correct, total, fast, starsEarned, rewarded, newChapters, totalStars } = summary;
+        const pending = pendingScene(totalStars, this.progression.data.chaptersSeen);
+        const mood = correct === total && fast >= total - 1 ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
+        const line = { bravo: 'Décollage réussi ! Plus rapide que mon vaisseau !', content: 'Bien joué, tes réflexes progressent !', comfort: 'Pas grave, la prochaine série sera la bonne !' }[mood];
+        const stars = !rewarded
+            ? '<p class="muted text-sm">Tu as déjà gagné tes étoiles bonus aujourd\'hui : s\'entraîner, c\'est déjà gagner !</p>'
+            : starsEarned > 0
+                ? `<p class="result-stars">${'⭐'.repeat(starsEarned)}</p><p class="muted">+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'} bonus</p>`
+                : '<p class="muted">Pas de bonus cette fois, la prochaine sera la bonne !</p>';
+        const chapters = newChapters.map(c => `<p class="unlock text-lg font-bold">${c.emoji} Nouveau chapitre : ${c.title} !</p>`).join('');
+        screen.innerHTML = `
+            <div class="text-center" id="rapid-result">
+                <div class="rabbit-says" id="rabbit-says" data-mood="${mood}">
+                    ${this.face('rabbit', mood)}
+                    <p class="speech">${line}</p>
+                </div>
+                <h1 class="text-2xl font-bold mb-md">⚡ Série rapide</h1>
+                <div class="result-card">
+                    <p class="text-lg">${correct} sur ${total} réussis · ${fast} ${fast > 1 ? 'réponses rapides' : 'réponse rapide'}</p>
+                    ${this.elanGauge(Array.from({ length: total }, (_, i) => i < fast))}
+                    ${stars}
+                    ${chapters}
+                </div>
+            </div>
+            <div class="flex flex-col gap-md btn-column">
+                ${this.readChapterButton(pending)}
+                <button class="${pending ? 'btn-secondary' : 'btn-primary btn-large'}" id="btn-again">Encore !</button>
+                <button class="btn-secondary" id="btn-universe">Mon univers</button>
+            </div>
+        `;
+        this.bindReadChapter(screen, pending);
+        let at = 150;
+        if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 2 ? 'stars3' : 'stars'), at); at += 1100; }
+        if (newChapters.length) this.later(() => Sound.play('planet'), at);
+        screen.querySelector('#btn-again').addEventListener('click', () => this.show('rapidCountdown'));
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
     }
@@ -309,18 +528,53 @@ class ScreenManager {
     createParentScreen() {
         const screen = this.screenEl('parent-screen');
         const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
-        const cards = SKILL_ORDER.map(id => {
+        const cheat = Cheat.isOn();
+        const playBtn = (id) => cheat ? `<button class="btn-secondary btn-small" data-play="${id}">▶ Jouer cette compétence</button>` : '';
+        const card = (id) => {
             const st = this.progression.getSkillStats(id);
-            if (!st) return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">Pas encore pratiquée</p></div>`;
+            if (!st) {
+                const req = SKILLS[id].requires;
+                const note = this.engine.isWaiting(id) ? `⏳ Prête : elle démarrera dès qu'une des ${PROGRESS_CAP.max} compétences en cours sera maîtrisée`
+                    : this.engine.isUnlocked(id) ? 'Pas encore pratiquée'
+                    : `🔒 Se débloque avec ${SKILLS[req.skill].name} niveau ${req.level} (${this.stars(req.level)})`;
+                return `<div class="skill-card"><div class="skill-head"><h3>${SKILLS[id].name}</h3><span>${this.stars(0)}</span></div><p class="muted text-sm">${note}</p>${playBtn(id)}</div>`;
+            }
             const w = this.progression.windowStats(st);
             const acc = Math.round(w.accuracy);
             return `<div class="skill-card">
                 <div class="skill-head"><h3>${SKILLS[id].name}</h3><span aria-label="Maîtrise ${st.mastery_level} sur 3">${this.stars(st.mastery_level)}</span></div>
-                <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s en moyenne</p>
+                <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s de réflexion en moyenne</p>
+                ${playBtn(id)}
             </div>`;
+        };
+        const axisLabel = (id) => SKILLS[id].axis || `${SKILLS[id].operation}${SKILLS[id].factor || SKILLS[id].divisor}`;
+        const cards = PATHS.map(path => {
+            const levels = path.skills.map(id => this.progression.getMasteryLevel(id));
+            const mastered = levels.filter(l => l >= 3).length;
+            const started = levels.filter(l => l >= 1).length;
+            const percent = levels.reduce((x, y) => x + y, 0) / (3 * levels.length) * 100;
+            const radar = path.radar
+                ? `<div class="radar-wrap">${Charts.radar(path.radar.map(id => ({ label: axisLabel(id), value: this.progression.getMasteryLevel(id) })), { title: path.name })}
+                   <p class="muted text-sm text-center">Du centre vers l'extérieur : vu, en cours, maîtrisé ⭐⭐⭐</p></div>`
+                : '';
+            return `<section class="path">
+                <div class="path-head"><h2 class="text-lg font-bold">${path.emoji} ${path.name}</h2><span class="muted text-sm">${mastered}/${path.skills.length} maîtrisées</span></div>
+                ${Charts.bar(percent, `Progression ${path.name}`)}
+                <p class="muted text-sm mb-md">${started} sur ${path.skills.length} commencées</p>
+                ${radar}
+                <details class="path-details"><summary>Détail par compétence</summary>
+                    <div class="flex flex-col gap-md">${path.skills.map(card).join('')}</div>
+                </details>
+            </section>`;
         }).join('');
+        // étoiles gagnées par jour (7 derniers jours)
+        const days = Array.from({ length: 7 }, (_, k) => {
+            const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (6 - k));
+            const stars = history.filter(h => new Date(h.at).toDateString() === d.toDateString()).reduce((x, h) => x + (h.starsEarned || 0), 0);
+            return { label: d.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3), stars };
+        });
         const recent = history.slice(-5).reverse().map(h =>
-            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill} · ${h.correct}/${h.total}</li>`).join('');
+            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${h.rapid ? 'Série rapide ⚡' : (SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill)} · ${h.abandoned ? `abandon (question ${h.at_question}/${h.total})` : `${h.correct}/${h.total}`}</li>`).join('');
 
         const pending = this.progression.getPendingErrors();
         const toReview = pending.length
@@ -331,11 +585,23 @@ class ScreenManager {
         screen.innerHTML = `
             <div class="parent-wrap">
                 <h1 class="text-2xl font-bold mb-md">Progression</h1>
-                <p class="mb-lg">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
-                <div class="flex flex-col gap-md mb-lg">${cards}</div>
+                <p class="mb-md">Étoiles collectées : <strong>⭐ ${this.progression.getTotalStars()}</strong></p>
+                <p class="mb-lg" id="in-progress">Compétences en cours : <strong>${this.engine.inProgressSkills().length} / ${PROGRESS_CAP.max}</strong>${this.engine.inProgressSkills().length ? ` <span class="muted text-sm">(${this.engine.inProgressSkills().map(id => SKILLS[id].name).join(', ')})</span>` : ''}</p>
+                ${cheat ? `<div class="cheat-panel" id="cheat-panel"><p>🧪 <strong>Mode test activé</strong> : seuils réduits (niveau 2 dès 1 réponse, niveau 3 dès 2), tout est débloqué, plafond levé. Ouvre une compétence et appuie sur ▶ Jouer.</p>
+                    <button class="btn-secondary btn-small" id="btn-cheat-off">Désactiver le mode test</button></div>` : ''}
+                ${cards}
+                <h2 class="text-lg font-bold mb-md">⭐ Étoiles des 7 derniers jours</h2>
+                <div class="mb-lg">${Charts.week(days)}</div>
                 ${toReview}
                 <h2 class="text-lg font-bold mb-md">Dernières sessions</h2>
                 <ul class="history mb-lg">${recent || '<li class="muted">Aucune session pour l\'instant</li>'}</ul>
+                <h2 class="text-lg font-bold mb-md">Revoir les explications</h2>
+                <div class="mb-lg">
+                    ${PATHS.map(p => `<details class="path-details replay-path"><summary>${p.emoji} ${p.name}</summary>
+                        <div class="replay-list">${p.skills.map(id => `<button class="btn-secondary" data-replay="${id}">${SKILLS[id].name}</button>`).join('')}</div>
+                    </details>`).join('')}
+                </div>
+                <p class="muted text-sm mb-md" id="app-version">Version ${APP_VERSION} (${APP_BUILD})</p>
                 <div class="flex flex-col gap-md">
                     <button class="btn-secondary" id="btn-sound-parent"></button>
                     <button class="btn-secondary" id="btn-export">Exporter les données</button>
@@ -346,6 +612,17 @@ class ScreenManager {
         `;
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
         this.bindSoundButton(screen.querySelector('#btn-sound-parent'), true);
+        // « cheat code » : 7 appuis rapprochés sur la ligne de version
+        const toggleCheat = (on) => { Cheat.set(on); this.progression.recomputeAll(); this.show('parent'); };
+        let taps = 0, tapTimer = null;
+        screen.querySelector('#app-version').addEventListener('click', () => {
+            taps++; clearTimeout(tapTimer); tapTimer = setTimeout(() => { taps = 0; }, 1500);
+            if (taps >= 7) toggleCheat(!Cheat.isOn());
+        });
+        const off = screen.querySelector('#btn-cheat-off');
+        if (off) off.addEventListener('click', () => toggleCheat(false));
+        screen.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => this.startSession(b.dataset.play)));
+        screen.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => this.show('discovery', { skillId: b.dataset.replay, replay: true })));
         screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
         screen.querySelector('#btn-reset').addEventListener('click', () => {
             if (confirm('Effacer toute la progression de cet appareil ? Cette action est définitive.')) {

@@ -1,12 +1,15 @@
-// MathPulse - Univers : fusée, renard 🦊, étoiles et planètes (données dans skills.js → PLANETS)
+// MathPulse - Univers : fusée, renard 🦊, étoiles et chapitres de l'histoire (données dans chapters.js → CHAPTERS)
 
 class Universe {
     constructor(progression) {
         this.stars = progression.getTotalStars();
-        this.max = PLANETS[PLANETS.length - 1].unlockAt;
+        this.max = CHAPTERS[CHAPTERS.length - 1].unlockAt;
+        const unlocked = chaptersUnlockedAt(this.stars);
+        this.currentId = unlocked[unlocked.length - 1].id;   // le dernier chapitre ouvert
     }
 
-    render() {
+    // Haut de l'écran : étoiles, fusée, progression et prochain objectif
+    renderHeader() {
         const pct = Math.min(100, Math.round((this.stars / this.max) * 100));
         return `
             <div class="universe-container">
@@ -20,10 +23,6 @@ class Universe {
                     <div class="fox" aria-hidden="true">🦊</div>
                 </div>
 
-                <div class="planets-container mb-lg">
-                    ${PLANETS.map(p => this.renderPlanet(p)).join('')}
-                </div>
-
                 <div class="progress-bar mb-md">
                     <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${this.max}" aria-valuenow="${Math.min(this.stars, this.max)}">
                         <div class="progress-fill" style="width:${pct}%"></div>
@@ -34,20 +33,49 @@ class Universe {
             </div>`;
     }
 
-    renderPlanet(planet) {
-        const unlocked = this.stars >= planet.unlockAt;
+    renderChapters() {
         return `
-            <div class="planet-card ${unlocked ? 'unlocked' : 'locked'}">
-                <div class="planet-emoji" aria-hidden="true">${unlocked ? planet.emoji : '🔒'}</div>
-                <div class="planet-name">${planet.name}</div>
-                <div class="planet-goal text-sm">${unlocked ? 'Débloquée !' : `${planet.unlockAt} ⭐`}</div>
-            </div>`;
+            <ol class="chapters-list" aria-label="Les chapitres de l'histoire">
+                ${CHAPTERS.map(c => this.renderChapter(c)).join('')}
+            </ol>`;
+    }
+
+    render() {
+        return this.renderHeader() + this.renderChapters();
+    }
+
+    // Un chapitre verrouillé cache son titre : on découvre l'histoire au fur et à mesure
+    renderChapter(chapter) {
+        const unlocked = this.stars >= chapter.unlockAt;
+        if (!unlocked) {
+            return `
+            <li class="chapter-card locked">
+                <div class="chapter-emoji" aria-hidden="true">🔒</div>
+                <div class="chapter-body">
+                    <div class="chapter-number text-sm">Chapitre ${chapter.number}</div>
+                    <div class="chapter-title">À découvrir</div>
+                </div>
+                <div class="chapter-goal text-sm">${chapter.unlockAt} ⭐</div>
+            </li>`;
+        }
+        const current = chapter.id === this.currentId;
+        return `
+            <li class="chapter-card unlocked${current ? ' current' : ''}"${current ? ' aria-current="step"' : ''}>
+                <div class="chapter-emoji" aria-hidden="true">${chapter.emoji}</div>
+                <div class="chapter-body">
+                    <div class="chapter-number text-sm">Chapitre ${chapter.number}</div>
+                    <div class="chapter-title">${chapter.title}</div>
+                    <div class="chapter-mission text-sm">${chapter.mission}</div>
+                    ${current ? '<div class="chapter-tag text-sm">En cours</div>' : ''}
+                </div>
+                ${chapter.scene ? `<button class="chapter-replay" data-chapter="${chapter.id}" aria-label="Revoir la scène du chapitre ${chapter.number}">Revoir</button>` : ''}
+            </li>`;
     }
 
     nextGoalText() {
-        const next = PLANETS.find(p => this.stars < p.unlockAt);
-        if (!next) return 'Bravo ! Tu as exploré toutes les planètes !';
+        const next = nextChapter(this.stars);
+        if (!next) return 'Bravo ! Tu as débloqué toute l\'histoire. À suivre…';
         const left = next.unlockAt - this.stars;
-        return `Encore ${left} ${left > 1 ? 'étoiles' : 'étoile'} pour atteindre ${next.name} !`;
+        return `Encore ${left} ${left > 1 ? 'étoiles' : 'étoile'} pour le chapitre ${next.number} !`;
     }
 }

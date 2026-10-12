@@ -5,7 +5,7 @@
 
 class Progression {
     constructor() {
-        this.data = { version: 1, skills: {}, totalStars: 0, discovered: {}, errors: {} };
+        this.data = { version: 1, skills: {}, totalStars: 0, discovered: {}, errors: {}, chaptersSeen: {} };
     }
 
     load() {
@@ -15,7 +15,8 @@ class Progression {
             skills: this.migrateSkills(saved.skills || {}),
             totalStars: Number.isFinite(saved.totalStars) ? saved.totalStars : 0,
             discovered: saved.discovered || {},
-            errors: saved.errors || {}   // calculs à revoir, indexés par exercise.key
+            errors: saved.errors || {},   // calculs à revoir, indexés par exercise.key
+            chaptersSeen: saved.chaptersSeen || {}   // scènes d'histoire déjà lues { idDuChapitre: true } (champ ajouté : les anciennes données n'en ont pas, version inchangée)
         };
     }
 
@@ -48,10 +49,16 @@ class Progression {
         // Fenêtre glissante : c'est elle qui décide de la maîtrise
         skill.recent.push({ c: correct ? 1 : 0, t });
         if (skill.recent.length > MASTERY.window) skill.recent.splice(0, skill.recent.length - MASTERY.window);
-        skill.mastery_level = this.computeMastery(skill);
+        skill.mastery_level = this.computeMastery(skill, skillId);
 
         this.save();
         return skill;
+    }
+
+    // Recalcule la maîtrise de toutes les compétences (après activation / désactivation du mode test)
+    recomputeAll() {
+        Object.entries(this.data.skills).forEach(([id, s]) => { s.mastery_level = this.computeMastery(s, id); });
+        this.save();
     }
 
     // Données d'avant la fenêtre glissante : on la reconstitue à partir des totaux (proportions, temps moyen)
@@ -74,10 +81,12 @@ class Progression {
         };
     }
 
-    computeMastery(skill) {
+    computeMastery(skill, skillId) {
         const w = this.windowStats(skill);
-        const l3 = MASTERY.level3, l2 = MASTERY.level2;
-        if (w.n >= l3.minSeen && w.accuracy >= l3.minAccuracy && w.avgMs <= l3.maxAvgMs) return 3;
+        const M = Cheat.mastery();   // seuils réduits en mode test
+        const l3 = M.level3, l2 = M.level2;
+        const maxAvgMs = Cheat.isOn() ? Infinity : (SKILLS[skillId] && SKILLS[skillId].maxAvgMs) || l3.maxAvgMs;   // seuil propre à la compétence, sinon général
+        if (w.n >= l3.minSeen && w.accuracy >= l3.minAccuracy && w.avgMs <= maxAvgMs) return 3;
         if (w.n >= l2.minSeen && w.accuracy >= l2.minAccuracy) return 2;
         return 1;
     }
@@ -154,6 +163,15 @@ class Progression {
             stats[skillId] = { name: SKILLS[skillId] ? SKILLS[skillId].name : skillId, ...skillData };
         }
         return stats;
+    }
+
+    hasSeenChapter(chapterId) {
+        return !!this.data.chaptersSeen[chapterId];
+    }
+
+    markChapterSeen(chapterId) {
+        this.data.chaptersSeen[chapterId] = true;
+        this.save();
     }
 
     hasSeenDiscovery(skillId) {

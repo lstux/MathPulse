@@ -1,6 +1,6 @@
 # MathPulse — Plan vers la bêta puis la release candidate
 
-_Rédigé le 6 octobre 2026. Les dates sont indicatives et supposent quelques soirées de travail par semaine ; elles se décalent si le rythme change. Les questions Q1 à Q13 renvoient à [`revue-mvp.md`](revue-mvp.md)._
+_Rédigé le 6 octobre 2026 (mis à jour le 8). Contenu au-delà de la 1.0 : voir [`parcours-etendu.md`](parcours-etendu.md) (tables ×3 à ×9, divisions, grands nombres). Les dates sont indicatives et supposent quelques soirées de travail par semaine ; elles se décalent si le rythme change. Les questions Q1 à Q13 renvoient à [`revue-mvp.md`](revue-mvp.md)._
 
 ## Vue d'ensemble
 
@@ -28,7 +28,8 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Mélange des notions | ✅ **Fait** (8 oct.) : sessions à 60 % compétence ciblée / 40 % rappels (calculs ratés d'abord, puis autres compétences déjà pratiquées), questions 2 et 4 | — |
 | Maîtrise plus juste | ✅ **Fait** : fenêtre glissante de 20 réponses (Q3, 8 oct., anciennes données migrées) ; coups de pouce (Q1) | — |
 | Pavé numérique | ✅ **Fait** (le 6 oct.) : grandes touches, ⌫, ✓, clavier physique | — |
-| Journal d'usage local | Enregistrer abandons (✕), usage de l'aide, temps par question dans l'historique | S |
+| Journal d'usage local | ✅ **Fait** (8 oct.) : historique par question (réflexion, temps total, aide, revue/rappel), abandons (✕) tracés, version + commit affichés dans l'espace parent | — |
+| Temps de maîtrise | ✅ **Fait** (8 oct.) : le temps compté est celui de réflexion (jusqu'au premier chiffre tapé) ; niveau 3 = moyenne ≤ 5 s (d'après les premiers tests) | — |
 
 **Critères de sortie :**
 - [ ] Tests unitaires et smoke verts en CI sur chaque push.
@@ -46,9 +47,10 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 
 | Chantier | Détail | Taille |
 |---|---|---|
-| Contenu | Soustraction simple (animation de retrait) et ×10, ajustés au niveau réel de l'enfant testeur (Q9) | M |
-| Mini-jeu « série rapide » | 5 calculs enchaînés, sans pression visible (spec §9, §27) | M |
+| Contenu | ✅ **Fait** (8 oct.) : soustraction simple (a − b, reste ≥ 1, animation de retrait, débloquée après Additions niveau 2) et ×10 (paquets de 10, débloqué après ×2 niveau 2) ; à ajuster au niveau réel de l'enfant testeur (Q9) | — |
+| Mini-jeu « série rapide » | ✅ **Fait** (8 oct.) : 5 calculs enchaînés sur compétences niveau ≥ 2, lapine, jauge « élan de la fusée » qui se remplit (jamais ne se vide), bonus jusqu'à 2⭐ (5/5 + ≥ 4 réponses ≤ 5 s), 2 séries récompensées par jour, sans coup de pouce | — |
 | Identité visuelle | Fusée, renard et planètes en SVG, états du renard (content, encourageant) (Q10) | L |
+| Intro, décompte, replay | ✅ **Fait** (8 oct.) : intro animée au premier lancement (vaisseau qui s'écrase, renard, puis la lapine arrive et il n'en revient pas ; bouton discret, passage automatique 5 s après la fin), « Revoir l'intro » sur l'accueil ; décompte 3-2-1 sonore avant la série rapide ; « Revoir les explications » dans l'espace parent | — |
 | Accessibilité | Passage axe/Lighthouse mesuré, navigation clavier complète, annonces lecteur d'écran, test avec animations réduites | M |
 | Appareils réels | Android Chrome (installation), iPhone/iPad Safari (écran d'accueil), PC ; vérifier la persistance des données (Q12) | M |
 | Mise à jour de la PWA | Message « nouvelle version disponible » quand le service worker se met à jour | S |
