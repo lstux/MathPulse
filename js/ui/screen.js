@@ -20,6 +20,8 @@ class ScreenManager {
     }
 
     show(name, data = {}) {
+        // Ambiance sonore de l'écran : celle du chapitre (scène ou univers), silence ailleurs
+        Sound.ambience(this.ambienceFor(name, data));
         this.timers.forEach(clearTimeout);
         this.timers = [];
         if (this.keyHandler) {
@@ -46,6 +48,15 @@ class ScreenManager {
         this.appContainer.appendChild(screen);
         this.currentScreen = name;
         window.scrollTo(0, 0);
+    }
+
+    ambienceFor(name, data = {}) {
+        if (name === 'scene' && data.chapter) return data.chapter.ambience || null;
+        if (name === 'universe') {
+            const chapter = currentChapter(this.progression.getTotalStars());
+            return chapter ? chapter.ambience || null : null;
+        }
+        return null;
     }
 
     screenEl(extraClass = '') {
@@ -167,6 +178,7 @@ class ScreenManager {
         const line = randomLine(currentChapter(this.progression.getTotalStars()));
         screen.innerHTML = `
             <div class="universe-wrap">
+                <div class="sound-row"><button class="btn-sound" id="btn-sound-universe"></button></div>
                 ${universe.renderHeader()}
                 ${line ? `<div class="rabbit-says" id="rabbit-line">${this.face('rabbit', 'content')}<p class="speech">${Scenes.fr(line)}</p></div>` : ''}
             </div>
@@ -180,6 +192,7 @@ class ScreenManager {
                 ${universe.renderChapters()}
             </div>
         `;
+        Sound.bindButton(screen.querySelector('#btn-sound-universe'));
         screen.querySelector('#btn-start-session').addEventListener('click', () => this.startSession());
         const rapidBtn = screen.querySelector('#btn-rapid');
         if (rapidBtn) rapidBtn.addEventListener('click', () => this.show('rapidIntro'));

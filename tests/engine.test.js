@@ -184,6 +184,12 @@ test('scènes: tous les chapitres complets, vignettes courtes, décors et person
     }
 });
 
+test('ambiances: chaque chapitre a une ambiance connue, applaudissements à la fin du chapitre 13', () => {
+    for (const c of CHAPTERS) assert.ok(['nature', 'ship', 'space'].includes(c.ambience), `ambiance connue au chapitre ${c.number}`);
+    assert.strictEqual(CHAPTERS[12].sfx, 'applause');
+    assert.ok(CHAPTERS.slice(0, 12).every(c => !c.sfx), 'un seul son de fin, au dernier chapitre');
+});
+
 test('scènes: scène à lire = premier chapitre ouvert avec scène non lue', () => {
     assert.strictEqual(pendingScene(0, {}).id, 'lapine');
     assert.strictEqual(pendingScene(0, { lapine: true }), null, 'au départ, seul le chapitre 1 est ouvert');

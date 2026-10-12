@@ -27,6 +27,17 @@ Tous les effets sonores viennent de **Mixkit** et sont libres d'utilisation (gra
 | `crash.mp3` | `mixkit-wrong-electricity-buzz-955.mp3` | Wrong electricity buzz | Intro : le vaisseau s'écrase |
 | `cleared.mp3` | `mixkit-positive-notification-951.mp3` | Positive notification | Un calcul qui résistait est acquis |
 
+## Ambiances et applaudissements (histoire)
+
+| Fichier utilisé | Source | Titre Mixkit | Usage |
+|---|---|---|---|
+| `amb-nature.mp3` | `bank/mixkit-night-crickets-near-the-swamp-1782.mp3` | Night crickets near the swamp | Ambiance forêt (chapitres 1, 2, 13) |
+| `amb-ship.mp3` | `bank/mixkit-cinematic-room-tone-loop-3199.mp3` | Cinematic room tone loop | Ambiance vaisseau (chapitres 3 à 10) |
+| `applause.mp3` | `bank/mixkit-end-of-show-clapping-crowd-477.mp3` | End of show clapping crowd | Fin de la scène du chapitre 13 |
+| `amb-space.mp3` | **Généré par MathPulse** (synthèse : trois notes graves et un souffle, sans échantillon externe) | — | Ambiance espace (chapitres 11 et 12) |
+
+`amb-space.mp3` n'a pas de source externe : il a été fabriqué pour ce projet, il n'y a donc pas de licence tierce à mentionner.
+
 ## Sons disponibles mais non utilisés
 
 `bank/` contient aussi : correct-answer-tone-2870, correct-positive-notification-957, game-show-wrong-answer-buzz-950, retro-arcade-casino-notification-211. Écartés volontairement (trop agressifs ou mettant la pression).

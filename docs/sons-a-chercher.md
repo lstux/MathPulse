@@ -2,6 +2,11 @@
 
 _Liste de courses sonore pour l'histoire du renard 🦊 et de la lapine 🐰. Rédigée le 12 octobre 2026. Elle complète [`assets/sounds/CREDITS.md`](../assets/sounds/CREDITS.md), qui décrit les 11 sons déjà utilisés par le jeu._
 
+## État (12 octobre 2026)
+
+- **Reçus et câblés :** `amb-nature` (forêt), `amb-ship` (vaisseau), `amb-space` (espace, fabriqué par MathPulse faute de bon son sur Mixkit), `applause` (fin du chapitre 13).
+- **Restent à trouver, priorité 1 :** `scene-open`, `scene-next`, `voice-blip`, `chapter-unlock`, `airlock-close`, `launch`, `landing`.
+
 ## Décisions
 
 - **Ambiances activées par défaut**, à volume très bas, **seulement pendant les scènes d'histoire et sur l'écran Univers** (jamais pendant les questions).

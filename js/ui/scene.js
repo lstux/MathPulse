@@ -20,7 +20,10 @@ const Scenes = {
         screen.innerHTML = `
             <div class="scene-top">
                 <p class="scene-chapter">Chapitre ${chapter.number} · ${chapter.title}</p>
-                <button class="btn-scene-skip" id="btn-scene-skip">Passer</button>
+                <div class="scene-top-actions">
+                    <button class="btn-sound" id="btn-sound-scene"></button>
+                    <button class="btn-scene-skip" id="btn-scene-skip">Passer</button>
+                </div>
             </div>
             <div class="scene-stage" id="scene-stage" aria-hidden="true"></div>
             <div class="scene-lines" id="scene-lines" aria-live="polite"></div>
@@ -60,9 +63,10 @@ const Scenes = {
         };
 
         next.addEventListener('click', () => {
-            if (index < vignettes.length - 1) { index++; draw(); } else finish();
+            if (index < vignettes.length - 1) { index++; draw(); } else { if (chapter.sfx) Sound.play(chapter.sfx); finish(); }
         });
         screen.querySelector('#btn-scene-skip').addEventListener('click', finish);
+        Sound.bindButton(screen.querySelector('#btn-sound-scene'));
         draw();
         return screen;
     }
