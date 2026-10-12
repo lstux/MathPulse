@@ -34,6 +34,12 @@ Tous les effets sonores viennent de **Mixkit** et sont libres d'utilisation (gra
 | `amb-nature.mp3` | `bank/mixkit-night-crickets-near-the-swamp-1782.mp3` | Night crickets near the swamp | Ambiance forêt (chapitres 1, 2, 13) |
 | `amb-ship.mp3` | `bank/mixkit-cinematic-room-tone-loop-3199.mp3` | Cinematic room tone loop | Ambiance vaisseau (chapitres 3 à 10) |
 | `applause.mp3` | `bank/mixkit-end-of-show-clapping-crowd-477.mp3` | End of show clapping crowd | Fin de la scène du chapitre 13 |
+| `scene-open.mp3` | `bank/mixkit-air-woosh-1489.mp3` | Air woosh | Ouverture d'une scène (coupé à 1 s) |
+| `scene-next.mp3` | `bank/mixkit-fast-double-click-on-mouse-275.mp3` | Fast double click on mouse | Vignette suivante |
+| `chapter-unlock.mp3` | `bank/mixkit-video-game-treasure-2066.mp3` | Video game treasure | Nouveau chapitre |
+| `airlock-close.mp3` | `bank/mixkit-sci-fi-futuristic-door-open-2527.mp3` (silences retirés) | Sci-fi futuristic door open | Chapitre 11, la porte du sas se referme (le fichier s'appelle « door open ») |
+| `launch.mp3` | `bank/mixkit-fast-rocket-whoosh-1714.mp3` (coupé à 4 s) | Fast rocket whoosh | Chapitre 11, décollage |
+| `landing.mp3` | `bank/mixkit-spaceship-landing-2735.mp3` (coupé à 3 s) | Spaceship landing | Chapitre 13, atterrissage sur la colline |
 | `amb-space.mp3` | **Généré par MathPulse** (synthèse : trois notes graves et un souffle, sans échantillon externe) | — | Ambiance espace (chapitres 11 et 12) |
 
 `amb-space.mp3` n'a pas de source externe : il a été fabriqué pour ce projet, il n'y a donc pas de licence tierce à mentionner.

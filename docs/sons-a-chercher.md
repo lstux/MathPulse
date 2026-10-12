@@ -4,8 +4,9 @@ _Liste de courses sonore pour l'histoire du renard 🦊 et de la lapine 🐰. R�
 
 ## État (12 octobre 2026)
 
-- **Reçus et câblés :** `amb-nature` (forêt), `amb-ship` (vaisseau), `amb-space` (espace, fabriqué par MathPulse faute de bon son sur Mixkit), `applause` (fin du chapitre 13).
-- **Restent à trouver, priorité 1 :** `scene-open`, `scene-next`, `voice-blip`, `chapter-unlock`, `airlock-close`, `launch`, `landing`.
+- **Reçus et câblés :** `amb-nature`, `amb-ship`, `amb-space` (fabriqué par MathPulse), `applause`, `scene-open`, `scene-next`, `chapter-unlock`, `airlock-close`, `launch`, `landing`.
+- **Abandonné :** `voice-blip` (pas de blip de voix pour l'instant).
+- **Priorité 1 : complète.** Priorité 2 et 3 à chercher plus tard.
 
 ## Décisions
 

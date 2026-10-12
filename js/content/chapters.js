@@ -255,9 +255,9 @@ const CHAPTERS = [
         scene: [
             { art: 'airlock', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Merci pour tout, renard. Sans toi, je serais encore là." }] },
-            { art: 'airlock-closed', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'airlock-close', art: 'airlock-closed', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'worried', text: "Euh… la porte ?" }] },
-            { art: 'porthole-earth', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'launch', art: 'porthole-earth', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'surprise', text: "Je n'avais pas prévu ça. Comment je rentre ?!" }] },
             { art: 'fuel', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'comfort', text: "Respire. S'il reste assez pour revenir, je te ramène. 83 moins 27 ?" },
@@ -307,7 +307,7 @@ const CHAPTERS = [
             { art: 'earth-top', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Et le double de 35 ? Pour les freins, 7 fois 100 ?" },
                 { who: 'fox', mood: 'bravo', text: "70 ! Et 700 !" }] },
-            { art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'landing', art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'comfort', text: "Tu vas me manquer." },
                 { who: 'rabbit', mood: 'content', text: "Et toi à moi." }] },
             { art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [

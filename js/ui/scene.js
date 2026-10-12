@@ -52,6 +52,7 @@ const Scenes = {
                 + `<div class="scene-cast">${v.cast.map(m =>
                     `<img class="cast ${m.at}${m.small ? ' small' : ''}${role(m.who)}" src="assets/story/${m.who}-full.svg" alt="">`).join('')}</div>`;
             lines.innerHTML = v.lines.map(lineHtml).join('');
+            if (v.sfx) Sound.play(v.sfx);
             dots.innerHTML = vignettes.map((_, i) => `<span class="scene-dot${i === index ? ' on' : ''}"></span>`).join('');
             next.textContent = index < vignettes.length - 1 ? 'Suite ›' : doneLabel;
         };
@@ -63,10 +64,11 @@ const Scenes = {
         };
 
         next.addEventListener('click', () => {
-            if (index < vignettes.length - 1) { index++; draw(); } else { if (chapter.sfx) Sound.play(chapter.sfx); finish(); }
+            if (index < vignettes.length - 1) { index++; Sound.play('scene-next'); draw(); } else { if (chapter.sfx) Sound.play(chapter.sfx); finish(); }
         });
         screen.querySelector('#btn-scene-skip').addEventListener('click', finish);
         Sound.bindButton(screen.querySelector('#btn-sound-scene'));
+        Sound.play('scene-open');
         draw();
         return screen;
     }

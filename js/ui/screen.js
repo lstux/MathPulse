@@ -501,7 +501,7 @@ class ScreenManager {
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 3 ? 'stars3' : 'stars'), at); at += 1100; }
         if (cleared > 0) { this.later(() => Sound.play('cleared'), at); at += 1100; }
-        if (newChapters.length) this.later(() => Sound.play('planet'), at);
+        if (newChapters.length) this.later(() => Sound.play('chapter-unlock'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.startSession());
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
@@ -542,7 +542,7 @@ class ScreenManager {
         this.bindReadChapter(screen, pending);
         let at = 150;
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 2 ? 'stars3' : 'stars'), at); at += 1100; }
-        if (newChapters.length) this.later(() => Sound.play('planet'), at);
+        if (newChapters.length) this.later(() => Sound.play('chapter-unlock'), at);
         screen.querySelector('#btn-again').addEventListener('click', () => this.show('rapidCountdown'));
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
