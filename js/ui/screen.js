@@ -206,6 +206,7 @@ class ScreenManager {
         bindReplay();
         screen.querySelectorAll('.sky-star').forEach(star => star.addEventListener('click', () => {
             screen.querySelectorAll('.sky-star').forEach(s => s.classList.toggle('selected', s === star));
+            Sound.play('star-tap');
             detail.innerHTML = universe.renderChapter(CHAPTERS.find(c => c.id === star.dataset.star));
             bindReplay();
         }));

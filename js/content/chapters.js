@@ -282,12 +282,12 @@ const CHAPTERS = [
             { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'think', text: "Chaque tronçon ajoute sa distance : 38 plus 45 ?" },
                 { who: 'fox', mood: 'content', text: "83 !" }] },
-            { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'asteroid-pass', art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'narrator', text: "Un astéroïde frôle le hublot. Le 🦊 serre les pattes, mais continue de compter." }] },
             { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Tu n'as plus peur ?" },
                 { who: 'fox', mood: 'worried', text: "Si. Mais je calcule quand même : 6 fois 7, quarante-deux !" }] },
-            { art: 'space-beacon-on', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { sfx: 'beacon-ping', art: 'space-beacon-on', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'bravo', text: "Mission accomplie. Regarde, la petite étoile jaune, là-bas : c'est chez moi." }] },
             { art: 'space-home', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Maintenant, on te ramène." }] }

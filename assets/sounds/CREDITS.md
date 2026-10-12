@@ -40,6 +40,9 @@ Tous les effets sonores viennent de **Mixkit** et sont libres d'utilisation (gra
 | `airlock-close.mp3` | `bank/mixkit-sci-fi-futuristic-door-open-2527.mp3` (silences retirés) | Sci-fi futuristic door open | Chapitre 11, la porte du sas se referme (le fichier s'appelle « door open ») |
 | `launch.mp3` | `bank/mixkit-fast-rocket-whoosh-1714.mp3` (coupé à 4 s) | Fast rocket whoosh | Chapitre 11, décollage |
 | `landing.mp3` | `bank/mixkit-spaceship-landing-2735.mp3` (coupé à 3 s) | Spaceship landing | Chapitre 13, atterrissage sur la colline |
+| `star-tap.mp3` | **Généré par MathPulse** (synthèse : notes désaccordées, réverbération courte) | — | Toucher une étoile de la carte du ciel |
+| `beacon-ping.mp3` | **Généré par MathPulse** (synthèse : deux pings qui montent, écho) | — | Chapitre 12, la balise envoie le rapport |
+| `asteroid-pass.mp3` | **Généré par MathPulse** (bruit rose filtré, fondu long) | — | Chapitre 12, un astéroïde frôle le hublot |
 | `amb-space.mp3` | **Généré par MathPulse** (synthèse : trois notes graves et un souffle, sans échantillon externe) | — | Ambiance espace (chapitres 11 et 12) |
 
 `amb-space.mp3` n'a pas de source externe : il a été fabriqué pour ce projet, il n'y a donc pas de licence tierce à mentionner.
