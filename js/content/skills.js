@@ -1,7 +1,7 @@
 // MathPulse - Catalogue des compétences (source unique de vérité)
 
 // Version affichée dans l'espace parent. APP_BUILD est remplacé par le commit lors du déploiement (CI).
-const APP_VERSION = '0.12.0';
+const APP_VERSION = '0.13.0';
 const APP_BUILD = 'dev';
 // Pour ajouter une compétence : une entrée ici + un générateur dans engine.js.
 
@@ -124,6 +124,7 @@ const SKILLS = {
     // Tables mélangées : a × b avec a et b de 2 à 9 (commutativité : 3 × 7 = 7 × 3)
     'multiply-mix': {
         id: 'multiply-mix',
+        axis: '×2-9',
         mixed: [2, 9],
         name: 'Tables mélangées (×2 à ×9)',
         title: 'Toutes les tables',
@@ -403,6 +404,18 @@ const RAPID = { length: 5, minLevel: 2, fastMs: 5000, maxRewardedPerDay: 2 };
 // Mélange des notions : jusqu'à `recallPerSession` questions sur 5 (40 %) reprennent des compétences déjà
 // pratiquées (autres que la compétence du jour). Les calculs à revoir (REVIEW) occupent ces places en priorité.
 const MIX = { recallPerSession: 2 };
+
+// Série libre 🎯 : l'enfant choisit ses compétences (mélangées sur `length` questions, 5 ou 10).
+// Les réponses comptent pour la maîtrise ; étoiles : au plus `maxStars` par série, pour les `maxRewardedPerDay`
+// premières séries libres de la journée, et seulement avec au moins `minRatio` de bonnes réponses.
+const FREE = { lengths: [5, 10], defaultLength: 5, maxStars: 1, minRatio: 0.8, maxRewardedPerDay: 2 };
+
+// Nom court d'une compétence (×4, ÷3, 47+8…), pour les pastilles et l'historique
+function skillShort(id) {
+    const s = SKILLS[id];
+    if (!s) return id;
+    return s.axis || (s.factor ? `${s.operation}${s.factor}` : s.divisor ? `${s.operation}${s.divisor}` : s.name);
+}
 
 // Plafond de compétences « en cours » : au plus `max` compétences commencées et pas encore maîtrisées (niveau < 3)
 // en même temps ; une nouvelle compétence n'est proposée que si la place est libre. Pour ne jamais bloquer

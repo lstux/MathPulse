@@ -830,3 +830,51 @@ test('voie D : ×100, doubles, moitiés, dizaines/centaines/milliers ronds', () 
     const req = { 'multiply-100': 'multiply-10', 'double-100': 'multiply-2', 'half-100': 'double-100', 'add-round': 'tens-add', 'sub-round': 'tens-sub' };
     for (const [id, r] of Object.entries(req)) assert.strictEqual(SKILLS[id].requires.skill, r, id);
 });
+
+test('série libre : mélange des compétences choisies, types variés, pas de doublon', () => {
+    localStorage.clear();
+    const { engine } = setup();
+    for (let n = 0; n < 300; n++) {
+        for (const length of [5, 10]) {
+            const ex = engine.generateFree(['multiply-4', 'multiply-7'], length);
+            assert.strictEqual(ex.length, length);
+            assert.ok(ex.every(e => e.free && ['multiply-4', 'multiply-7'].includes(e.skill)));
+            assert.strictEqual(new Set(ex.map(e => e.key)).size, length, 'pas de doublon');
+            const c4 = ex.filter(e => e.skill === 'multiply-4').length, c7 = ex.filter(e => e.skill === 'multiply-7').length;
+            assert.ok(Math.abs(c4 - c7) <= 1, 'répartition équilibrée');
+            ex.forEach(e => assert.ok(e.type !== 'multiple' || e.choices.includes(e.answer)));
+        }
+    }
+    // une seule compétence, ou des compétences « manquantes » (compléments) et des divisions
+    assert.ok(engine.generateFree(['divide-3'], 5).every(e => e.skill === 'divide-3'));
+    assert.ok(engine.generateFree(['complement-10', 'divide-9', 'add-round'], 10).every(e => e.type !== 'numeric' || e.skill !== 'complement-10'));
+    assert.throws(() => engine.generateFree([], 5));
+    assert.strictEqual(skillShort('multiply-4'), '×4'); assert.strictEqual(skillShort('divide-3'), '÷3'); assert.strictEqual(skillShort('add-units'), '47+8');
+});
+
+test('série libre : maîtrise par compétence, étoiles (≥ 80 %, 1 max, 2 séries/jour), historique', () => {
+    localStorage.clear();
+    const { engine, progression } = setup();
+    const play = (skills, wrong = 0, length = 5) => {
+        const s = new Session(engine, progression);
+        s.start({ free: { skills, length } });
+        s.exercises.forEach((ex, i) => { s.beginQuestion(); s.submitAnswer(i < wrong ? -1 : ex.answer); s.next(); });
+        return s.complete();
+    };
+    let sum = play(['multiply-4', 'multiply-7']);
+    assert.ok(sum.free && sum.correct === 5 && sum.starsEarned === 1 && sum.rewarded && sum.skills.length === 2);
+    assert.ok(progression.getSkillStats('multiply-4') && progression.getSkillStats('multiply-7'), 'chaque compétence compte pour sa maîtrise');
+    sum = play(['divide-3'], 2);
+    assert.strictEqual(sum.starsEarned, 0, '3/5 : pas d\'étoile');
+    assert.ok(sum.rewarded, 'la 2e série du jour est encore éligible (même sans étoile)');
+    sum = play(['multiply-4']); assert.ok(!sum.rewarded && sum.starsEarned === 0, '3e série du jour : plus d\'étoile, même avec 5/5');
+    assert.ok(sum.correct === 5);
+    sum = play(['multiply-4', 'multiply-7'], 2, 10); assert.strictEqual(sum.starsEarned, 0);
+    const h = storage.get(storage.KEYS.SESSION_HISTORY).filter(x => x.free);
+    assert.ok(h.length === 4 && h[0].skills.join() === 'multiply-4,multiply-7' && h[0].answers.length === 5);
+    assert.strictEqual(progression.getTotalStars(), 1);
+    // abandon
+    const s = new Session(engine, progression); s.start({ free: { skills: ['divide-9'], length: 5 } }); s.abandon();
+    const last = storage.get(storage.KEYS.SESSION_HISTORY).slice(-1)[0];
+    assert.ok(last.abandoned && last.free && last.skills[0] === 'divide-9');
+});

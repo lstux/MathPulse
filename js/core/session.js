@@ -16,13 +16,20 @@ class Session {
         this.cleared = 0;
         this.completed = false;
         this.rapid = false;
+        this.free = false;            // série libre : compétences choisies par l'enfant
+        this.freeSkills = [];
         this.summary = null;
     }
 
     // start({ rapid: true }) : série rapide (5 calculs enchaînés, sans coup de pouce ni calcul à revoir)
     start(options = {}) {
         this.rapid = !!options.rapid;
-        if (this.rapid) {
+        this.free = !!options.free;
+        this.freeSkills = this.free ? [...options.free.skills] : [];
+        if (this.free) {
+            this.skill = 'free';
+            this.exercises = this.engine.generateFree(options.free.skills, options.free.length);
+        } else if (this.rapid) {
             this.skill = 'rapid';
             this.exercises = this.engine.generateRapid();
         } else {
@@ -134,12 +141,40 @@ class Session {
         return this.summary;
     }
 
+    // Série libre : au plus FREE.maxStars étoile(s), pour les premières séries de la journée, avec ≥ 80 % de réussite
+    completeFree() {
+        const total = this.results.length;
+        const correct = this.results.filter(r => r.correct).length;
+        const today = new Date().toDateString();
+        const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
+        const rewardedToday = history.filter(h => h.free && h.rewarded && new Date(h.at).toDateString() === today).length;
+        const rewarded = rewardedToday < FREE.maxRewardedPerDay;
+        const good = total > 0 && correct >= Math.ceil(total * FREE.minRatio) && !this.isOverHintQuota();
+        const starsEarned = rewarded && good ? FREE.maxStars : 0;
+        const before = this.progression.getTotalStars();
+        const after = this.progression.addStars(starsEarned);
+        const newChapters = newChaptersBetween(before, after);
+
+        this.summary = {
+            free: true, skill: 'free', skills: this.freeSkills, correct, total, starsEarned, rewarded,
+            hintsUsed: this.hintsUsed, capped: false, reviewed: 0, cleared: this.cleared, totalStars: after, newChapters,
+            avgTime: total ? this.results.reduce((sum, r) => sum + r.time_ms, 0) / total : 0
+        };
+        storage.append(storage.KEYS.SESSION_HISTORY, {
+            at: new Date().toISOString(), skill: 'free', free: true, skills: this.freeSkills, rewarded, correct, total, starsEarned,
+            hintsUsed: this.hintsUsed,
+            answers: this.results.map(r => ({ q: r.question, ok: r.correct, think_ms: r.think_ms, total_ms: r.time_ms, hinted: r.hinted }))
+        });
+        this.completed = true;
+        return this.summary;
+    }
+
     // Session quittée avant la fin (✕) : on garde une trace pour comprendre où l'enfant décroche
     abandon() {
         if (this.completed || this.abandoned || !this.skill) return;
         this.abandoned = true;
         storage.append(storage.KEYS.SESSION_HISTORY, {
-            at: new Date().toISOString(), skill: this.skill, abandoned: true,
+            at: new Date().toISOString(), skill: this.skill, abandoned: true, ...(this.free ? { free: true, skills: this.freeSkills } : {}),
             answered: this.results.length, total: this.exercises.length, hintsUsed: this.hintsUsed,
             at_question: this.currentIndex + 1
         });
@@ -153,6 +188,7 @@ class Session {
     complete() {
         if (this.completed) return this.summary;
         if (this.rapid) return this.completeRapid();
+        if (this.free) return this.completeFree();
         const total = this.results.length;
         const correct = this.results.filter(r => r.correct).length;
         const baseStars = starsForScore(correct);

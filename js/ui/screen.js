@@ -34,11 +34,12 @@ class ScreenManager {
             home: () => this.createHomeScreen(),
             universe: () => this.createUniverseScreen(),
             scene: () => this.createSceneScreen(data),
+            free: () => this.createFreeScreen(),
             rapidIntro: () => this.createRapidIntroScreen(),
             rapidCountdown: () => this.createRapidCountdownScreen(),
             discovery: () => data.replay
                 ? Discovery.create(data.skillId, () => this.show('parent'), 'Retour')
-                : Discovery.create(data.skillId, () => this.show('game')),
+                : Discovery.create(data.skillId, data.then || (() => this.show('game'))),
             game: () => this.createGameScreen(),
             result: () => this.createResultScreen(data.summary),
             parent: () => this.createParentScreen()
@@ -187,6 +188,7 @@ class ScreenManager {
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-start-session">C'est parti !</button>
                 ${this.engine.rapidAvailable() ? '<button class="btn-secondary" id="btn-rapid">⚡ Série rapide</button>' : ''}
+                <button class="btn-secondary" id="btn-free">🎯 Choisir mes exercices</button>
                 <button class="btn-secondary" id="btn-back-home">Retour</button>
             </div>
             <div class="universe-wrap">
@@ -196,6 +198,7 @@ class ScreenManager {
         `;
         Sound.bindButton(screen.querySelector('#btn-sound-universe'));
         screen.querySelector('#btn-start-session').addEventListener('click', () => this.startSession());
+        screen.querySelector('#btn-free').addEventListener('click', () => this.show('free'));
         const rapidBtn = screen.querySelector('#btn-rapid');
         if (rapidBtn) rapidBtn.addEventListener('click', () => this.show('rapidIntro'));
         screen.querySelector('#btn-back-home').addEventListener('click', () => this.show('home'));
@@ -235,6 +238,96 @@ class ScreenManager {
     bindReadChapter(screen, pending) {
         const btn = screen.querySelector('#btn-read');
         if (btn) btn.addEventListener('click', () => this.show('scene', { chapter: pending, doneLabel: 'Continuer', next: () => this.show('universe') }));
+    }
+
+    // ---------- Série libre : l'enfant choisit ses compétences ----------
+    freePrefs() {
+        const p = storage.get(storage.KEYS.USER_PREFS) || {};
+        return { skills: (p.freeSkills || []).filter(id => SKILLS[id]), length: FREE.lengths.includes(p.freeLength) ? p.freeLength : FREE.defaultLength };
+    }
+
+    createFreeScreen() {
+        const screen = this.screenEl('free-screen');
+        const prefs = this.freePrefs();
+        const picked = new Set(prefs.skills);
+        let length = prefs.length;
+        const chip = (id) => {
+            const locked = !this.engine.isUnlocked(id);
+            return `<button class="chip" data-skill="${id}" aria-pressed="false" aria-label="${SKILLS[id].name}${locked ? ' (pas encore débloquée)' : ''}" title="${SKILLS[id].name}">${skillShort(id)}${locked ? ' <span aria-hidden="true">🔒</span>' : ''}</button>`;
+        };
+        screen.innerHTML = `
+            <div class="free-wrap">
+                <h1 class="text-2xl font-bold mb-md">🎯 Choisis tes exercices</h1>
+                <p class="muted mb-md">Touche une ou plusieurs compétences : la série les mélange. 🔒 = pas encore débloquée, tu peux quand même t'entraîner !</p>
+                <div class="free-presets mb-md">
+                    <button class="btn-secondary btn-small" id="pre-tables">Toutes les tables</button>
+                    <button class="btn-secondary btn-small" id="pre-div">Toutes les divisions</button>
+                    <button class="btn-secondary btn-small" id="pre-none">Tout effacer</button>
+                </div>
+                ${PATHS.map(p => `<section class="free-path"><h2 class="text-lg font-bold mb-sm">${p.emoji} ${p.name}</h2><div class="free-chips">${p.skills.map(chip).join('')}</div></section>`).join('')}
+                <div class="free-length" role="group" aria-label="Nombre de questions">
+                    <span>Questions :</span>
+                    ${FREE.lengths.map(n => `<button class="chip" data-len="${n}" aria-pressed="false">${n}</button>`).join('')}
+                </div>
+            </div>
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-free-go">C'est parti !</button>
+                <button class="btn-secondary" id="btn-free-back">Retour</button>
+            </div>
+        `;
+        const go = screen.querySelector('#btn-free-go');
+        const refresh = () => {
+            screen.querySelectorAll('[data-skill]').forEach(b => b.setAttribute('aria-pressed', String(picked.has(b.dataset.skill))));
+            screen.querySelectorAll('[data-len]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.len) === length)));
+            go.disabled = picked.size === 0;
+            go.textContent = picked.size ? `C'est parti ! (${picked.size} choisie${picked.size > 1 ? 's' : ''})` : 'Choisis au moins une compétence';
+        };
+        screen.querySelectorAll('[data-skill]').forEach(b => b.addEventListener('click', () => {
+            const id = b.dataset.skill;
+            picked.has(id) ? picked.delete(id) : picked.add(id);
+            refresh();
+        }));
+        screen.querySelectorAll('[data-len]').forEach(b => b.addEventListener('click', () => { length = Number(b.dataset.len); refresh(); }));
+        const preset = (ids) => { picked.clear(); ids.forEach(id => picked.add(id)); refresh(); };
+        screen.querySelector('#pre-tables').addEventListener('click', () => preset(PATHS.find(p => p.id === 'tables').skills));
+        screen.querySelector('#pre-div').addEventListener('click', () => preset(PATHS.find(p => p.id === 'division').skills));
+        screen.querySelector('#pre-none').addEventListener('click', () => preset([]));
+        go.addEventListener('click', () => {
+            if (!picked.size) return;
+            const skills = SKILL_ORDER.filter(id => picked.has(id));
+            const prefsNow = storage.get(storage.KEYS.USER_PREFS) || {};
+            storage.set(storage.KEYS.USER_PREFS, { ...prefsNow, freeSkills: skills, freeLength: length });
+            this.startFree({ skills, length });
+        });
+        screen.querySelector('#btn-free-back').addEventListener('click', () => this.show('universe'));
+        refresh();
+        return screen;
+    }
+
+    // Démarre une série libre : scène d'histoire en attente, puis découverte des compétences jamais vues, puis le jeu
+    startFree(config) {
+        const pending = pendingScene(this.progression.getTotalStars(), this.progression.data.chaptersSeen);
+        if (pending) {
+            this.show('scene', { chapter: pending, doneLabel: 'À toi de jouer !', next: () => this.startFree(config) });
+            return;
+        }
+        this.freeConfig = config;
+        this.session = new Session(this.engine, this.progression);
+        this.session.start({ free: config });
+        Sound.play('start');
+        const unseen = config.skills.filter(id => !this.progression.hasSeenDiscovery(id));
+        const next = () => {
+            const id = unseen.shift();
+            if (!id) { this.show('game'); return; }
+            this.progression.markDiscovery(id);
+            this.show('discovery', { skillId: id, then: next });
+        };
+        next();
+    }
+
+    // Libellé d'une série libre : « ×4, ×7 » (au plus 3 compétences nommées)
+    freeLabel(skills) {
+        return skills.length <= 3 ? skills.map(skillShort).join(', ') : `${skills.length} compétences`;
     }
 
     startRapid() {
@@ -484,9 +577,11 @@ class ScreenManager {
                 </div>
                 <h1 class="text-2xl font-bold mb-md">${title}</h1>
                 <div class="result-card">
-                    <p class="text-lg">${correct} sur ${total} réussis · ${SKILLS[skill].name}</p>
+                    <p class="text-lg">${correct} sur ${total} réussis · ${summary.free ? `Série libre : ${this.freeLabel(summary.skills)}` : SKILLS[skill].name}</p>
                     <p class="result-stars">${starsEarned > 0 ? '⭐'.repeat(starsEarned) : '—'}</p>
-                    <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}` : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
+                    <p class="muted">${starsEarned > 0 ? `+${starsEarned} ${starsEarned > 1 ? 'étoiles' : 'étoile'}`
+                        : summary.free && !summary.rewarded ? 'Tu as déjà gagné tes étoiles des séries libres aujourd\'hui : s\'entraîner, c\'est déjà gagner !'
+                        : 'Pas d\'étoile cette fois, la prochaine sera la bonne !'}</p>
                     ${endLine ? `<p class="story-line text-lg">${Scenes.fr(endLine)}</p>` : ''}
                     ${capped ? `<p class="muted text-sm">Beaucoup de coups de pouce : ${HINTS.maxStarsOverQuota} étoiles maximum cette fois.</p>` : ''}
                     ${cleared > 0 ? `<p class="cleared text-lg font-bold">🦊 ${cleared > 1 ? `${cleared} calculs qui te résistaient sont maintenant acquis` : 'Un calcul qui te résistait est maintenant acquis'} !</p>` : ''}
@@ -505,7 +600,7 @@ class ScreenManager {
         if (starsEarned > 0) { this.later(() => Sound.play(starsEarned === 3 ? 'stars3' : 'stars'), at); at += 1100; }
         if (cleared > 0) { this.later(() => Sound.play('cleared'), at); at += 1100; }
         if (newChapters.length) this.later(() => Sound.play('chapter-unlock'), at);
-        screen.querySelector('#btn-again').addEventListener('click', () => this.startSession());
+        screen.querySelector('#btn-again').addEventListener('click', () => summary.free ? this.startFree(this.freeConfig || { skills: summary.skills, length: total }) : this.startSession());
         screen.querySelector('#btn-universe').addEventListener('click', () => this.show('universe'));
         return screen;
     }
@@ -574,7 +669,7 @@ class ScreenManager {
                 ${playBtn(id)}
             </div>`;
         };
-        const axisLabel = (id) => SKILLS[id].axis || `${SKILLS[id].operation}${SKILLS[id].factor || SKILLS[id].divisor}`;
+        const axisLabel = skillShort;
         const cards = PATHS.map(path => {
             const levels = path.skills.map(id => this.progression.getMasteryLevel(id));
             const mastered = levels.filter(l => l >= 3).length;
@@ -601,7 +696,7 @@ class ScreenManager {
             return { label: d.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3), stars };
         });
         const recent = history.slice(-5).reverse().map(h =>
-            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${h.rapid ? 'Série rapide ⚡' : (SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill)} · ${h.abandoned ? `abandon (question ${h.at_question}/${h.total})` : `${h.correct}/${h.total}`}</li>`).join('');
+            `<li>${new Date(h.at).toLocaleDateString('fr-FR')} · ${h.rapid ? 'Série rapide ⚡' : h.free ? `Série libre 🎯 : ${this.freeLabel(h.skills || [])}` : (SKILLS[h.skill] ? SKILLS[h.skill].name : h.skill)} · ${h.abandoned ? `abandon (question ${h.at_question}/${h.total})` : `${h.correct}/${h.total}`}</li>`).join('');
 
         const pending = this.progression.getPendingErrors();
         const toReview = pending.length

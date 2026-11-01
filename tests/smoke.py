@@ -178,6 +178,30 @@ with sync_playwright() as p:
     assert pg.locator('#rapid-result').count() == 1, 'résultat de la série rapide attendu'
     assert '+2' in pg.inner_text('#rapid-result'), pg.inner_text('#rapid-result')
     pg.click('#btn-universe')
+    # série libre 🎯 : choisir ×4 et ×7, découvertes des compétences neuves, 5 questions mélangées, résultat « Série libre »
+    pg.click('#btn-free'); pg.wait_for_selector('#btn-free-go')
+    assert pg.is_disabled('#btn-free-go'), 'aucune compétence cochée : le bouton est inactif'
+    pg.click('[data-skill="multiply-4"]'); pg.click('[data-skill="multiply-7"]'); pg.click('[data-len="5"]')
+    assert pg.get_attribute('[data-skill="multiply-4"]', 'aria-pressed') == 'true' and '2 choisies' in pg.inner_text('#btn-free-go')
+    pg.click('#btn-free-go')
+    for _ in range(8):
+        if pg.locator('#question').count(): break
+        if pg.locator('#btn-scene-skip').count(): pg.click('#btn-scene-skip')
+        elif pg.locator('#btn-start-game').count(): pg.click('#btn-start-game')
+        pg.wait_for_timeout(300)
+    seen_ops = set()
+    for _ in range(5):
+        q = pg.inner_text('#question'); seen_ops.add('7' if ' 7 ' in q or q.endswith('7') else '4')
+        ans = solve(q)
+        if pg.locator('.choice').count(): pg.click(f'.choice[data-value="{ans}"]')
+        else:
+            for d in str(ans): pg.click(f'.key[data-key="{d}"]')
+            pg.click('.key[data-key="ok"]')
+        pg.wait_for_timeout(1400)
+    assert 'Série libre : ×4, ×7' in pg.inner_text('.result-card'), pg.inner_text('.result-card')
+    assert pg.evaluate("storage.get(storage.KEYS.SESSION_HISTORY).slice(-1)[0].free") is True
+    assert pg.evaluate("!!window.mathpulse.progression.getSkillStats('multiply-4') && !!window.mathpulse.progression.getSkillStats('multiply-7')")
+    pg.click('#btn-universe')
     # espace parent : version affichée, abandon tracé
     pg.click('#btn-universe') if pg.locator('#btn-universe').count() else None
     pg.evaluate("window.mathpulse.screenManager.show('parent')"); pg.wait_for_timeout(200)

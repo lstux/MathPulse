@@ -130,6 +130,27 @@ class Engine {
         });
     }
 
+    // Série libre : `length` exercices en alternant les compétences choisies (types variés selon le plan de chacune)
+    generateFree(skillIds, length = FREE.defaultLength) {
+        const ids = this.shuffle([...new Set(skillIds)].filter(id => SKILLS[id]));
+        if (!ids.length) throw new Error('Aucune compétence choisie');
+        const turn = {}, offset = {}, seen = new Set(), exercises = [];
+        for (let i = 0; i < length; i++) {
+            const id = ids[i % ids.length], plan = SKILLS[id].plan;
+            if (offset[id] === undefined) { offset[id] = this.randInt(0, plan.length - 1); turn[id] = 0; }
+            const type = plan[(offset[id] + turn[id]++) % plan.length];
+            let ex = null;
+            for (let tries = 0; tries < 30; tries++) {
+                ex = this.generateExercise(id, type);
+                if (!seen.has(ex.key)) break;
+            }
+            seen.add(ex.key);
+            ex.free = true;
+            exercises.push(ex);
+        }
+        return exercises;
+    }
+
     generateExercise(skillId, type = 'numeric') {
         const skill = SKILLS[skillId];
         if (!skill) throw new Error(`Compétence inconnue : ${skillId}`);
