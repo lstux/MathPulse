@@ -2,18 +2,21 @@
 
 🚀 **https://lstux.github.io/MathPulse/**
 
-Jeu de calcul mental pour enfants (~8 ans, CE2), en HTML/CSS/JS sans dépendance, installable (PWA), qui fonctionne hors ligne. Les données restent dans le navigateur (localStorage) : pas de compte, pas de serveur.
+Jeu de calcul mental pour enfants (~8 ans, CE2), en HTML/CSS/JS sans dépendance, installable (PWA), qui fonctionne hors ligne.
 
-**Statut : prototype jouable (pré-bêta).** Voir [`docs/revue-mvp.md`](docs/revue-mvp.md) pour l'état réel et les questions ouvertes, et [`docs/plan-beta-rc.md`](docs/plan-beta-rc.md) pour la suite.
+**Confidentialité :** aucune donnée ne quitte l'appareil. La progression est stockée dans le navigateur (localStorage) ; il n'y a ni compte, ni serveur, ni statistiques d'usage, ni cookie de suivi. La sauvegarde se fait à la main (export / import d'un fichier JSON dans l'espace parent).
+
+**Statut : version 1.0.** Voir [`CHANGELOG.md`](CHANGELOG.md), [`docs/plan-beta-rc.md`](docs/plan-beta-rc.md) (plan et état de la bêta / RC) et [`docs/revue-mvp.md`](docs/revue-mvp.md).
 
 ## Ce qui fonctionne aujourd'hui
 
-- 3 compétences : additions (1–9), ×2, ×5. Sessions de 5 questions : réponse numérique, QCM, nombre manquant.
+- 34 compétences en 4 parcours (additions et soustractions, tables de multiplication, calcul malin, divisions), débloquées progressivement. Sessions de 5 questions : réponse numérique, QCM, nombre manquant. Rappel des calculs ratés et des notions déjà vues.
+- Série rapide (5 calculs enchaînés) et série libre (l'enfant choisit ses exercices).
 - Découverte animée la première fois qu'une compétence est jouée.
 - Erreur = explication visuelle (blocs / groupes), jamais de punition. Bouton « 💡 coup de pouce » pour voir l'illustration avant de répondre : **2 gratuits par session** ; au-delà, la session rapporte 2 étoiles au maximum et les réponses aidées ne comptent plus dans la maîtrise.
 - Saisie par pavé numérique intégré (clavier physique accepté sur ordinateur).
-- Étoiles de session (0–3) qui font avancer la fusée et débloquent les chapitres de l'histoire du renard et de la lapine (10 chapitres, de 0 à 195 étoiles, voir `docs/storyboard-narratif.md`). Maîtrise par compétence (⭐ à ⭐⭐⭐) affichée dans l'espace parent.
-- Espace parent : progression, historique, export JSON, réinitialisation.
+- Étoiles de session (0–3) qui font avancer la fusée et débloquent les chapitres de l'histoire du renard et de la lapine (13 chapitres, voir `docs/storyboard-narratif.md`), avec ambiances et effets sonores. Maîtrise par compétence (⭐ à ⭐⭐⭐) affichée dans l'espace parent.
+- Espace parent : progression, historique, export et import JSON de la progression, réinitialisation.
 - Hors ligne (service worker), thème clair/sombre automatique, animations réduites si demandé par le système.
 
 ## Lancer en local
@@ -63,7 +66,7 @@ Sur téléphone : ouvrir l'adresse dans Chrome (Android) puis « Installer l'app
 
 [Slovingo](https://github.com/lstux/Slovingo) (architecture légère, offline d'abord) et la spec de conception initiale (v0.2).
 
-_Licence : à définir (aucun fichier LICENSE pour l'instant)._
+_Licence : GNU GPL v3 (voir [`LICENSE`](LICENSE))._
 
 ## Sons
 

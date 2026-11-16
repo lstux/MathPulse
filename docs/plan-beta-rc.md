@@ -32,7 +32,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Temps de maîtrise | ✅ **Fait** (8 oct.) : le temps compté est celui de réflexion (jusqu'au premier chiffre tapé) ; niveau 3 = moyenne ≤ 5 s (d'après les premiers tests) | — |
 
 **Critères de sortie :**
-- [ ] Tests unitaires et smoke verts en CI sur chaque push.
+- [x] Tests unitaires et smoke verts en CI sur chaque push.
 - [x] Une erreur réapparaît bien dans la session suivante (test automatique : unitaire + navigateur).
 - [ ] Application accessible en ligne et installable sur au moins un Android.
 - [x] Q1, Q2, Q4, Q5, Q6 tranchées (6 oct.) et consignées dans `revue-mvp.md`.
@@ -49,7 +49,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 |---|---|---|
 | Contenu | ✅ **Fait** (8 oct.) : soustraction simple (a − b, reste ≥ 1, animation de retrait, débloquée après Additions niveau 2) et ×10 (paquets de 10, débloqué après ×2 niveau 2) ; à ajuster au niveau réel de l'enfant testeur (Q9) | — |
 | Mini-jeu « série rapide » | ✅ **Fait** (8 oct.) : 5 calculs enchaînés sur compétences niveau ≥ 2, lapine, jauge « élan de la fusée » qui se remplit (jamais ne se vide), bonus jusqu'à 2⭐ (5/5 + ≥ 4 réponses ≤ 5 s), 2 séries récompensées par jour, sans coup de pouce | — |
-| Identité visuelle | Fusée, renard et planètes en SVG, états du renard (content, encourageant) (Q10) | L |
+| Identité visuelle | ✅ Fait (illustrations SVG, personnages animés). Fusée, renard et planètes en SVG, états du renard (content, encourageant) (Q10) | L |
 | Intro, décompte, replay | ✅ **Fait** (8 oct.) : intro animée au premier lancement (vaisseau qui s'écrase, renard, puis la lapine arrive et il n'en revient pas ; bouton discret, passage automatique 5 s après la fin), « Revoir l'intro » sur l'accueil ; décompte 3-2-1 sonore avant la série rapide ; « Revoir les explications » dans l'espace parent | — |
 | Accessibilité | Passage axe/Lighthouse mesuré, navigation clavier complète, annonces lecteur d'écran, test avec animations réduites | M |
 | Appareils réels | Android Chrome (installation), iPhone/iPad Safari (écran d'accueil), PC ; vérifier la persistance des données (Q12) | M |
@@ -87,7 +87,7 @@ Règle de passage d'une étape à la suivante : **tous les critères de sortie s
 | Mise à jour | Parcours de mise à jour du service worker testé de bout en bout (ancienne version → nouvelle, sans perte) |
 | Documentation | `LICENSE` (Q13), README final, `CHANGELOG.md`, note de confidentialité (« aucune donnée ne quitte l'appareil ») |
 | Finitions | Captures d'écran dans le manifeste, titres/descriptions finaux, page 404 propre, vérification des textes (orthographe, ton) |
-| Publication | Étiquette Git `v1.0.0-rc.1`, déploiement sur l'adresse définitive |
+| Publication | ~~Étiquette Git `v1.0.0-rc.1`~~ (non posée : la RC est validée par le propriétaire le 16 nov., on passe directement à `v1.0.0`), déploiement sur l'adresse définitive |
 
 ### Période d'observation de la RC (1 semaine)
 Utilisation normale par les enfants testeurs, sans aucune nouvelle fonctionnalité. Tout bug trouvé donne une `rc.2`, et la semaine d'observation repart.
@@ -96,8 +96,8 @@ Utilisation normale par les enfants testeurs, sans aucune nouvelle fonctionnalit
 - [ ] Zéro P0 et zéro P1 ouverts ; une semaine complète sans nouveau bug P0/P1.
 - [ ] Tests unitaires, smoke et Lighthouse verts sur la version déployée.
 - [ ] Migration de données et mise à jour du service worker validées.
-- [ ] Licence, changelog et note de confidentialité publiés.
-- [ ] Sauvegarde/export vérifié : une progression exportée se restaure (ajouter un bouton d'import si absent).
+- [x] Licence (GPL-3), changelog et note de confidentialité publiés (README).
+- [x] Sauvegarde/export vérifié : une progression exportée se restaure (bouton « Importer une sauvegarde » ajouté, test automatique d'aller-retour).
 
 ---
 
@@ -116,3 +116,10 @@ Utilisation normale par les enfants testeurs, sans aucune nouvelle fonctionnalit
 1. Activer GitHub Pages (*Source : GitHub Actions*) et vérifier l'adresse sur un téléphone.
 2. ✅ Réapparition des erreurs (fait).
 3. ✅ Maîtrise sur les 20 dernières réponses, puis mélange des notions (faits le 8 oct.).
+
+## Reporté après 1.0 (v1.1)
+
+- Message « nouvelle version disponible » quand le service worker se met à jour.
+- Page 404 propre et captures d'écran dans le manifeste.
+- Passage Lighthouse / axe mesuré et consigné ; vérifications formelles sur iOS.
+- Test automatique de migration entre versions du format de données (le format porte `version: 1`, l'import refuse les fichiers plus récents).

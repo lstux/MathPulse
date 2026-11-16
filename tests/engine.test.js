@@ -878,3 +878,25 @@ test('série libre : maîtrise par compétence, étoiles (≥ 80 %, 1 max, 2 sé
     const last = storage.get(storage.KEYS.SESSION_HISTORY).slice(-1)[0];
     assert.ok(last.abandoned && last.free && last.skills[0] === 'divide-9');
 });
+
+test('export / import : aller-retour, fichier invalide ou trop récent sans effet', () => {
+    const { progression } = setup();
+    storage.set(storage.KEYS.PROGRESSION, { version: 1, skills: {}, totalStars: 7, discovered: {}, errors: {}, chaptersSeen: { c1: true } });
+    storage.set(storage.KEYS.SESSION_HISTORY, [{ date: '2026-11-01' }]);
+    storage.set(storage.KEYS.USER_PREFS, { sound: false, introSeen: true });
+    const exported = JSON.parse(JSON.stringify(storage.exportData()));
+    assert.strictEqual(exported.version, 1);
+    storage.resetAll();
+    assert.strictEqual(storage.get(storage.KEYS.PROGRESSION).totalStars, 0);
+    assert.deepStrictEqual(storage.importData(exported), { ok: true });
+    progression.load();
+    assert.strictEqual(progression.getTotalStars(), 7);
+    assert.ok(progression.data.chaptersSeen.c1);
+    assert.strictEqual(storage.get(storage.KEYS.SESSION_HISTORY).length, 1);
+    assert.strictEqual(storage.get(storage.KEYS.USER_PREFS).introSeen, true);
+    // refus : rien n'est écrit
+    assert.strictEqual(storage.importData({ app: 'autre', version: 1, progression: {} }).reason, 'format');
+    assert.strictEqual(storage.importData({ app: 'mathpulse', version: 1, progression: [] }).reason, 'format');
+    assert.strictEqual(storage.importData({ app: 'mathpulse', version: 2, progression: { totalStars: 99 } }).reason, 'version');
+    assert.strictEqual(storage.get(storage.KEYS.PROGRESSION).totalStars, 7);
+});

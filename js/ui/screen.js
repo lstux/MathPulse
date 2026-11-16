@@ -727,6 +727,9 @@ class ScreenManager {
                 <div class="flex flex-col gap-md">
                     <button class="btn-secondary" id="btn-sound-parent"></button>
                     <button class="btn-secondary" id="btn-export">Exporter les données</button>
+                    <button class="btn-secondary" id="btn-import">Importer une sauvegarde</button>
+                    <input type="file" id="file-import" accept="application/json,.json" hidden>
+                    <p class="muted text-sm" id="import-msg" role="status" aria-live="polite"></p>
                     <button class="btn-secondary" id="btn-reset">Réinitialiser la progression</button>
                     <button class="btn-primary" id="btn-back-home">Retour</button>
                 </div>
@@ -746,6 +749,9 @@ class ScreenManager {
         screen.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => this.startSession(b.dataset.play)));
         screen.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => this.show('discovery', { skillId: b.dataset.replay, replay: true })));
         screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
+        const fileInput = screen.querySelector('#file-import');
+        screen.querySelector('#btn-import').addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => { const f = fileInput.files[0]; fileInput.value = ''; if (f) this.importFile(f, screen.querySelector('#import-msg')); });
         screen.querySelector('#btn-reset').addEventListener('click', () => {
             if (confirm('Effacer toute la progression de cet appareil ? Cette action est définitive.')) {
                 this.progression.reset();
@@ -753,6 +759,23 @@ class ScreenManager {
             }
         });
         return screen;
+    }
+
+    importFile(file, msgEl) {
+        const say = (t) => { msgEl.textContent = t; };
+        const reader = new FileReader();
+        reader.onerror = () => say('Impossible de lire ce fichier.');
+        reader.onload = () => {
+            let data;
+            try { data = JSON.parse(reader.result); } catch (e) { say('Ce fichier n\'est pas une sauvegarde MathPulse.'); return; }
+            if (!confirm('Remplacer la progression de cet appareil par celle de la sauvegarde ? Cette action est définitive.')) return;
+            const res = storage.importData(data);
+            if (!res.ok) { say(res.reason === 'version' ? 'Cette sauvegarde vient d\'une version plus récente de MathPulse.' : 'Ce fichier n\'est pas une sauvegarde MathPulse.'); return; }
+            this.progression.load();
+            this.show('parent');
+            const m = document.querySelector('#import-msg'); if (m) m.textContent = '✅ Sauvegarde restaurée.';
+        };
+        reader.readAsText(file);
     }
 
     exportData() {

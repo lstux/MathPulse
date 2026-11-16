@@ -8,6 +8,7 @@ const storage = {
     },
 
     MAX_HISTORY: 200,
+    EXPORT_VERSION: 1,   // version du format de fichier d'export
 
     init() {
         this.ensureDefaults();
@@ -58,7 +59,7 @@ const storage = {
     exportData() {
         return {
             app: 'mathpulse',
-            version: 1,
+            version: this.EXPORT_VERSION,
             exportedAt: new Date().toISOString(),
             progression: this.get(this.KEYS.PROGRESSION),
             history: this.get(this.KEYS.SESSION_HISTORY),
@@ -66,12 +67,21 @@ const storage = {
         };
     },
 
+    // Restaure un export. Retourne { ok: true } ou { ok: false, reason } ('format' | 'version').
+    // Les écritures ne se font qu'après validation complète : un fichier invalide ne touche à rien.
     importData(data) {
-        if (!data || data.app !== 'mathpulse' || !data.progression) return false;
+        if (!data || data.app !== 'mathpulse' || !data.progression || typeof data.progression !== 'object' || Array.isArray(data.progression)) {
+            return { ok: false, reason: 'format' };
+        }
+        if (!Number.isInteger(data.version) || data.version < 1 || data.version > this.EXPORT_VERSION) {
+            return { ok: false, reason: 'version' };
+        }
+        const history = Array.isArray(data.history) ? data.history.slice(-this.MAX_HISTORY) : [];
+        const prefs = data.prefs && typeof data.prefs === 'object' && !Array.isArray(data.prefs) ? data.prefs : { sound: false };
         this.set(this.KEYS.PROGRESSION, data.progression);
-        this.set(this.KEYS.SESSION_HISTORY, data.history || []);
-        this.set(this.KEYS.USER_PREFS, data.prefs || { sound: false });
-        return true;
+        this.set(this.KEYS.SESSION_HISTORY, history);
+        this.set(this.KEYS.USER_PREFS, prefs);
+        return { ok: true };
     },
 
     // Supprime uniquement les clés de MathPulse (jamais localStorage.clear())
