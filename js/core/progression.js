@@ -3,21 +3,66 @@
 //  - maîtrise d'une compétence (niveau 1-3, affichée ⭐⭐⭐ sur les cartes)
 //  - étoiles de récompense (totalStars), gagnées en fin de session, qui font avancer la fusée
 
+const DATA_VERSION = 2;
+const MASTERY_STATES = ['vu', 'compris', 'durable'];
+
 class Progression {
     constructor() {
-        this.data = { version: 1, skills: {}, totalStars: 0, discovered: {}, errors: {}, chaptersSeen: {} };
+        this.data = { version: DATA_VERSION, skills: {}, totalStars: 0, discovered: {}, errors: {}, chaptersSeen: {}, missions: {}, mastery: {}, reviews: [] };
     }
 
     load() {
         const saved = storage.get(storage.KEYS.PROGRESSION) || {};
         this.data = {
-            version: 1,   // version du format des données (pour les futures migrations)
+            version: DATA_VERSION,   // version du format des données (v1 → v2 : missions, mastery, reviews ajoutés ; rien n'est retiré)
             skills: this.migrateSkills(saved.skills || {}),
             totalStars: Number.isFinite(saved.totalStars) ? saved.totalStars : 0,
             discovered: saved.discovered || {},
             errors: saved.errors || {},   // calculs à revoir, indexés par exercise.key
-            chaptersSeen: saved.chaptersSeen || {}   // scènes d'histoire déjà lues { idDuChapitre: true } (champ ajouté : les anciennes données n'en ont pas, version inchangée)
+            chaptersSeen: saved.chaptersSeen || {},   // scènes d'histoire déjà lues { idDuChapitre: true }
+            missions: saved.missions || {},   // v2 : { idMission: { runs, lastAt, understood, unaided, reused } }
+            mastery: saved.mastery || {},     // v2 : { idCompétence: { state: 'vu' | 'compris' | 'durable', strategies: { id: état } } }
+            reviews: Array.isArray(saved.reviews) ? saved.reviews : []   // v2 : rappels espacés (phase 2c)
         };
+        if ((saved.version || 1) < 2) this.seedMastery();
+    }
+
+    // Migration v1 → v2 : état de départ prudent, déduit des niveaux v1 (niveau 3 → « compris », jamais « durable »)
+    seedMastery() {
+        Object.keys(this.data.skills).forEach(id => {
+            if (!this.data.mastery[id]) this.data.mastery[id] = { state: this.data.skills[id].mastery_level >= 3 ? 'compris' : 'vu', strategies: {} };
+        });
+    }
+
+    // Un état ne régresse jamais d'un coup (un échec programmera un rappel plus proche : phase 2c)
+    raiseState(current, wanted) {
+        return MASTERY_STATES.indexOf(wanted) > MASTERY_STATES.indexOf(current || '') ? wanted : current;
+    }
+
+    getMastery(skillId) {
+        return this.data.mastery[skillId] || null;
+    }
+
+    getMission(missionId) {
+        return this.data.missions[missionId] || null;
+    }
+
+    // Fin de mission (résumé de MissionRun.complete) : la mission est « vue » ; la stratégie est « comprise » si le défi est réussi.
+    // Le passage de la compétence à « compris » / « durable » demande des preuves variées et des rappels : phase 2c.
+    recordMission(summary) {
+        const m = this.data.missions[summary.mission] || { runs: 0 };
+        this.data.missions[summary.mission] = {
+            runs: m.runs + 1, lastAt: summary.at,
+            understood: !!(m.understood || summary.understood),
+            unaided: !!(m.unaided || summary.unaided),
+            reused: !!(m.reused || summary.reused)
+        };
+        if (summary.skill) {
+            const ma = this.data.mastery[summary.skill] || (this.data.mastery[summary.skill] = { state: 'vu', strategies: {} });
+            ma.state = this.raiseState(ma.state, 'vu');
+            if (summary.strategy) ma.strategies[summary.strategy] = this.raiseState(ma.strategies[summary.strategy], summary.understood ? 'compris' : 'vu');
+        }
+        this.save();
     }
 
     migrateSkills(skills) {

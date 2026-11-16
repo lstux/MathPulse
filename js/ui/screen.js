@@ -42,6 +42,7 @@ class ScreenManager {
                 : Discovery.create(data.skillId, data.then || (() => this.show('game'))),
             game: () => this.createGameScreen(),
             result: () => this.createResultScreen(data.summary),
+            mission: () => this.createMissionScreen(data),
             parent: () => this.createParentScreen()
         };
         const screen = (builders[name] || builders.home)();
@@ -646,6 +647,18 @@ class ScreenManager {
         return screen;
     }
 
+    // ---------- Mission (v2) : une étape par écran, la mission en cours est gardée dans this.missionRun ----------
+    createMissionScreen(data) {
+        if (data.missionId) this.missionRun = new MissionRun(MISSIONS[data.missionId], this.progression);
+        const back = () => { this.missionRun = null; this.show(data.from || 'parent'); };
+        return MissionUI.create(this.missionRun, {
+            rerender: () => this.show('mission', { from: data.from }),
+            done: back, quit: back,
+            later: (fn, ms) => this.later(fn, ms),
+            setKeyHandler: (h) => { this.keyHandler = h; document.addEventListener('keydown', h); }
+        });
+    }
+
     // ---------- Espace parent ----------
     createParentScreen() {
         const screen = this.screenEl('parent-screen');
@@ -711,6 +724,11 @@ class ScreenManager {
                 <p class="mb-lg" id="in-progress">Compétences en cours : <strong>${this.engine.inProgressSkills().length} / ${PROGRESS_CAP.max}</strong>${this.engine.inProgressSkills().length ? ` <span class="muted text-sm">(${this.engine.inProgressSkills().map(id => SKILLS[id].name).join(', ')})</span>` : ''}</p>
                 ${cheat ? `<div class="cheat-panel" id="cheat-panel"><p>🧪 <strong>Mode test activé</strong> : seuils réduits (niveau 2 dès 1 réponse, niveau 3 dès 2), tout est débloqué, plafond levé. Ouvre une compétence et appuie sur ▶ Jouer.</p>
                     <button class="btn-secondary btn-small" id="btn-cheat-off">Désactiver le mode test</button></div>` : ''}
+                ${cheat ? `<h2 class="text-lg font-bold mb-md">🧪 Missions (v2, en construction)</h2>
+                    <div class="flex flex-col gap-md mb-lg">${Object.values(MISSIONS).map(m => {
+                        const d = this.progression.getMission(m.id);
+                        return `<button class="btn-secondary" data-mission="${m.id}">▶ ${m.title}${d ? ` · jouée ${d.runs} fois${d.reused ? ' · réemploi ✓' : d.understood ? ' · comprise ✓' : ''}` : ''}</button>`;
+                    }).join('')}</div>` : ''}
                 ${cards}
                 <h2 class="text-lg font-bold mb-md">⭐ Étoiles des 7 derniers jours</h2>
                 <div class="mb-lg">${Charts.week(days)}</div>
@@ -747,6 +765,7 @@ class ScreenManager {
         const off = screen.querySelector('#btn-cheat-off');
         if (off) off.addEventListener('click', () => toggleCheat(false));
         screen.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => this.startSession(b.dataset.play)));
+        screen.querySelectorAll('[data-mission]').forEach(b => b.addEventListener('click', () => this.show('mission', { missionId: b.dataset.mission, from: 'parent' })));
         screen.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => this.show('discovery', { skillId: b.dataset.replay, replay: true })));
         screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
         const fileInput = screen.querySelector('#file-import');

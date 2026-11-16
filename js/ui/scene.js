@@ -16,10 +16,11 @@ const Scenes = {
 
         const screen = document.createElement('main');
         screen.className = 'screen active scene-screen flex flex-col flex-center gap-md p-lg';
-        screen.setAttribute('aria-label', `Chapitre ${chapter.number} : ${chapter.title}`);
+        const label = chapter.label || `Chapitre ${chapter.number} · ${chapter.title}`;   // label : scène de mission (hors chapitre)
+        screen.setAttribute('aria-label', label);
         screen.innerHTML = `
             <div class="scene-top">
-                <p class="scene-chapter">Chapitre ${chapter.number} · ${chapter.title}</p>
+                <p class="scene-chapter">${label}</p>
                 <div class="scene-top-actions">
                     <button class="btn-sound" id="btn-sound-scene"></button>
                     <button class="btn-scene-skip" id="btn-scene-skip">Passer</button>

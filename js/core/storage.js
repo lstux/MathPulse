@@ -8,14 +8,14 @@ const storage = {
     },
 
     MAX_HISTORY: 200,
-    EXPORT_VERSION: 1,   // version du format de fichier d'export
+    EXPORT_VERSION: 2,   // version du format de fichier d'export (les fichiers v1 restent acceptés : progression.load() les migre)
 
     init() {
         this.ensureDefaults();
     },
 
     ensureDefaults() {
-        if (!this.get(this.KEYS.PROGRESSION)) this.set(this.KEYS.PROGRESSION, { version: 1, skills: {}, totalStars: 0, discovered: {} });
+        if (!this.get(this.KEYS.PROGRESSION)) this.set(this.KEYS.PROGRESSION, { version: 2, skills: {}, totalStars: 0, discovered: {} });
         if (!this.get(this.KEYS.SESSION_HISTORY)) this.set(this.KEYS.SESSION_HISTORY, []);
         if (!this.get(this.KEYS.USER_PREFS)) this.set(this.KEYS.USER_PREFS, { sound: true });
     },

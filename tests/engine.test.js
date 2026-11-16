@@ -885,7 +885,7 @@ test('export / import : aller-retour, fichier invalide ou trop récent sans effe
     storage.set(storage.KEYS.SESSION_HISTORY, [{ date: '2026-11-01' }]);
     storage.set(storage.KEYS.USER_PREFS, { sound: false, introSeen: true });
     const exported = JSON.parse(JSON.stringify(storage.exportData()));
-    assert.strictEqual(exported.version, 1);
+    assert.strictEqual(exported.version, 2);
     storage.resetAll();
     assert.strictEqual(storage.get(storage.KEYS.PROGRESSION).totalStars, 0);
     assert.deepStrictEqual(storage.importData(exported), { ok: true });
@@ -897,6 +897,95 @@ test('export / import : aller-retour, fichier invalide ou trop récent sans effe
     // refus : rien n'est écrit
     assert.strictEqual(storage.importData({ app: 'autre', version: 1, progression: {} }).reason, 'format');
     assert.strictEqual(storage.importData({ app: 'mathpulse', version: 1, progression: [] }).reason, 'format');
-    assert.strictEqual(storage.importData({ app: 'mathpulse', version: 2, progression: { totalStars: 99 } }).reason, 'version');
+    assert.strictEqual(storage.importData({ app: 'mathpulse', version: 3, progression: { totalStars: 99 } }).reason, 'version');
     assert.strictEqual(storage.get(storage.KEYS.PROGRESSION).totalStars, 7);
+});
+
+// ---------- v2 : missions ----------
+test('missions : données valides (étapes typées, ids uniques, preuves et compétence connues, visuels existants côté Animations)', () => {
+    const types = ['scene', 'problem', 'explain', 'challenge', 'transfer'];
+    for (const m of Object.values(MISSIONS)) {
+        assert.ok(SKILLS[m.skill], `${m.id} : compétence inconnue`);
+        const ids = m.steps.map(s => s.id);
+        assert.strictEqual(new Set(ids).size, ids.length, `${m.id} : ids d'étapes en double`);
+        m.steps.forEach(s => {
+            assert.ok(types.includes(s.type), `${m.id}/${s.id} : type inconnu`);
+            if (MISSION_ANSWER_STEPS.includes(s.type)) assert.ok(Array.isArray(s.operands) && s.operands.length === 2 && s.prompt);
+            if (s.type === 'scene') assert.ok(s.vignettes.length && s.vignettes.every(v => v.art && v.lines.length));
+            if (s.type === 'explain') assert.ok(s.title && s.text && s.formula);
+        });
+        [...m.evidence.understood, ...m.evidence.reused].forEach(id => assert.ok(ids.includes(id), `${m.id} : preuve « ${id} » sans étape`));
+        assert.ok(m.steps.findIndex(s => s.type === 'problem') < m.steps.findIndex(s => s.type === 'explain'), 'on découvre avant d\'expliquer');
+    }
+});
+
+test('mission : parcours réussi du premier coup → comprise, sans aide, réemployée ; progression enregistrée', () => {
+    const { progression } = setup();
+    const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
+    assert.throws(() => run.answer(1), /n'attend pas/);          // scène : pas de réponse
+    assert.ok(run.next());
+    assert.ok(!run.canAdvance() && !run.next(), 'problème : il faut proposer une réponse');
+    assert.deepStrictEqual({ ...run.answer('55') }, { correct: true, attempts: 1, done: true, feedback: 'ok' });
+    run.next(); run.next();                                       // explication
+    assert.strictEqual(run.step.type, 'challenge');
+    assert.ok(run.answer(43).correct); run.next();
+    assert.ok(run.answer(64).correct); run.next();
+    assert.ok(run.isComplete());
+    const s = run.complete();
+    assert.ok(s.discovered && s.understood && s.unaided && s.reused);
+    assert.strictEqual(run.complete(), s, 'complete() est idempotent');
+    const saved = JSON.parse(JSON.stringify(storage.get(storage.KEYS.PROGRESSION)));
+    assert.deepStrictEqual(saved.missions['pass-ten-47-8'].runs, 1);
+    assert.strictEqual(saved.mastery['add-units'].state, 'vu', 'une mission ne suffit pas à « comprendre » la compétence');
+    assert.strictEqual(saved.mastery['add-units'].strategies['pass-through-ten'], 'compris');
+});
+
+test('mission : erreurs → jamais de blocage ; problème raté mène à l\'explication ; 3 essais puis on continue sans preuve', () => {
+    const { progression } = setup();
+    const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
+    run.next();
+    let r = run.answer(54);
+    assert.ok(!r.correct && r.done && r.feedback === 'explain', 'problème raté : on passe à l\'explication');
+    assert.strictEqual(run.answer(55).correct, false, 'étape close : une nouvelle réponse ne change rien');
+    run.next(); run.next();
+    assert.strictEqual(run.answer(42).feedback, 'retry');
+    assert.ok(!run.canAdvance());
+    assert.strictEqual(run.answer(44).feedback, 'hint');
+    r = run.answer(43);
+    assert.ok(r.correct && r.attempts === 3); run.next();
+    assert.strictEqual(run.lastExplain().id, 'explain');
+    run.answer(1); run.answer(2); r = run.answer(3);
+    assert.ok(!r.correct && r.done && r.feedback === 'explain' && run.canAdvance());
+    run.next();
+    const s = run.complete();
+    assert.ok(!s.discovered && s.understood && !s.unaided && !s.reused);
+    assert.strictEqual(progression.getMastery('add-units').strategies['pass-through-ten'], 'compris');
+    // une mission rejouée moins bien ne fait rien régresser
+    const again = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
+    again.next(); again.answer(0); again.next(); again.next();
+    [1, 2, 3].forEach(v => again.answer(v)); again.next(); [1, 2, 3].forEach(v => again.answer(v)); again.next();
+    assert.ok(!again.complete().understood);
+    assert.strictEqual(progression.getMission('pass-ten-47-8').runs, 2);
+    assert.ok(progression.getMission('pass-ten-47-8').understood);
+    assert.strictEqual(progression.getMastery('add-units').strategies['pass-through-ten'], 'compris');
+});
+
+test('données v2 : migration depuis v1 sans perte, maîtrise de départ prudente, import d\'un fichier v1', () => {
+    const v1 = { version: 1, totalStars: 12, discovered: { 'multiply-2': true }, errors: {}, chaptersSeen: { lapine: true },
+        skills: { 'multiply-2': { seen: 30, correct: 30, mastery_level: 3, recent: [] }, 'addition-simple': { seen: 4, correct: 2, mastery_level: 1, recent: [] } } };
+    storage.set(storage.KEYS.PROGRESSION, v1);
+    const p = new Progression(); p.load();
+    assert.strictEqual(p.data.version, 2);
+    assert.strictEqual(p.getTotalStars(), 12);
+    assert.ok(p.data.chaptersSeen.lapine && p.data.discovered['multiply-2'] && p.getSkillStats('multiply-2'));
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(p.data.missions)), {});
+    assert.ok(Array.isArray(p.data.reviews) && p.data.reviews.length === 0);
+    assert.strictEqual(p.getMastery('multiply-2').state, 'compris', 'niveau 3 en v1 → « compris », jamais « durable »');
+    assert.strictEqual(p.getMastery('addition-simple').state, 'vu');
+    // un fichier exporté en v1 s'importe toujours
+    storage.resetAll();
+    assert.ok(storage.importData({ app: 'mathpulse', version: 1, progression: v1, history: [] }).ok);
+    const q = new Progression(); q.load();
+    assert.strictEqual(q.getTotalStars(), 12);
+    assert.strictEqual(q.getMastery('multiply-2').state, 'compris');
 });
