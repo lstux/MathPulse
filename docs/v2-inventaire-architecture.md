@@ -148,14 +148,16 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 | 2a | `mission/runner` + étapes `scene/problem/challenge/explain` + format de mission + migration de données v2 | Une mission « factice » tourne de bout en bout, tests unitaires |
 | 2b | `diagnosis` + `feedback` gradué + catalogue d'erreurs (additions) | Chaque erreur type testée produit le bon retour |
 | 2c | `mastery` + `scheduler` | Simulations de séquences de réponses → états et rappels attendus (tests) |
-| 3 | Composant `ten-frame` tactile + mission 8 + 7 complète | Test avec ton fils sur téléphone ; ajustements |
+| 3 | Composant tactile (frise / boîte de 10) + mission pilote 47 + 8 complète | Test avec ton fils sur téléphone ; ajustements |
 | 4+ | Généralisation (§15 de la synthèse) | — |
 
-## 6. Décisions à prendre **[À trancher]**
+## 6. Décisions (16 novembre 2026)
 
-1. **Public cible.** La mission 8 + 7 relève du CP/CE1, le jeu actuel vise le CE2. On garde 8 ans comme cœur et on assume que les missions de base servent aussi de rattrapage ? Ou on abaisse le public ?
-2. **Lecture.** Sans voix (hors périmètre), une pédagogie de découverte reste très textuelle. Pour un lecteur débutant, accepte-t-on des textes **ultra courts + animations porteuses du sens** (ma proposition), ou la voix est-elle remontée en priorité ?
-3. **Manipulation tactile.** « Toucher un objet, puis toucher la destination » plutôt que le glisser-déposer, par défaut sur mobile. D'accord ?
-4. **Statut de l'étoile.** Une fois l'histoire découplée, les étoiles deviennent un retour de satisfaction sans rôle de verrou. On les garde (compatibilité, ambiance) ou on les retire de l'interface enfant ?
-5. **Seuils de maîtrise** (≥ 2 contextes, rappels à 3 j et 14 j) : bonne base de départ, à régler après les premiers tests avec ton fils.
-6. **Versions.** Branche `v2` longue avec 1.x en maintenance sur `main`, ou développement sur `main` derrière un drapeau ?
+1. **Public cible : 8 ans (CE2) reste le cœur.** 8 + 7 n'était qu'un exemple ; la mission pilote devient **47 + 8** (même stratégie de passage par la dizaine, au niveau CE2, compétence existante `add-units`).
+2. **Lecture : textes très courts, animations porteuses du sens.** Pas de voix dans le périmètre initial.
+3. **Manipulation : « toucher l'objet, puis toucher la destination »** par défaut ; pas de glisser-déposer obligatoire.
+4. **Étoiles : conservées comme récompense de satisfaction**, sans rôle de verrou une fois l'histoire découplée (compatibilité des données v1, repère familier pour l'enfant).
+5. **Seuils de maîtrise : valeurs du §3.4 comme point de départ** (≥ 2 formes, ≥ 2 contextes, rappels à 3 j et 14 j), regroupés dans une constante réglable et ajustés après les premiers tests réels.
+6. **Branche `v2` longue** ; `main` reste en 1.x (correctifs uniquement).
+
+**[À trancher]** Noms des personnages : la synthèse parle de « Gab » et « Andrea », le jeu actuel dit « le renard » et « la lapine » sans les nommer. Les missions v2 gardent « le renard / la lapine » tant que ce n'est pas décidé.
