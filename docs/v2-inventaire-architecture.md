@@ -103,7 +103,7 @@ Catalogue par compétence : chaque entrée associe un **motif d'erreur** à un *
 ```jsonc
 { "skill": "addition-simple", "errors": [
   { "id": "count-off-by-one", "match": "answer == total ± 1",        "feedback": ["question:count-again", "visual:groups"] },
-  { "id": "tens-units-mixup", "match": "answer == a + b - 10 || answer == 10 + (a+b)%10 - ...", "feedback": ["visual:ten-frame"] },
+  { "id": "tens-units-mixup", "match": "answer == (a + b) % 10  (retenue oubliée ou dizaine perdue)", "feedback": ["visual:ten-frame"] },
   { "id": "operation-swap",   "match": "answer == |a - b|",           "feedback": ["question:which-operation"] }
 ]}
 ```
