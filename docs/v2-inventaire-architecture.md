@@ -120,6 +120,8 @@ Le retour est **gradué** (indice → question → visuel → nouvelle expérien
 | `compris` | Preuves de compréhension (exploration réussie, défis réussis **sans aide**) dans ≥ 2 formes d'exercice |
 | `durable` | Réemploi réussi en `transfer` dans ≥ 2 contextes **et** un rappel réussi après ≥ 3 jours, puis un autre après ≥ 14 jours |
 
+_Réalisé (phase 2c, 17 nov.) : `js/learning/mastery.js` (`Mastery`, `Scheduler`, seuils dans `MASTERY_RULES`). « Compris » = au moins 2 réussites sans aide dans au moins 2 formes (réponse à taper, nombre manquant, choix, défi de mission). « Durable » = compris + 2 contextes de réemploi (rappel dans une autre session, série rapide, série libre, réemploi en mission) + un rappel réussi après ≥ 3 j et un autre après ≥ 14 j. Les rappels à échéance passent en premier dans les 2 places de rappel de chaque session, sous une forme tirée au hasard. À la migration v1, les premiers rappels sont étalés (1, 3 ou 7 j selon le niveau). L'espace parent affiche l'état et le prochain rappel._
+
 Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappel plus proche. Le temps de réponse n'est qu'un signal secondaire, jamais décisif (§5.3).
 
 `scheduler.js` : une file de rappels datés (type Leitner : 1 j → 3 j → 7 j → 14 j → 30 j). À chaque session, il propose en priorité les notions fragiles, en **variant la forme** de l'exercice (E4, §5.4). L'histoire, elle, avance sans condition de maîtrise.
@@ -149,7 +151,7 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 | 1 (ici) | Ce document validé ; décisions §6 prises | Décisions consignées |
 | 2a ✅ | `mission/runner` + étapes `scene/problem/challenge/explain` + format de mission + migration de données v2 | Une mission « factice » tourne de bout en bout, tests unitaires |
 | 2b ✅ | `diagnosis` + `feedback` gradué + catalogue d'erreurs (additions) | Chaque erreur type testée produit le bon retour |
-| 2c | `mastery` + `scheduler` | Simulations de séquences de réponses → états et rappels attendus (tests) |
+| 2c ✅ | `mastery` + `scheduler` | Simulations de séquences de réponses → états et rappels attendus (tests) |
 | 3 | Composant tactile (frise / boîte de 10) + mission pilote 47 + 8 complète | Test avec ton fils sur téléphone ; ajustements |
 | 4+ | Généralisation (§15 de la synthèse) | — |
 

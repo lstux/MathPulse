@@ -29,15 +29,31 @@ class Progression {
     }
 
     // Migration v1 → v2 : état de départ prudent, déduit des niveaux v1 (niveau 3 → « compris », jamais « durable »)
-    seedMastery() {
+    seedMastery(now = Date.now()) {
         Object.keys(this.data.skills).forEach(id => {
-            if (!this.data.mastery[id]) this.data.mastery[id] = { state: this.data.skills[id].mastery_level >= 3 ? 'compris' : 'vu', strategies: {} };
+            const level = this.data.skills[id].mastery_level || 1;
+            if (!this.data.mastery[id]) this.data.mastery[id] = { state: level >= 3 ? 'compris' : 'vu', strategies: {} };
+            // premier rappel étalé selon le niveau v1 (1 j, 3 j ou 7 j) : tout ne revient pas le même jour
+            if (!Scheduler.get(this.data, id)) {
+                const box = Math.min(level, 3) - 1;
+                this.data.reviews.push({ skill: id, box, setAt: now, dueAt: now + MASTERY_RULES.boxesDays[box] * DAY_MS });
+            }
         });
     }
 
-    // Un état ne régresse jamais d'un coup (un échec programmera un rappel plus proche : phase 2c)
-    raiseState(current, wanted) {
-        return MASTERY_STATES.indexOf(wanted) > MASTERY_STATES.indexOf(current || '') ? wanted : current;
+    // Preuve apportée par une réponse à un exercice (voir learning/mastery.js). opts : { aided, context }
+    recordEvidence(exercise, correct, opts = {}, now = Date.now()) {
+        const state = Mastery.recordExercise(this.data, exercise, correct, opts, now);
+        this.save();
+        return state;
+    }
+
+    getReview(skillId) {
+        return Scheduler.get(this.data, skillId);
+    }
+
+    dueSkills(now = Date.now()) {
+        return Scheduler.due(this.data, now);
     }
 
     getMastery(skillId) {
@@ -52,9 +68,9 @@ class Progression {
         return this.data.missions[missionId] || null;
     }
 
-    // Fin de mission (résumé de MissionRun.complete) : la mission est « vue » ; la stratégie est « comprise » si le défi est réussi.
-    // Le passage de la compétence à « compris » / « durable » demande des preuves variées et des rappels : phase 2c.
-    recordMission(summary) {
+    // Fin de mission (résumé de MissionRun.complete) : la stratégie est « comprise » si le défi est réussi ;
+    // pour la compétence, la mission apporte une forme et un contexte de réemploi (voir learning/mastery.js).
+    recordMission(summary, now = Date.now()) {
         const m = this.data.missions[summary.mission] || { runs: 0 };
         this.data.missions[summary.mission] = {
             runs: m.runs + 1, lastAt: summary.at,
@@ -67,11 +83,7 @@ class Progression {
             const seen = this.data.errorTypes[summary.skill] || (this.data.errorTypes[summary.skill] = {});
             summary.errors.forEach(id => { seen[id] = (seen[id] || 0) + 1; });
         }
-        if (summary.skill) {
-            const ma = this.data.mastery[summary.skill] || (this.data.mastery[summary.skill] = { state: 'vu', strategies: {} });
-            ma.state = this.raiseState(ma.state, 'vu');
-            if (summary.strategy) ma.strategies[summary.strategy] = this.raiseState(ma.strategies[summary.strategy], summary.understood ? 'compris' : 'vu');
-        }
+        Mastery.recordMission(this.data, summary, now);
         this.save();
     }
 

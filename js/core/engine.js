@@ -102,15 +102,18 @@ class Engine {
     pickRecalls(targetId) {
         const picked = this.pickReviews();
         const keys = new Set(picked.map(r => r.key));
+        const dueNow = this.progression.dueSkills();
         const others = SKILL_ORDER
-            .filter(id => id !== targetId && this.progression.getSkillStats(id))
-            .map(id => ({ id, level: this.progression.getMasteryLevel(id), last: Date.parse(this.progression.getSkillStats(id).last_practiced) || 0 }))
-            .sort((a, b) => a.level - b.level || a.last - b.last);
+            .filter(id => id !== targetId && (this.progression.getSkillStats(id) || dueNow.includes(id)))   // pratiquée, ou vue en mission et à rappeler
+            .map(id => ({ id, due: dueNow.includes(id) ? dueNow.indexOf(id) : Infinity, level: this.progression.getMasteryLevel(id), last: Date.parse((this.progression.getSkillStats(id) || {}).last_practiced) || 0 }))
+            .sort((a, b) => a.due - b.due || a.level - b.level || a.last - b.last);   // rappels espacés arrivés à échéance d'abord
         const total = Math.min(MIX.recallPerSession, 2);
         for (let i = 0; others.length && picked.length < total; i++) {
             let ex = null;
             for (let tries = 0; tries < 30; tries++) {
-                ex = this.generateExercise(others[i % others.length].id, 'numeric');
+                // un rappel espacé change de forme d'une fois sur l'autre (on ne mémorise pas une réponse, on réutilise une notion)
+                const o = others[i % others.length], plan = SKILLS[o.id].plan;
+                ex = this.generateExercise(o.id, o.due !== Infinity ? plan[this.randInt(0, plan.length - 1)] : 'numeric');
                 if (!keys.has(ex.key)) break;
             }
             keys.add(ex.key);

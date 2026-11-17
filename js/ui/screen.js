@@ -690,6 +690,15 @@ class ScreenManager {
         const history = storage.get(storage.KEYS.SESSION_HISTORY) || [];
         const cheat = Cheat.isOn();
         const playBtn = (id) => cheat ? `<button class="btn-secondary btn-small" data-play="${id}">▶ Jouer cette compétence</button>` : '';
+        // Maîtrise durable (v2) : état et prochain rappel espacé
+        const durable = (id) => {
+            const m = this.progression.getMastery(id), r = this.progression.getReview(id);
+            if (!m) return '';
+            const label = { vu: '👀 Vu', compris: '💡 Compris', durable: '🌳 Durable' }[m.state] || '';
+            const days = r ? Math.ceil((r.dueAt - Date.now()) / DAY_MS) : null;
+            const when = days === null || m.state === 'durable' && days > 30 ? '' : days <= 0 ? ' · rappel prévu dès maintenant' : ` · prochain rappel dans ${days} j`;
+            return `<p class="muted text-sm">${label}${when}</p>`;
+        };
         const card = (id) => {
             const st = this.progression.getSkillStats(id);
             if (!st) {
@@ -704,6 +713,7 @@ class ScreenManager {
             return `<div class="skill-card">
                 <div class="skill-head"><h3>${SKILLS[id].name}</h3><span aria-label="Maîtrise ${st.mastery_level} sur 3">${this.stars(st.mastery_level)}</span></div>
                 <p class="muted text-sm">${acc} % de réussite sur les ${w.n} dernières · ${st.seen} questions au total · ${(w.avgMs / 1000).toFixed(1)} s de réflexion en moyenne</p>
+                ${durable(id)}
                 ${playBtn(id)}
             </div>`;
         };

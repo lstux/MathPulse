@@ -99,6 +99,9 @@ class Session {
         // La maîtrise va à la compétence de l'exercice (un calcul à revoir peut venir d'une autre compétence)
         if (countedForMastery) this.progression.recordAnswer(exercise.skill, correct, thinkMs);
         const reviewOutcome = this.progression.noteResult(exercise, correct, !!hint);
+        // Maîtrise durable (v2) : formes réussies sans aide, contextes de réemploi, rappels espacés
+        this.progression.recordEvidence(exercise, correct, { aided: !!hint,
+            context: this.rapid ? 'rapid' : this.free ? 'free' : (exercise.recall || exercise.review) ? 'recall' : 'session' }, now);
         if (reviewOutcome === 'cleared') this.cleared++;
         const fast = correct && thinkMs <= RAPID.fastMs;
         this.results[this.results.length - 1].fast = fast;

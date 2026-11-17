@@ -979,7 +979,7 @@ test('données v2 : migration depuis v1 sans perte, maîtrise de départ prudent
     assert.strictEqual(p.getTotalStars(), 12);
     assert.ok(p.data.chaptersSeen.lapine && p.data.discovered['multiply-2'] && p.getSkillStats('multiply-2'));
     assert.deepStrictEqual(JSON.parse(JSON.stringify(p.data.missions)), {});
-    assert.ok(Array.isArray(p.data.reviews) && p.data.reviews.length === 0);
+    assert.strictEqual(p.data.reviews.length, 2, 'un premier rappel par compétence déjà pratiquée');
     assert.strictEqual(p.getMastery('multiply-2').state, 'compris', 'niveau 3 en v1 → « compris », jamais « durable »');
     assert.strictEqual(p.getMastery('addition-simple').state, 'vu');
     // un fichier exporté en v1 s'importe toujours
@@ -1071,4 +1071,94 @@ test('diagnostic : retour gradué (question, puis image du chemin sans résultat
     assert.strictEqual(progression.getErrorTypes('add-units')['add-forgot-carry'], 2);
     assert.strictEqual(progression.getErrorTypes('add-units')['off-by-one'], 1);
     assert.deepStrictEqual(Object.keys(progression.getErrorTypes('multiply-2')), []);
+});
+
+// ---------- v2 : maîtrise durable et rappels espacés ----------
+test('maîtrise : vu → compris demande des réussites sans aide dans 2 formes ; une aide ou une erreur ne compte pas, rien ne régresse', () => {
+    const { progression } = setup();
+    const T = Date.UTC(2026, 10, 17), ex = (type) => ({ skill: 'multiply-3', type });
+    assert.strictEqual(progression.recordEvidence(ex('numeric'), true, { context: 'session' }, T), 'vu');
+    assert.strictEqual(progression.recordEvidence(ex('numeric'), true, { context: 'session' }, T), 'vu', 'une seule forme ne suffit pas');
+    assert.strictEqual(progression.recordEvidence(ex('missing'), true, { aided: true, context: 'session' }, T), 'vu', 'réussite aidée : pas une preuve');
+    assert.strictEqual(progression.recordEvidence(ex('missing'), false, { context: 'session' }, T), 'vu');
+    assert.strictEqual(progression.recordEvidence(ex('missing'), true, { context: 'session' }, T), 'vu');
+    assert.strictEqual(progression.recordEvidence(ex('missing'), true, { context: 'session' }, T), 'compris');
+    for (let i = 0; i < 5; i++) progression.recordEvidence(ex('numeric'), false, { context: 'session' }, T + i);
+    assert.strictEqual(progression.getMastery('multiply-3').state, 'compris', 'des erreurs ne font pas redescendre');
+    assert.strictEqual(JSON.parse(JSON.stringify(storage.get(storage.KEYS.PROGRESSION))).mastery['multiply-3'].state, 'compris', 'enregistré');
+});
+
+test('rappels espacés : cases 1, 3, 7, 14, 30 j ; réussite = case suivante, échec = retour plus rapide, aide = rien ne bouge', () => {
+    const { progression } = setup();
+    const T = Date.UTC(2026, 10, 17), D = 24 * 3600 * 1000, ex = { skill: 'multiply-3', type: 'numeric' };
+    const days = () => Math.round((progression.getReview('multiply-3').dueAt - progression.getReview('multiply-3').setAt) / D);
+    progression.recordEvidence(ex, true, {}, T);
+    assert.strictEqual(days(), 1);
+    assert.deepStrictEqual([...progression.dueSkills(T)], []);
+    progression.recordEvidence(ex, true, {}, T + 3600e3);
+    assert.strictEqual(progression.getReview('multiply-3').box, 0, 'rappel pas encore dû : la case ne bouge pas');
+    assert.deepStrictEqual([...progression.dueSkills(T + D)], ['multiply-3']);
+    let t = T + D;
+    progression.recordEvidence(ex, true, { aided: true }, t);
+    assert.ok(progression.getReview('multiply-3').box === 0 && progression.dueSkills(t).length === 1, 'réussi avec aide : le rappel reste dû');
+    const seq = [];
+    for (let i = 0; i < 5; i++) { progression.recordEvidence(ex, true, {}, t); seq.push(days()); t = progression.getReview('multiply-3').dueAt; }
+    assert.deepStrictEqual(seq, [3, 7, 14, 30, 30]);
+    progression.recordEvidence(ex, false, {}, t);
+    assert.strictEqual(days(), 14, 'échec : une case en arrière');
+    progression.recordEvidence(ex, false, {}, t + D);
+    assert.strictEqual(days(), 14, 'une erreur avant l\'échéance ne repousse ni n\'avance rien');
+    // la plus en retard d'abord
+    progression.recordEvidence({ skill: 'multiply-4', type: 'numeric' }, true, {}, T);
+    assert.deepStrictEqual([...progression.dueSkills(t + 30 * D)], ['multiply-4', 'multiply-3']);
+});
+
+test('maîtrise : durable = compris + 2 contextes de réemploi + un rappel réussi après ≥ 3 j et un autre après ≥ 14 j (jamais plus tôt)', () => {
+    const { progression } = setup();
+    const T = Date.UTC(2026, 10, 17), D = 24 * 3600 * 1000;
+    const ans = (type, context, t) => progression.recordEvidence({ skill: 'add-units', type }, true, { context }, t);
+    ans('numeric', 'session', T); ans('numeric', 'session', T); ans('missing', 'session', T);
+    assert.strictEqual(ans('missing', 'recall', T), 'compris');
+    assert.strictEqual(ans('numeric', 'rapid', T + D), 'compris', '2 contextes, mais rappel après 1 j seulement');       // case 0 → 1
+    assert.strictEqual(ans('missing', 'recall', T + 4 * D), 'compris', 'rappel après 3 j : il manque celui de 14 j');      // case 1 → 2
+    assert.strictEqual(ans('numeric', 'recall', T + 11 * D), 'compris', 'rappel après 7 j : toujours pas 14 j');           // case 2 → 3
+    assert.strictEqual(ans('numeric', 'recall', T + 25 * D), 'durable');                                                    // 14 j
+    assert.deepStrictEqual([...progression.getMastery('add-units').gaps], [1, 3, 7, 14]);
+    // sans réemploi (toujours dans sa propre session), même avec les rappels : pas durable
+    [0, 0, 0, 0, 1, 4, 11, 25].forEach((d, i) => progression.recordEvidence({ skill: 'multiply-6', type: i % 2 ? 'numeric' : 'missing' }, true, { context: 'session' }, T + d * D));
+    assert.strictEqual(progression.getMastery('multiply-6').state, 'compris');
+    // une mission apporte une forme (défi du premier coup) et un contexte (réemploi)
+    progression.recordMission({ mission: 'm1', skill: 'multiply-6', strategy: 's', understood: true, unaided: true, reused: true, at: '', errors: [] }, T + 25 * D);
+    progression.recordEvidence({ skill: 'multiply-6', type: 'numeric' }, true, { context: 'free' }, T + 25 * D);
+    assert.strictEqual(progression.getMastery('multiply-6').state, 'durable');
+});
+
+test('rappels dans les sessions : une compétence à échéance passe devant dans les rappels ; la session enregistre forme, contexte et rappel', () => {
+    const { progression, engine } = setup();
+    const now = Date.now(), D = 24 * 3600 * 1000;
+    ['multiply-2', 'multiply-5', 'multiply-10'].forEach(id => { for (let i = 0; i < 6; i++) progression.recordAnswer(id, true, 1000); });
+    progression.recordEvidence({ skill: 'multiply-10', type: 'numeric' }, true, {}, now - 2 * D);   // rappel dû depuis hier
+    progression.recordEvidence({ skill: 'multiply-2', type: 'numeric' }, true, {}, now);
+    for (let n = 0; n < 30; n++) {
+        const recalls = engine.pickRecalls('addition-simple');
+        assert.strictEqual(recalls[0].skill, 'multiply-10', 'la compétence à échéance est rappelée en premier');
+        assert.ok(SKILLS['multiply-10'].plan.includes(recalls[0].type));
+    }
+    const s = new Session(engine, progression); s.start({ skill: 'addition-simple' });
+    s.exercises.forEach(ex => { s.beginQuestion(); s.submitAnswer(ex.answer); s.next(); });
+    s.complete();
+    assert.ok(progression.getReview('multiply-10').dueAt > now, 'rappel fait pendant la session : reprogrammé');
+    assert.strictEqual(progression.getReview('multiply-10').box, 1);
+    assert.ok(progression.getMastery('multiply-10').contexts.recall, 'réemploi hors de sa propre session');
+    assert.ok(!progression.getMastery('addition-simple').contexts.session, 'sa propre session n\'est pas un réemploi');
+});
+
+test('migration v1 : premiers rappels étalés selon le niveau (1, 3, 7 j)', () => {
+    storage.set(storage.KEYS.PROGRESSION, { version: 1, totalStars: 0, skills: {
+        a: { seen: 3, mastery_level: 1, recent: [] }, b: { seen: 9, mastery_level: 2, recent: [] }, c: { seen: 30, mastery_level: 3, recent: [] } } });
+    const p = new Progression(); p.load();
+    const d = id => Math.round((p.getReview(id).dueAt - p.getReview(id).setAt) / (24 * 3600 * 1000));
+    assert.deepStrictEqual([d('a'), d('b'), d('c')], [1, 3, 7]);
+    p.save(); const q = new Progression(); q.load();
+    assert.strictEqual(q.data.reviews.length, 3, 'pas de doublon au rechargement');
 });
