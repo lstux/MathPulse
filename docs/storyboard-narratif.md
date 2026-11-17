@@ -1,6 +1,6 @@
 # MathPulse — Storyboard narratif (chapitres 1 à 10)
 
-> **Mise à jour du 17 novembre 2026 (branche v2) :** le renard est le joueur (son prénom remplace `{nom}` dans les dialogues) et la « lapine » est une hase nommée **Andrea**. Le texte ci-dessous garde le vocabulaire d'origine ; `js/content/chapters.js` fait foi.
+> **Mise à jour du 17 novembre 2026 (branche v2) :** l'histoire a été réécrite. Le renard est le joueur (son prénom remplace `{nom}`, il pose des questions et ne répond plus aux calculs dans les scènes) ; la « lapine » est une hase dont le nom se change à un seul endroit (`HARE_NAME` dans `js/content/chapters.js`, `{hase}` dans les textes) ; un revers au chapitre 4-5 ; une idée de science par chapitre. Voir [`histoire-v2-avant-apres.md`](histoire-v2-avant-apres.md). Le texte ci-dessous est le storyboard d'origine, gardé pour mémoire ; `js/content/chapters.js` fait foi.
 
 _Rédigé le 11 octobre 2026. Complète [`narrative-beta.md`](narrative-beta.md) (décisions de fond). Chapitres 1 à 3 validés, chapitres 4 à 10 **proposés à valider** : textes, seuils d'étoiles et découpage sont provisoires, rien n'est codé. Le code se fera sur la branche `feat/narrative-ux`._
 

@@ -1,5 +1,6 @@
 // MathPulse - Le joueur : c'est lui le renard de l'histoire. Son prénom est demandé une fois, puis utilisé dans les textes.
-// Dans les textes (chapters.js, missions.js), {nom} est remplacé par le prénom, ou par « renard » s'il n'en a pas donné.
+// Dans les textes (chapters.js, missions.js), {nom} est remplacé par le prénom, ou par « renard » s'il n'en a pas donné,
+// et {hase} par le nom de la hase (HARE_NAME).
 
 const Player = {
     MAX: 14,
@@ -23,7 +24,9 @@ const Player = {
     asked() { return !!this.prefs().nameAsked; },
 
     // Nom affiché de celui qui parle (lecteurs d'écran)
-    label(who) { return who === 'rabbit' ? 'Andrea' : (this.name() || 'Le renard'); },
+    hare() { return typeof HARE_NAME === 'string' && HARE_NAME ? HARE_NAME : 'La hase'; },   // nom de la hase : constante HARE_NAME (content/chapters.js)
 
-    text(t) { return String(t).replace(/\{nom\}/g, this.name() || 'renard'); }
+    label(who) { return who === 'rabbit' ? this.hare() : (this.name() || 'Le renard'); },
+
+    text(t) { return String(t).replace(/\{nom\}/g, this.name() || 'renard').replace(/\{hase\}/g, this.hare()); }
 };

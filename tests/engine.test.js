@@ -998,7 +998,8 @@ test('joueur : prénom nettoyé, demandé une fois, {nom} remplacé dans les tex
     assert.ok(!Player.asked());
     assert.strictEqual(Player.text('Merci, {nom}.'), 'Merci, renard.');
     assert.strictEqual(Player.label('fox'), 'Le renard');
-    assert.strictEqual(Player.label('rabbit'), 'Andrea');
+    assert.strictEqual(Player.label('rabbit'), HARE_NAME);
+    assert.strictEqual(Player.text('Bravo ! {hase} est contente.'), `Bravo ! ${HARE_NAME} est contente.`);
     assert.strictEqual(Player.set('  <img src=x onerror=1> Léo-Paul 42  '), 'img srcx onerr');
     assert.strictEqual(Player.set("Zoé d'Arc"), "Zoé d'Arc");
     assert.ok(Player.asked());
@@ -1011,7 +1012,14 @@ test('joueur : prénom nettoyé, demandé une fois, {nom} remplacé dans les tex
     // l'histoire s'adresse au joueur par {nom}, jamais par « renard » en apostrophe
     const all = JSON.stringify(CHAPTERS);
     assert.ok(all.includes('{nom}') && !/, renard[.,]/.test(all));
-    assert.ok(all.includes('Andrea') && !/lapine de|la lapine/i.test(all.replace(/"id":"lapine"/g, '')));
+    assert.ok(!/lapine de|la lapine/i.test(all.replace(/"id":"lapine"/g, '')));
+    // le nom de la hase n'est écrit qu'à un seul endroit (HARE_NAME) : partout ailleurs {hase}, sans élision devant
+    const texts = all + JSON.stringify(MISSIONS);
+    assert.ok(texts.includes('{hase}') && !texts.includes(HARE_NAME));
+    assert.ok(!/(\bde|\bque|\bd'|\bqu') ?\{hase\}/i.test(texts), 'pas de « de {hase} » : l\'élision dépend du nom');
+    assert.ok(!/[🐰🦊]/u.test(JSON.stringify(CHAPTERS.map(c => [c.scene, c.lines, c.end]))), 'plus d\'émoji à la place des personnages dans les textes');
+    // le renard est le joueur : dans les scènes, il ne donne jamais la réponse à un calcul
+    for (const c of CHAPTERS) for (const v of c.scene) for (const l of v.lines) if (l.who === 'fox') assert.ok(!/\d/.test(l.text), `chapitre ${c.number} : le renard ne répond pas aux calculs (« ${l.text} »)`);
 });
 
 // ---------- v2 : diagnostic des erreurs ----------

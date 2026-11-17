@@ -58,7 +58,7 @@ with sync_playwright() as p:
     assert pg.locator('.sky-star').count() == 13 and pg.locator('.sky-star.unlocked').count() == 1 and pg.locator('[data-chapter]').count() == 1, 'seul le chapitre 1 est ouvert (avec « Revoir »)'
     pg.click('#btn-start-session')
     assert pg.locator('.scene-screen').count() == 1 and 'Chapitre 1' in pg.inner_text('.scene-chapter'), 'scène du chapitre 1 attendue avant la 1re session'
-    for _ in range(4):
+    for _ in range(len(pg.locator('.scene-dot').all()) - 1):   # le nombre de vignettes dépend du texte du chapitre
         pg.click('#btn-scene-next')
     assert pg.inner_text('#btn-scene-next') == 'À toi de jouer !'
     assert pg.evaluate("window.mathpulse.progression.hasSeenChapter('lapine')") is False, 'le chapitre n\'est « lu » qu\'à la fin'
