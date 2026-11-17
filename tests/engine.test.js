@@ -112,6 +112,7 @@ test('progression: persistance et reset sans toucher aux autres clés', () => {
 test('session: étoiles créditées une seule fois, chapitre 2 débloqué à 6', () => {
     const { engine, progression } = setup();
     progression.addStars(4);
+    progression.advanceStory(4);   // v2 : l'histoire a sa propre avancée (+3 par session terminée)
     const s = new Session(engine, progression);
     s.start();
     for (const ex of s.exercises) { s.beginQuestion(); s.submitAnswer(ex.answer); s.next(); }
@@ -149,14 +150,15 @@ test('chapitres: déblocage par seuil, plusieurs chapitres d\'un coup, fin de l\
 
 test('univers: chapitres ouverts visibles, chapitres fermés sans titre, dernier chapitre « en cours »', () => {
     const { progression } = setup();
-    progression.addStars(16);
+    progression.addStars(16); progression.advanceStory(16);
     const html = new Universe(progression).render();
     assert.ok(html.includes('Les circuits'), 'le chapitre 3 est ouvert');
     assert.ok(!html.includes('La salle des machines'), 'le titre du chapitre 4 reste caché');
     assert.strictEqual((html.match(/sky-star locked/g) || []).length, 10);
     assert.strictEqual((html.match(/sky-star unlocked/g) || []).length, 3);
     assert.strictEqual((html.match(/aria-current="step"/g) || []).length, 1);
-    assert.ok(html.includes('pour le chapitre 4'));
+    assert.ok(html.includes('Encore 4 missions pour le chapitre 4'), '28 − 16 = 12 pas, soit 4 sessions');
+    assert.ok(!/\d+ ⭐/.test(html.replace(/star-counter[\s\S]*?<\/div>/, '')), 'plus aucun seuil en étoiles sur la carte');
 });
 
 test('scènes: tous les chapitres complets, vignettes courtes, décors et personnages connus', () => {
@@ -1161,4 +1163,43 @@ test('migration v1 : premiers rappels étalés selon le niveau (1, 3, 7 j)', () 
     assert.deepStrictEqual([d('a'), d('b'), d('c')], [1, 3, 7]);
     p.save(); const q = new Progression(); q.load();
     assert.strictEqual(q.data.reviews.length, 3, 'pas de doublon au rechargement');
+});
+
+// ---------- v2 : l'histoire ne dépend plus du score ----------
+test('histoire découplée : tout faux, l\'histoire avance quand même ; les étoiles ne débloquent plus rien ; migration sans recul', () => {
+    const { engine, progression } = setup();
+    const play = (ok, opts) => {
+        const s = new Session(engine, progression); s.start(opts);
+        s.exercises.forEach(ex => { s.beginQuestion(); s.submitAnswer(ok ? ex.answer : -1); s.next(); });
+        return s.complete();
+    };
+    let sum = play(false);
+    assert.ok(sum.starsEarned === 0 && sum.storyGain === 3 && sum.storyPoints === 3 && sum.newChapters.length === 0);
+    sum = play(false);
+    assert.strictEqual(progression.getTotalStars(), 0);
+    assert.deepStrictEqual(sum.newChapters.map(c => c.id), ['vaisseau'], '2 sessions terminées, 0 étoile : le chapitre 2 s\'ouvre');
+    assert.strictEqual(pendingScene(progression.getStoryPoints(), { lapine: true }).id, 'vaisseau');
+    progression.addStars(500);
+    assert.strictEqual(progression.getStoryPoints(), 6, 'des étoiles en plus n\'ouvrent aucun chapitre');
+    // une session abandonnée ne fait pas avancer
+    const ab = new Session(engine, progression); ab.start(); ab.abandon();
+    assert.strictEqual(progression.getStoryPoints(), 6);
+    // série libre : +1 tant qu'elle est « récompensable » (2 par jour), même ratée
+    sum = play(false, { free: { skills: ['multiply-2'], length: 5 } });
+    assert.ok(sum.storyGain === 1 && sum.starsEarned === 0);
+    play(false, { free: { skills: ['multiply-2'], length: 5 } });
+    assert.strictEqual(play(true, { free: { skills: ['multiply-2'], length: 5 } }).storyGain, 0, '3e série du jour');
+    // une mission terminée fait avancer l'histoire
+    const before = progression.getStoryPoints();
+    const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
+    run.next(); run.answer(0); run.next(); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next();
+    run.complete();
+    assert.strictEqual(progression.getStoryPoints(), before + STORY.mission);
+    // migration : l'avancée reprend le total d'étoiles (v1, ou v2 d'avant le découplage)
+    storage.set(storage.KEYS.PROGRESSION, { version: 1, totalStars: 40, skills: {} });
+    const p = new Progression(); p.load();
+    assert.strictEqual(p.getStoryPoints(), 40);
+    assert.strictEqual(currentChapter(p.getStoryPoints()).id, currentChapter(40).id);
+    p.addStars(9); p.save(); const q = new Progression(); q.load();
+    assert.ok(q.getStoryPoints() === 40 && q.getTotalStars() === 49, 'une fois migrée, l\'avancée ne suit plus les étoiles');
 });

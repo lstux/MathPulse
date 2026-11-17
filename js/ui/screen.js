@@ -57,7 +57,7 @@ class ScreenManager {
     ambienceFor(name, data = {}) {
         if (name === 'scene' && data.chapter) return data.chapter.ambience || null;
         if (name === 'universe') {
-            const chapter = currentChapter(this.progression.getTotalStars());
+            const chapter = currentChapter(this.progression.getStoryPoints());
             return chapter ? chapter.ambience || null : null;
         }
         return null;
@@ -204,7 +204,7 @@ class ScreenManager {
         const screen = this.screenEl();
         const universe = new Universe(this.progression);
         // Une ligne de la lapine avant « C'est parti » (ici et pas pendant la session : elle ne retarde aucune réponse)
-        const line = randomLine(currentChapter(this.progression.getTotalStars()));
+        const line = randomLine(currentChapter(this.progression.getStoryPoints()));
         screen.innerHTML = `
             <div class="universe-wrap">
                 <div class="sound-row"><button class="btn-sound" id="btn-sound-universe"></button></div>
@@ -332,7 +332,7 @@ class ScreenManager {
 
     // Démarre une série libre : scène d'histoire en attente, puis découverte des compétences jamais vues, puis le jeu
     startFree(config) {
-        const pending = pendingScene(this.progression.getTotalStars(), this.progression.data.chaptersSeen);
+        const pending = pendingScene(this.progression.getStoryPoints(), this.progression.data.chaptersSeen);
         if (pending) {
             this.show('scene', { chapter: pending, doneLabel: 'À toi de jouer !', next: () => this.startFree(config) });
             return;
@@ -413,7 +413,7 @@ class ScreenManager {
 
     startSession(forcedSkill = null) {
         // Scène d'histoire à lire avant la session (chapitre ouvert, pas encore lu) ; pas en mode test (compétence imposée)
-        const pending = forcedSkill ? null : pendingScene(this.progression.getTotalStars(), this.progression.data.chaptersSeen);
+        const pending = forcedSkill ? null : pendingScene(this.progression.getStoryPoints(), this.progression.data.chaptersSeen);
         if (pending) {
             this.show('scene', { chapter: pending, doneLabel: 'À toi de jouer !', next: () => this.startSession() });
             return;
@@ -588,9 +588,9 @@ class ScreenManager {
     createResultScreen(summary) {
         if (summary.rapid) return this.createRapidResultScreen(summary);
         const screen = this.screenEl();
-        const { correct, total, starsEarned, newChapters, skill, capped, cleared, totalStars } = summary;
-        const endLine = chapterEndLine(currentChapter(Math.max(0, totalStars - starsEarned)), starsEarned);
-        const pending = pendingScene(totalStars, this.progression.data.chaptersSeen);
+        const { correct, total, starsEarned, newChapters, skill, capped, cleared, totalStars, storyPoints, storyGain } = summary;
+        const endLine = chapterEndLine(currentChapter(Math.max(0, storyPoints - storyGain)), starsEarned);
+        const pending = pendingScene(storyPoints, this.progression.data.chaptersSeen);
         const title = correct === total ? 'Parfait !' : correct >= 3 ? 'Bien joué !' : 'On continue de s\'entraîner !';
         const chapters = newChapters.map(c => `<p class="unlock text-lg font-bold">${c.emoji} Nouveau chapitre : ${c.title} !</p>`).join('');
         const mood = correct === total ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
@@ -633,8 +633,8 @@ class ScreenManager {
 
     createRapidResultScreen(summary) {
         const screen = this.screenEl();
-        const { correct, total, fast, starsEarned, rewarded, newChapters, totalStars } = summary;
-        const pending = pendingScene(totalStars, this.progression.data.chaptersSeen);
+        const { correct, total, fast, starsEarned, rewarded, newChapters, totalStars, storyPoints } = summary;
+        const pending = pendingScene(storyPoints, this.progression.data.chaptersSeen);
         const mood = correct === total && fast >= total - 1 ? 'bravo' : correct >= 3 ? 'content' : 'comfort';
         const line = { bravo: 'Décollage réussi ! Plus rapide que mon vaisseau !', content: 'Bien joué, tes réflexes progressent !', comfort: 'Pas grave, la prochaine série sera la bonne !' }[mood];
         const stars = !rewarded

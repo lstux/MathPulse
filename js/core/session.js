@@ -126,13 +126,16 @@ class Session {
         const rewardedToday = history.filter(h => h.rapid && h.rewarded && new Date(h.at).toDateString() === today).length;
         const rewarded = rewardedToday < RAPID.maxRewardedPerDay;
         const starsEarned = rewarded ? Session.rapidStars(correct, total, fast) : 0;
-        const before = this.progression.getTotalStars();
         const after = this.progression.addStars(starsEarned);
-        const newChapters = newChaptersBetween(before, after);
+        // L'histoire avance parce que l'activité est terminée, pas selon le score
+        const storyGain = rewarded ? STORY.rapid : 0;
+        const storyBefore = this.progression.getStoryPoints();
+        const storyPoints = this.progression.advanceStory(storyGain);
+        const newChapters = newChaptersBetween(storyBefore, storyPoints);
 
         this.summary = {
             rapid: true, skill: 'rapid', correct, total, fast, starsEarned, rewarded,
-            hintsUsed: 0, capped: false, reviewed: 0, cleared: 0, totalStars: after, newChapters,
+            hintsUsed: 0, capped: false, reviewed: 0, cleared: 0, totalStars: after, storyPoints, storyGain, newChapters,
             avgTime: total ? this.results.reduce((sum, r) => sum + r.think_ms, 0) / total : 0
         };
         storage.append(storage.KEYS.SESSION_HISTORY, {
@@ -154,13 +157,16 @@ class Session {
         const rewarded = rewardedToday < FREE.maxRewardedPerDay;
         const good = total > 0 && correct >= Math.ceil(total * FREE.minRatio) && !this.isOverHintQuota();
         const starsEarned = rewarded && good ? FREE.maxStars : 0;
-        const before = this.progression.getTotalStars();
         const after = this.progression.addStars(starsEarned);
-        const newChapters = newChaptersBetween(before, after);
+        // L'histoire avance parce que l'activité est terminée, pas selon le score
+        const storyGain = rewarded ? STORY.free : 0;
+        const storyBefore = this.progression.getStoryPoints();
+        const storyPoints = this.progression.advanceStory(storyGain);
+        const newChapters = newChaptersBetween(storyBefore, storyPoints);
 
         this.summary = {
             free: true, skill: 'free', skills: this.freeSkills, correct, total, starsEarned, rewarded,
-            hintsUsed: this.hintsUsed, capped: false, reviewed: 0, cleared: this.cleared, totalStars: after, newChapters,
+            hintsUsed: this.hintsUsed, capped: false, reviewed: 0, cleared: this.cleared, totalStars: after, storyPoints, storyGain, newChapters,
             avgTime: total ? this.results.reduce((sum, r) => sum + r.time_ms, 0) / total : 0
         };
         storage.append(storage.KEYS.SESSION_HISTORY, {
@@ -197,15 +203,18 @@ class Session {
         const baseStars = starsForScore(correct);
         const capped = this.isOverHintQuota() && baseStars > HINTS.maxStarsOverQuota;
         const starsEarned = capped ? HINTS.maxStarsOverQuota : baseStars;
-        const before = this.progression.getTotalStars();
         const after = this.progression.addStars(starsEarned);
-        const newChapters = newChaptersBetween(before, after);
+        // L'histoire avance parce que l'activité est terminée, pas selon le score
+        const storyGain = STORY.session;
+        const storyBefore = this.progression.getStoryPoints();
+        const storyPoints = this.progression.advanceStory(storyGain);
+        const newChapters = newChaptersBetween(storyBefore, storyPoints);
 
         this.summary = {
             skill: this.skill, correct, total, starsEarned,
             hintsUsed: this.hintsUsed, capped,
             reviewed: this.exercises.filter(e => e.review).length, cleared: this.cleared,
-            totalStars: after, newChapters,
+            totalStars: after, storyPoints, storyGain, newChapters,
             avgTime: total ? this.results.reduce((s, r) => s + r.time_ms, 0) / total : 0
         };
         storage.append(storage.KEYS.SESSION_HISTORY, {

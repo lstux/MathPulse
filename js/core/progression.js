@@ -8,7 +8,7 @@ const MASTERY_STATES = ['vu', 'compris', 'durable'];
 
 class Progression {
     constructor() {
-        this.data = { version: DATA_VERSION, skills: {}, totalStars: 0, discovered: {}, errors: {}, chaptersSeen: {}, missions: {}, mastery: {}, errorTypes: {}, reviews: [] };
+        this.data = { version: DATA_VERSION, skills: {}, totalStars: 0, story: 0, discovered: {}, errors: {}, chaptersSeen: {}, missions: {}, mastery: {}, errorTypes: {}, reviews: [] };
     }
 
     load() {
@@ -17,6 +17,8 @@ class Progression {
             version: DATA_VERSION,   // version du format des données (v1 → v2 : missions, mastery, reviews ajoutés ; rien n'est retiré)
             skills: this.migrateSkills(saved.skills || {}),
             totalStars: Number.isFinite(saved.totalStars) ? saved.totalStars : 0,
+            // avancée de l'histoire, découplée des étoiles en v2 ; au départ elle reprend le total d'étoiles : personne ne recule
+            story: Number.isFinite(saved.story) ? saved.story : (Number.isFinite(saved.totalStars) ? saved.totalStars : 0),
             discovered: saved.discovered || {},
             errors: saved.errors || {},   // calculs à revoir, indexés par exercise.key
             chaptersSeen: saved.chaptersSeen || {},   // scènes d'histoire déjà lues { idDuChapitre: true }
@@ -84,6 +86,7 @@ class Progression {
             summary.errors.forEach(id => { seen[id] = (seen[id] || 0) + 1; });
         }
         Mastery.recordMission(this.data, summary, now);
+        this.data.story += STORY.mission;   // une mission terminée fait avancer l'histoire, réussie ou non
         this.save();
     }
 
@@ -208,6 +211,17 @@ class Progression {
         this.data.totalStars += Math.max(0, count);
         this.save();
         return this.data.totalStars;
+    }
+
+    // L'histoire avance quand une activité est terminée, quel que soit le score (voir STORY dans chapters.js)
+    advanceStory(points) {
+        this.data.story += Math.max(0, points);
+        this.save();
+        return this.data.story;
+    }
+
+    getStoryPoints() {
+        return this.data.story;
     }
 
     getTotalStars() {

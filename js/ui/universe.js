@@ -2,7 +2,8 @@
 
 class Universe {
     constructor(progression) {
-        this.stars = progression.getTotalStars();
+        this.totalStars = progression.getTotalStars();   // récompense affichée
+        this.stars = progression.getStoryPoints();       // avancée de l'histoire (v2 : ne dépend plus du score)
         this.max = CHAPTERS[CHAPTERS.length - 1].unlockAt;
         const unlocked = chaptersUnlockedAt(this.stars);
         this.currentId = unlocked[unlocked.length - 1].id;   // le dernier chapitre ouvert
@@ -16,7 +17,7 @@ class Universe {
             <div class="universe-container">
                 <div class="star-counter text-center mb-lg">
                     <span aria-hidden="true">⭐</span>
-                    <strong>${this.stars}</strong> ${this.stars > 1 ? 'étoiles' : 'étoile'}
+                    <strong>${this.totalStars}</strong> ${this.totalStars > 1 ? 'étoiles' : 'étoile'}
                 </div>
 
                 <div class="chapter-banner scene-stage mb-lg" role="img" aria-label="Chapitre ${current.number} : ${current.title}">
@@ -66,7 +67,7 @@ class Universe {
             const unlocked = this.stars >= c.unlockAt, isCurrent = c.id === this.currentId;
             const style = `left:${pos[i].x.toFixed(2)}%;top:${pos[i].y.toFixed(2)}%`;
             if (!unlocked) {
-                return `<button class="sky-star locked" style="${style}" data-star="${c.id}" aria-label="Chapitre ${c.number} : à découvrir, ${c.unlockAt} étoiles"><span class="sky-dot" aria-hidden="true"></span><span class="sky-goal text-sm" aria-hidden="true">${c.unlockAt} ⭐</span></button>`;
+                return `<button class="sky-star locked" style="${style}" data-star="${c.id}" aria-label="Chapitre ${c.number} : à découvrir, dans ${this.left(c)}"><span class="sky-dot" aria-hidden="true"></span><span class="sky-goal text-sm" aria-hidden="true">${sessionsUntil(c, this.stars)} 🚀</span></button>`;
             }
             return `<button class="sky-star unlocked${isCurrent ? ' current' : ''}" style="${style}" data-star="${c.id}"${isCurrent ? ' aria-current="step"' : ''} aria-label="Chapitre ${c.number} : ${c.title}"><img src="assets/story/icons/${c.id}.svg" alt="" width="44" height="44"></button>`;
         }).join('');
@@ -92,7 +93,7 @@ class Universe {
                     <div class="chapter-number text-sm">Chapitre ${chapter.number}</div>
                     <div class="chapter-title">À découvrir</div>
                 </div>
-                <div class="chapter-goal text-sm">${chapter.unlockAt} ⭐<br>encore ${chapter.unlockAt - this.stars}</div>
+                <div class="chapter-goal text-sm">dans<br>${this.left(chapter)}</div>
             </div>`;
         }
         const current = chapter.id === this.currentId;
@@ -109,10 +110,15 @@ class Universe {
             </div>`;
     }
 
+    // « 2 missions » : nombre de sessions à terminer avant ce chapitre
+    left(chapter) {
+        const n = sessionsUntil(chapter, this.stars);
+        return `${n} ${n > 1 ? 'missions' : 'mission'}`;
+    }
+
     nextGoalText() {
         const next = nextChapter(this.stars);
         if (!next) return 'Bravo ! Tu as débloqué toute l\'histoire. À\u00a0suivre…';
-        const left = next.unlockAt - this.stars;
-        return `Encore ${left} ${left > 1 ? 'étoiles' : 'étoile'} pour le chapitre ${next.number} !`;
+        return `Encore ${this.left(next)} pour le chapitre ${next.number} !`;
     }
 }

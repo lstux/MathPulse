@@ -34,6 +34,7 @@ _16 novembre 2026. Base : tag `v1.0.0` et synthèse « Vision et orientations de
 
 ### 2.3 Couplages à défaire (ils contredisent la vision)
 1. **L'histoire dépend des performances.** Les chapitres se débloquent par `totalStars`, et les étoiles viennent des sessions. Un enfant qui échoue reste donc bloqué dans l'histoire, ce que E5 interdit. → Les chapitres avancent par **missions jouées** (pas par score) ; les étoiles deviennent un simple retour de satisfaction.
+   _Réalisé (17 nov.) : l'avancée de l'histoire (`progression.data.story`) est distincte des étoiles. Une session ou une mission **terminée** vaut +3, une série rapide ou libre +1 (dans la limite quotidienne déjà en place), quel que soit le score ; une session abandonnée ne compte pas. Les seuils des chapitres (`unlockAt`) sont inchangés : le rythme est celui d'un enfant qui gagnait 3 étoiles par session. À la migration, l'avancée reprend le total d'étoiles (personne ne recule). L'écran Univers annonce « Encore N missions pour le chapitre X »._
 2. **Une réussite = une compétence validée.** La maîtrise ne dépend que de la précision et du temps sur un même type d'exercice. → E4 : preuves variées et réemploi en mission.
 3. **Les erreurs ne sont pas typées.** `errors` mémorise l'opération ratée (`+:8:7`), pas *pourquoi* elle a été ratée. → catalogue d'erreurs (§4.2).
 4. **Un seul parcours linéaire de déblocage** (`requires: {skill, level}`). → graphe de compétences par **prérequis de compréhension**, sans bloquer le récit.

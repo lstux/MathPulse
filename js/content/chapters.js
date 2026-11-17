@@ -1,6 +1,8 @@
 // MathPulse - Chapitres de l'histoire : le renard 🦊 (c'est le joueur : {nom} dans les textes = son prénom, voir player.js) et Andrea 🐰, la hase exploratrice
 // (les identifiants « rabbit » et « lapine » sont historiques : ils servent de clés dans les données et les fichiers, on ne les renomme pas)
-// Source : docs/storyboard-narratif.md. Un chapitre se débloque quand le total d'étoiles atteint `unlockAt`.
+// Source : docs/storyboard-narratif.md. Un chapitre se débloque quand l'avancée de l'histoire (progression.getStoryPoints()) atteint `unlockAt`.
+// v2 : l'histoire avance avec les activités TERMINÉES (STORY ci-dessous), jamais avec le score : un enfant en difficulté n'est pas bloqué.
+// Les étoiles restent une récompense, sans rôle de verrou.
 // Chaque chapitre : titre, seuil, banner (décor affiché en bannière sur l'écran Univers quand c'est le chapitre en cours), thème de la mission, et :
 //   scene : vignettes { art, cast, lines } jouées au déblocage du chapitre (voir scene.js)
 //     art  : décor (forest, clearing, ship, ship-lit, engine…, cockpit…, space…, hill…), fichiers dans assets/story/scene/
@@ -12,6 +14,9 @@
 //   end  : message de fin de session { full (3 ⭐), some (1 à 2 ⭐), none (0 ⭐) } ; absent = pas de message
 // Règle d'écriture : textes courts (une quarantaine de mots par vignette au plus), lisibles seul en CE2.
 // Les émojis de la liste des chapitres sont provisoires, à remplacer par des SVG.
+
+// Avancée de l'histoire par activité terminée, quel que soit le résultat (une session rapportait au mieux 3 étoiles : les seuils gardent leur rythme)
+const STORY = { session: 3, mission: 3, rapid: 1, free: 1 };
 
 const CHAPTERS = [
     { id: 'lapine',      number: 1,  unlockAt: 0, ambience: 'nature', banner: 'forest',   emoji: '🌲', title: 'Une drôle de hase',          mission: "Le test d'Andrea",
@@ -326,7 +331,7 @@ const CHAPTERS = [
     }
 ];
 
-// Chapitres débloqués avec ce total d'étoiles
+// Chapitres débloqués avec cette avancée de l'histoire (paramètre nommé `stars` pour des raisons historiques)
 function chaptersUnlockedAt(stars) {
     return CHAPTERS.filter(c => stars >= c.unlockAt);
 }
@@ -339,6 +344,11 @@ function newChaptersBetween(before, after) {
 // Prochain chapitre à débloquer, ou null une fois toute l'histoire ouverte
 function nextChapter(stars) {
     return CHAPTERS.find(c => stars < c.unlockAt) || null;
+}
+
+// Nombre de sessions (ou missions) à terminer pour ouvrir ce chapitre
+function sessionsUntil(chapter, points) {
+    return Math.max(0, Math.ceil((chapter.unlockAt - points) / STORY.session));
 }
 
 // Chapitre en cours : le dernier ouvert avec ce total d'étoiles
