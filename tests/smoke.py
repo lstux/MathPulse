@@ -125,7 +125,14 @@ with sync_playwright() as p:
                 pg.click('.key[data-key="ok"]')
             mood = pg.get_attribute('#mascot', 'data-mood')
             assert mood == ('comfort' if wrong else 'bravo'), f'réaction du renard inattendue : {mood}'
-            if wrong: pg.click('#btn-continue'); pg.wait_for_timeout(200)
+            if wrong:
+                # v2 : première erreur → piste de la hase et deuxième essai ; deuxième erreur → réponse et explication
+                assert pg.locator('.retry-help').count() == 1 and pg.locator('#btn-continue').count() == 0, 'piste attendue avant le deuxième essai'
+                pg.wait_for_selector('.key[data-key="ok"]:not([disabled])', timeout=3000)
+                for d in str(ans + 2): pg.click(f'.key[data-key="{d}"]')
+                pg.click('.key[data-key="ok"]')
+                assert 'La réponse est' in pg.inner_text('#feedback') and pg.locator('#visual-slot .retry-help').count() == 1
+                pg.click('#btn-continue'); pg.wait_for_timeout(200)
             else: pg.wait_for_timeout(1400)
         assert pg.locator('.result-card').count(), 'écran de résultat attendu'
         assert pg.locator('#rabbit-says').count() == 1, 'la lapine doit apparaître en fin de session'

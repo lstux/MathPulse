@@ -501,15 +501,18 @@ class ScreenManager {
             else this.show('game');
         };
 
+        let typed = '', attempt = 1;   // attempt 2 : deuxième essai après une piste (hors série rapide)
         const submit = (value, chosenBtn) => {
             if (answered || String(value).trim() === '') return;
             answered = true;
-            const result = s.submitAnswer(value);
+            const first = attempt === 1;
+            const result = first ? s.submitAnswer(value) : s.retryAnswer(value);
+            const retry = first && !result.correct && !s.rapid;   // première erreur : piste, puis on réessaie
             controls().forEach(c => { c.disabled = true; });
             screen.querySelector('#btn-hint').hidden = true;
+            const display = screen.querySelector('#answer-display');
 
             // Pavé numérique : on affiche la réponse validée (✓ / ✗) et on libère la place pour le retour
-            const display = screen.querySelector('#answer-display');
             if (display) {
                 display.textContent = `${value} ${result.correct ? '✓' : '✗'}`;
                 display.classList.add(result.correct ? 'correct' : 'wrong');
@@ -517,9 +520,10 @@ class ScreenManager {
             }
 
             // Le retour d'un choix ne repose pas que sur la couleur : ✓ / ✗
+            // (avant un deuxième essai, on ne montre pas la bonne réponse)
             screen.querySelectorAll('.choice').forEach(btn => {
-                if (Number(btn.dataset.value) === result.answer) { btn.classList.add('correct'); btn.textContent += ' ✓'; }
-                else if (btn === chosenBtn) { btn.classList.add('wrong'); btn.textContent += ' ✗'; }
+                if (Number(btn.dataset.value) === result.answer && !retry) { btn.classList.add('correct'); btn.textContent += ' ✓'; }
+                else if (btn === chosenBtn) { btn.classList.add('wrong'); btn.textContent += ' ✗'; btn.dataset.out = '1'; }
             });
 
             const fb = screen.querySelector('#feedback');
@@ -539,8 +543,23 @@ class ScreenManager {
                 return;
             }
             if (result.correct) {
-                fb.innerHTML = `<div class="feedback-success"><p class="text-lg font-bold">Bravo !</p></div>`;
+                fb.innerHTML = `<div class="feedback-success"><p class="text-lg font-bold">${first ? 'Bravo !' : 'Bravo, tu as trouvé !'}</p></div>`;
                 this.later(advance, 1100);
+            } else if (retry) {
+                // Piste de la hase (adaptée au type d'erreur), puis deuxième essai
+                attempt = 2;
+                // la piste se place au-dessus du pavé (elle reste lisible pendant le deuxième essai, sans défiler)
+                screen.querySelector('#visual-slot').innerHTML = `<div class="retry-help">${MissionUI.says('rabbit', result.help.text, 'think')}</div>`;
+                screen.classList.add('has-retry');
+                this.later(() => {
+                    answered = false; typed = '';
+                    controls().forEach(c => { c.disabled = !!c.dataset.out; });
+                    if (display) {
+                        display.textContent = '?'; display.className = 'answer-display empty';
+                        screen.querySelector('#keypad').hidden = false;
+                    }
+                    this.reactFox(screen, 'content', null);
+                }, 900);
             } else {
                 fb.innerHTML = `
                     <div class="feedback-error">
@@ -557,7 +576,6 @@ class ScreenManager {
 
         // Pavé numérique (3 chiffres maximum : les réponses attendues vont jusqu'à 50)
         if (!ex.choices) {
-            let typed = '';
             const display = screen.querySelector('#answer-display');
             const press = key => {
                 if (answered) return;

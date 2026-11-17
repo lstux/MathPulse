@@ -105,7 +105,30 @@ class Session {
         if (reviewOutcome === 'cleared') this.cleared++;
         const fast = correct && thinkMs <= RAPID.fastMs;
         this.results[this.results.length - 1].fast = fast;
-        return { correct, answer: exercise.answer, countedForMastery, reviewOutcome, fast };
+        // v2 : après une première erreur (hors série rapide), une piste adaptée et un deuxième essai
+        const help = !correct && !this.rapid ? Session.helpFor(exercise, answer) : null;
+        if (help && help.error) this.progression.countErrorType(exercise.skill, help.error);
+        return { correct, answer: exercise.answer, countedForMastery, reviewOutcome, fast, help };
+    }
+
+    // Deuxième essai sur la question courante, après une première erreur.
+    // Seule la première réponse compte : le deuxième essai ne change ni la maîtrise, ni les étoiles, ni les calculs à revoir.
+    retryAnswer(answer) {
+        const r = this.results[this.currentIndex];
+        if (this.rapid || !r || r.correct || r.second) throw new Error('Pas de deuxième essai possible ici');
+        const exercise = this.getCurrentExercise();
+        const correct = this.engine.validateAnswer(exercise, answer);
+        r.second = { answer: String(answer), correct };
+        return { correct, answer: exercise.answer, second: true };
+    }
+
+    // Piste de la hase pour une première erreur. Diagnostic par type d'erreur pour les calculs écrits « a op b = ? » ;
+    // pour « a + ? = c » ou une question formulée autrement (double de…), une piste générale qui ne trompe pas.
+    static helpFor(exercise, answer) {
+        if (exercise.type === 'missing') return { error: null, text: 'Presque ! Remplace le ? par ta réponse, et vérifie le calcul.' };
+        if (SKILLS[exercise.skill] && SKILLS[exercise.skill].ask) return { error: null, text: 'Presque ! Essaie encore.' };
+        const fb = Diagnosis.feedback(exercise.operation, exercise.operands[0], exercise.operands[1], Number(answer), 1);
+        return { error: fb.error, text: fb.text };
     }
 
     next() {
@@ -172,7 +195,7 @@ class Session {
         storage.append(storage.KEYS.SESSION_HISTORY, {
             at: new Date().toISOString(), skill: 'free', free: true, skills: this.freeSkills, rewarded, correct, total, starsEarned,
             hintsUsed: this.hintsUsed,
-            answers: this.results.map(r => ({ q: r.question, ok: r.correct, think_ms: r.think_ms, total_ms: r.time_ms, hinted: r.hinted }))
+            answers: this.results.map(r => ({ q: r.question, ok: r.correct, think_ms: r.think_ms, total_ms: r.time_ms, hinted: r.hinted, ...(r.second ? { second_ok: r.second.correct } : {}) }))
         });
         this.completed = true;
         return this.summary;
@@ -220,7 +243,7 @@ class Session {
         storage.append(storage.KEYS.SESSION_HISTORY, {
             at: new Date().toISOString(), skill: this.skill, correct, total, starsEarned, hintsUsed: this.hintsUsed,
             // journal d'usage : une ligne par question (temps de réflexion et temps total, aide, revue/rappel)
-            answers: this.results.map(r => ({ q: r.question, ok: r.correct, think_ms: r.think_ms, total_ms: r.time_ms,
+            answers: this.results.map(r => ({ q: r.question, ok: r.correct, think_ms: r.think_ms, total_ms: r.time_ms, ...(r.second ? { second_ok: r.second.correct } : {}),
                 hinted: r.hinted, review: r.review, recall: r.recall }))
         });
         this.completed = true;

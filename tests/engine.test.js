@@ -1330,3 +1330,47 @@ test('diagnostic × et ÷ : erreurs typiques reconnues, image ou conseil de mét
     assert.strictEqual(Diagnosis.feedback('×', 37, 100, 370, 2).tip, null);
     assert.ok(Diagnosis.feedback('÷', 42, 7, 9, 1).text === 'Presque ! Essaie encore.');
 });
+
+// ---------- v2 : deuxième essai en session ----------
+test('session : première erreur → piste adaptée et deuxième essai ; seule la première réponse compte', () => {
+    const { engine, progression } = setup();
+    const s = new Session(engine, progression); s.start({ skill: 'add-units' });
+    s.exercises = [engine.buildExercise('add-units', 'numeric', 47, 8), engine.buildExercise('add-units', 'missing', 47, 8),
+        engine.buildExercise('multiply-7', 'numeric', 6, 7), engine.buildExercise('double-100', 'numeric', 37, 2), engine.buildExercise('add-units', 'numeric', 36, 7)];
+    // 1. dizaine oubliée, puis trouvé au 2e essai
+    s.beginQuestion();
+    let r = s.submitAnswer('45');
+    assert.ok(!r.correct && r.help.error === 'add-forgot-carry' && r.help.text.includes('50'));
+    assert.ok(!r.help.text.includes('55'), 'la piste ne donne pas la réponse');
+    assert.ok(s.retryAnswer('55').correct);
+    assert.throws(() => s.retryAnswer('55'), /deuxième essai/, 'un seul deuxième essai');
+    s.next();
+    // 2. « 47 + ? = 55 » : piste générale (le diagnostic de 47 + 8 n'aurait pas de sens ici)
+    s.beginQuestion(); r = s.submitAnswer('7');
+    assert.ok(r.help.error === null && r.help.text.includes('Remplace le ?'));
+    assert.ok(!s.retryAnswer('9').correct); s.next();
+    // 3. table d'à côté (×) ; 4. question formulée autrement : piste générale
+    s.beginQuestion(); assert.strictEqual(s.submitAnswer('48').help.error, 'mul-wrong-table'); s.next();
+    s.beginQuestion(); r = s.submitAnswer('39'); assert.ok(r.help.error === null && r.help.text === 'Presque ! Essaie encore.'); s.next();
+    s.beginQuestion(); assert.strictEqual(s.submitAnswer('43').help, null, 'bonne réponse : pas de piste'); s.next();
+    const sum = s.complete();
+    assert.strictEqual(sum.correct, 1, 'le 2e essai réussi ne compte pas comme une bonne réponse');
+    assert.strictEqual(sum.starsEarned, starsForScore(1));
+    assert.strictEqual(progression.getSkillStats('add-units').seen, 3, 'une seule réponse comptée par question pour la maîtrise');
+    assert.strictEqual(progression.getSkillStats('add-units').correct, 1);
+    assert.ok(progression.getPendingErrors().some(e => e.operands[0] === 47 && e.operands[1] === 8), 'le calcul raté reste à revoir, même trouvé au 2e essai');
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(progression.getErrorTypes('add-units'))), { 'add-forgot-carry': 1 });
+    assert.strictEqual(progression.getErrorTypes('multiply-7')['mul-wrong-table'], 1);
+    const h = storage.get(storage.KEYS.SESSION_HISTORY).slice(-1)[0];
+    assert.ok(h.answers[0].second_ok === true && h.answers[1].second_ok === false && !('second_ok' in h.answers[4]));
+});
+
+test('série rapide : pas de piste ni de deuxième essai', () => {
+    const { engine, progression } = setup();
+    for (let i = 0; i < 6; i++) progression.recordAnswer('multiply-2', true, 1000);
+    const s = new Session(engine, progression); s.start({ rapid: true });
+    s.beginQuestion();
+    const r = s.submitAnswer('99999');
+    assert.ok(!r.correct && r.help === null);
+    assert.throws(() => s.retryAnswer('1'), /deuxième essai/);
+});

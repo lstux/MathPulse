@@ -62,6 +62,13 @@ class Progression {
         return this.data.mastery[skillId] || null;
     }
 
+    // Un type d'erreur reconnu (diagnosis.js) sur une compétence, en session d'entraînement
+    countErrorType(skillId, errorId) {
+        const seen = this.data.errorTypes[skillId] || (this.data.errorTypes[skillId] = {});
+        seen[errorId] = (seen[errorId] || 0) + 1;
+        this.save();
+    }
+
     getErrorTypes(skillId) {
         return this.data.errorTypes[skillId] || {};
     }

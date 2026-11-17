@@ -419,3 +419,11 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .nb-idea:last-child { border-bottom: 0; }
 .nb-idea p { flex: 1; }
 .nb-count { white-space: nowrap; font-weight: 400; }
+
+/* ---------- Deuxième essai en session : piste de la hase ---------- */
+.retry-help { width: 100%; display: flex; justify-content: center; }
+.retry-help .mission-says { margin-top: 0; width: 100%; max-width: 420px; }
+.game-screen.has-retry { gap: var(--spacing-sm); }
+.game-screen.has-retry .answer-display { min-height: 52px; }
+.game-screen.has-retry .key { min-height: 48px; }
+.game-screen .choice[data-out] { opacity: .55; }
