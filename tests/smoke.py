@@ -42,7 +42,11 @@ with sync_playwright() as p:
     pg.click('#btn-intro-start'); pg.wait_for_selector('#ia-scene', timeout=4000)
     pg.wait_for_timeout(300); assert pg.locator('.ia-fall').count() == 1 and pg.locator('.ia-lamp').count() == 1
     assert pg.inner_text('#btn-skip-intro') == 'Passer'
-    pg.click('#btn-skip-intro'); assert pg.inner_text('h1') == 'MathPulse'
+    pg.click('#btn-skip-intro')
+    # prénom du joueur : demandé une fois avant le premier accueil, puis utilisé dans l'histoire
+    assert pg.inner_text('h1') == "Le renard, c'est toi !"
+    pg.fill('#player-name', ' <b>Léo</b>7 '); pg.click('#btn-name-ok')
+    assert pg.inner_text('h1') == 'MathPulse' and 'Bonjour bLéob !' in pg.inner_text('main'), 'prénom nettoyé puis affiché'
     pg.click('#btn-intro'); pg.wait_for_selector('#ia-scene', timeout=4000)   # « Revoir l'intro » : sans écran de lancement
     assert pg.locator('#btn-intro-start').count() == 0
     # fin de l'animation : le bouton devient « Continuer › » puis l'accueil s'affiche tout seul 3 s plus tard

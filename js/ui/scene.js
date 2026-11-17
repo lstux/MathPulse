@@ -4,10 +4,8 @@
 const Scenes = {
     // Typographie française : espace insécable avant « : ; ? ! » et dans les guillemets, pour qu'un signe ne reste pas seul en fin de ligne
     fr(text) {
-        return text.replace(/« /g, '«\u00a0').replace(/ ([»:;?!])/g, '\u00a0$1');
+        return Player.text(text).replace(/« /g, '«\u00a0').replace(/ ([»:;?!])/g, '\u00a0$1');
     },
-
-    NAMES: { fox: 'Le renard', rabbit: 'La lapine' },
 
     create(chapter, { onDone, doneLabel = 'Continuer' } = {}) {
         const vignettes = chapter.scene;
@@ -40,7 +38,7 @@ const Scenes = {
             if (l.who === 'narrator') return `<p class="scene-narr">${Scenes.fr(l.text)}</p>`;
             return `<div class="scene-line scene-line-${l.who}">
                 <img class="face" src="assets/story/expr/${l.who}-${l.mood || 'content'}.svg" alt="" width="56" height="56">
-                <p class="speech"><span class="sr-only">${Scenes.NAMES[l.who]} : </span>${Scenes.fr(l.text)}</p>
+                <p class="speech"><span class="sr-only">${Player.label(l.who)} : </span>${Scenes.fr(l.text)}</p>
             </div>`;
         };
 

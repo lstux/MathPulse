@@ -16,6 +16,7 @@ const PRECACHE = [
     './js/content/missions.js',
     './js/core/storage.js',
     './js/core/cheat.js',
+    './js/core/player.js',
     './js/core/progression.js',
     './js/core/engine.js',
     './js/core/session.js',

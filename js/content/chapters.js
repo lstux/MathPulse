@@ -1,11 +1,12 @@
-// MathPulse - Chapitres de l'histoire (le renard 🦊 et la lapine 🐰)
+// MathPulse - Chapitres de l'histoire : le renard 🦊 (c'est le joueur : {nom} dans les textes = son prénom, voir player.js) et Andrea 🐰, la hase exploratrice
+// (les identifiants « rabbit » et « lapine » sont historiques : ils servent de clés dans les données et les fichiers, on ne les renomme pas)
 // Source : docs/storyboard-narratif.md. Un chapitre se débloque quand le total d'étoiles atteint `unlockAt`.
 // Chaque chapitre : titre, seuil, banner (décor affiché en bannière sur l'écran Univers quand c'est le chapitre en cours), thème de la mission, et :
 //   scene : vignettes { art, cast, lines } jouées au déblocage du chapitre (voir scene.js)
 //     art  : décor (forest, clearing, ship, ship-lit, engine…, cockpit…, space…, hill…), fichiers dans assets/story/scene/
 //     cast : personnages affichés { who: 'fox' | 'rabbit', at: 'left' | 'right' | 'center', small? }
 //     lines: { who: 'narrator' | 'fox' | 'rabbit', text, mood? } (mood : expression du visage)
-//   lines: lignes de la lapine, une au hasard sur l'écran de l'univers avant « C'est parti »
+//   lines: lignes d'Andrea, une au hasard sur l'écran de l'univers avant « C'est parti »
 //   ambience : ambiance sonore du chapitre (nature | ship | space), jouée pendant la scène et sur l'écran Univers
 //   sfx  : son joué à la fin de la scène du chapitre (ici les applaudissements)
 //   end  : message de fin de session { full (3 ⭐), some (1 à 2 ⭐), none (0 ⭐) } ; absent = pas de message
@@ -13,15 +14,15 @@
 // Les émojis de la liste des chapitres sont provisoires, à remplacer par des SVG.
 
 const CHAPTERS = [
-    { id: 'lapine',      number: 1,  unlockAt: 0, ambience: 'nature', banner: 'forest',   emoji: '🌲', title: 'Une drôle de lapine',        mission: 'Le test de la lapine',
+    { id: 'lapine',      number: 1,  unlockAt: 0, ambience: 'nature', banner: 'forest',   emoji: '🌲', title: 'Une drôle de hase',          mission: "Le test d'Andrea",
         scene: [
             { art: 'forest', cast: [{ who: 'fox', at: 'left', small: true }], lines: [
                 { who: 'narrator', text: "Une lueur entre les arbres… Tu t'approches, le cœur un peu rapide." }] },
             { art: 'forest', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'rabbit', text: "Bonsoir ! Je suis exploratrice. Je viens d'une planète autour d'une étoile que tu vois parfois dans le ciel." }] },
+                { who: 'rabbit', text: "Bonsoir ! Je m'appelle Andrea, je suis exploratrice. Je viens d'une planète autour d'une étoile que tu vois parfois dans le ciel." }] },
             { art: 'forest', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'fox', mood: 'worried', text: "Tu es tombée du ciel ?!" },
-                { who: 'rabbit', text: "Posée en urgence. Une micro-météorite a abîmé mon circuit de navigation. Rien de grave !" }] },
+                { who: 'fox', mood: 'worried', text: "Une lapine… tombée du ciel ?!" },
+                { who: 'rabbit', text: "Une hase ! Et je me suis posée en urgence. Une micro-météorite a abîmé mon circuit de navigation. Rien de grave !" }] },
             { art: 'forest', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Mon vaisseau est juste derrière. Mais on ne montre pas ses instruments au premier venu : un petit test d'abord." }] },
             { art: 'forest', cast: [{ who: 'rabbit', at: 'center' }], lines: [
@@ -58,7 +59,7 @@ const CHAPTERS = [
         lines: [
             "Enlever, c'est aussi une façon de compter.",
             "Moins il y a de débris, plus il y a de place pour réparer.",
-            "Ne t'inquiète pas, renard, on avance bien."
+            "Ne t'inquiète pas, {nom}, on avance bien."
         ],
         end: { full: "Le panneau est presque propre !", some: "Tu as aidé la 🐰 à dégager le vaisseau." }
     },
@@ -80,7 +81,7 @@ const CHAPTERS = [
         lines: [
             "Deux par module, cinq par paquet : tout s'allume peu à peu.",
             "Tu vois ? Dès qu'on groupe, c'est plus simple.",
-            "Respire, renard. Tu fais ça très bien."
+            "Respire, {nom}. Tu fais ça très bien."
         ],
         end: { some: "Un voyant de plus brille grâce à toi !" }
     },
@@ -237,10 +238,10 @@ const CHAPTERS = [
                 { who: 'rabbit', mood: 'content', text: "Et celui-ci est multiplié par 100. 6 fois 100 ?" },
                 { who: 'fox', mood: 'bravo', text: "600 !" }] },
             { art: 'cockpit-radio', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'rabbit', mood: 'comfort', text: "« …on pense à toi. Reviens quand tu pourras. » C'est ma famille, renard." }] },
+                { who: 'rabbit', mood: 'comfort', text: "« …on pense à toi. Reviens quand tu pourras. » C'est ma famille, {nom}." }] },
             { art: 'cockpit-radio', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'comfort', text: "Ils t'attendent. Alors on va te ramener." },
-                { who: 'rabbit', mood: 'content', text: "Merci, renard. Même si tu parles beaucoup." }] },
+                { who: 'rabbit', mood: 'content', text: "Merci, {nom}. Même si tu parles beaucoup." }] },
             { art: 'cockpit-lit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Cette fois, vraiment, c'est l'heure des adieux." }] }
         ],
@@ -254,7 +255,7 @@ const CHAPTERS = [
     { id: 'embarquement', number: 11, unlockAt: 155, ambience: 'space', banner: 'porthole-earth', emoji: '🚪', title: 'Embarquement surprise',      mission: 'Vérifier le carburant',
         scene: [
             { art: 'airlock', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
-                { who: 'rabbit', mood: 'content', text: "Merci pour tout, renard. Sans toi, je serais encore là." }] },
+                { who: 'rabbit', mood: 'content', text: "Merci pour tout, {nom}. Sans toi, je serais encore là." }] },
             { sfx: 'airlock-close', art: 'airlock-closed', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'worried', text: "Euh… la porte ?" }] },
             { sfx: 'launch', art: 'porthole-earth', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
@@ -269,7 +270,7 @@ const CHAPTERS = [
                 { who: 'rabbit', mood: 'think', text: "Chut. Les renards n'ont pas à tout répéter. Mais d'abord une escale : mon rapport doit partir par la balise relais." }] }
         ],
         lines: [
-            "Il en reste assez. Je te le promets, renard.",
+            "Il en reste assez. Je te le promets, {nom}.",
             "Calculer le retour, c'est la meilleure façon de se rassurer.",
             "Regarde par le hublot : on n'est jamais perdu quand on sait compter."
         ],
@@ -319,7 +320,7 @@ const CHAPTERS = [
         lines: [
             "Chaque soir, une lumière dans le ciel : c'est moi.",
             "Doubler, partager en deux : deux gestes pour atterrir en douceur.",
-            "Tu sais, renard, tu es un excellent copilote."
+            "Tu sais, {nom}, tu es un excellent copilote."
         ],
         end: { some: "Tu as aidé la 🐰 à rentrer… et à te ramener." }
     }

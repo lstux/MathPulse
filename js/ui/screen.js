@@ -20,6 +20,7 @@ class ScreenManager {
     }
 
     show(name, data = {}) {
+        if (name === 'home' && !Player.asked()) name = 'name';   // le prénom est demandé une fois, avant le premier accueil
         // Ambiance sonore de l'écran : celle du chapitre (scène ou univers), silence ailleurs
         Sound.ambience(this.ambienceFor(name, data));
         this.timers.forEach(clearTimeout);
@@ -42,6 +43,7 @@ class ScreenManager {
                 : Discovery.create(data.skillId, data.then || (() => this.show('game'))),
             game: () => this.createGameScreen(),
             result: () => this.createResultScreen(data.summary),
+            name: () => this.createNameScreen(data),
             mission: () => this.createMissionScreen(data),
             parent: () => this.createParentScreen()
         };
@@ -152,14 +154,37 @@ class ScreenManager {
         return '⭐'.repeat(n) + '☆'.repeat(Math.max(0, max - n));
     }
 
+    // ---------- Prénom du joueur (c'est lui le renard) : demandé une fois, modifiable dans l'espace parent ----------
+    createNameScreen(data = {}) {
+        const screen = this.screenEl('name-screen');
+        const current = Player.name();
+        screen.innerHTML = `
+            <div class="text-center">
+                <div class="name-face">${this.face('fox', 'content')}</div>
+                <h1 class="text-2xl font-bold mb-md">Le renard, c'est toi !</h1>
+                <label class="text-lg" for="player-name">Comment t'appelles-tu ?</label>
+            </div>
+            <input class="name-input" id="player-name" type="text" maxlength="${Player.MAX}" autocomplete="given-name" autocapitalize="words" spellcheck="false" value="${current}" placeholder="Ton prénom">
+            <div class="flex flex-col gap-md btn-column">
+                <button class="btn-primary btn-large" id="btn-name-ok">C'est moi !</button>
+                <button class="btn-secondary" id="btn-name-skip">${current ? 'Ne plus utiliser mon prénom' : 'Plus tard'}</button>
+            </div>`;
+        const input = screen.querySelector('#player-name');
+        const done = (value) => { Player.set(value); this.show(data.from || 'home'); };
+        screen.querySelector('#btn-name-ok').addEventListener('click', () => done(input.value));
+        screen.querySelector('#btn-name-skip').addEventListener('click', () => done(''));
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') done(input.value); });
+        return screen;
+    }
+
     // ---------- Accueil ----------
     createHomeScreen() {
         const screen = this.screenEl();
         screen.innerHTML = `
             <div class="text-center">
-                <img class="intro-img" src="assets/story/intro.svg" alt="Un renard et une lapine pilote spatiale devant son vaisseau en panne : « 2 + 3 = ? »" width="360" height="520">
+                <img class="intro-img" src="assets/story/intro.svg" alt="Un renard et une hase pilote spatiale devant son vaisseau en panne : « 2 + 3 = ? »" width="360" height="520">
                 <h1 class="text-3xl font-bold mb-md">MathPulse</h1>
-                <p class="text-lg muted">Le calcul mental, version aventure !</p>
+                <p class="text-lg muted">${Player.name() ? `Bonjour ${Player.name()} ! ` : ''}Le calcul mental, version aventure !</p>
             </div>
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-play">Jouer</button>
@@ -744,6 +769,7 @@ class ScreenManager {
                 <p class="muted text-sm mb-md" id="app-version">Version ${APP_VERSION} (${APP_BUILD})</p>
                 <div class="flex flex-col gap-md">
                     <button class="btn-secondary" id="btn-sound-parent"></button>
+                    <button class="btn-secondary" id="btn-name">✏️ Prénom du joueur : ${Player.name() || 'non renseigné'}</button>
                     <button class="btn-secondary" id="btn-export">Exporter les données</button>
                     <button class="btn-secondary" id="btn-import">Importer une sauvegarde</button>
                     <input type="file" id="file-import" accept="application/json,.json" hidden>
@@ -767,6 +793,7 @@ class ScreenManager {
         screen.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => this.startSession(b.dataset.play)));
         screen.querySelectorAll('[data-mission]').forEach(b => b.addEventListener('click', () => this.show('mission', { missionId: b.dataset.mission, from: 'parent' })));
         screen.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => this.show('discovery', { skillId: b.dataset.replay, replay: true })));
+        screen.querySelector('#btn-name').addEventListener('click', () => this.show('name', { from: 'parent' }));
         screen.querySelector('#btn-export').addEventListener('click', () => this.exportData());
         const fileInput = screen.querySelector('#file-import');
         screen.querySelector('#btn-import').addEventListener('click', () => fileInput.click());

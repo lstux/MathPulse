@@ -372,3 +372,8 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 /* ---------- Missions (v2) ---------- */
 .mission-screen .mission-says { width: 100%; max-width: 420px; margin-top: var(--spacing-md); }
 .mission-screen .question { margin-top: 0; }
+
+/* ---------- Prénom du joueur ---------- */
+.name-face .face { width: 96px; height: 96px; }
+.name-input { width: 100%; max-width: 320px; min-height: 56px; padding: 0 var(--spacing-md); font: inherit; font-size: var(--font-size-2xl); font-weight: 700; text-align: center;
+    color: var(--color-text); background: var(--color-surface, #fff); border: 3px solid var(--color-primary); border-radius: 16px; }

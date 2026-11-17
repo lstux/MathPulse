@@ -160,4 +160,4 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 5. **Seuils de maîtrise : valeurs du §3.4 comme point de départ** (≥ 2 formes, ≥ 2 contextes, rappels à 3 j et 14 j), regroupés dans une constante réglable et ajustés après les premiers tests réels.
 6. **Branche `v2` longue** ; `main` reste en 1.x (correctifs uniquement).
 
-**[À trancher]** Noms des personnages : la synthèse parle de « Gab » et « Andrea », le jeu actuel dit « le renard » et « la lapine » sans les nommer. Les missions v2 gardent « le renard / la lapine » tant que ce n'est pas décidé.
+7. **Personnages (17 nov.).** Le renard **est le joueur** : son prénom est demandé une fois (écran dédié avant le premier accueil, modifiable dans l'espace parent, facultatif) et remplace `{nom}` dans les textes (« renard » par défaut). La « lapine » est en réalité une **hase** et s'appelle **Andrea**. « Gab » (nom venu de la synthèse) n'est pas retenu. Les identifiants techniques `rabbit` / `lapine` restent inchangés (clés de données et noms de fichiers).

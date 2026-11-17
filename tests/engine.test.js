@@ -989,3 +989,24 @@ test('données v2 : migration depuis v1 sans perte, maîtrise de départ prudent
     assert.strictEqual(q.getTotalStars(), 12);
     assert.strictEqual(q.getMastery('multiply-2').state, 'compris');
 });
+
+test('joueur : prénom nettoyé, demandé une fois, {nom} remplacé dans les textes (« renard » par défaut), Andrea nommée', () => {
+    storage.init();
+    assert.ok(!Player.asked());
+    assert.strictEqual(Player.text('Merci, {nom}.'), 'Merci, renard.');
+    assert.strictEqual(Player.label('fox'), 'Le renard');
+    assert.strictEqual(Player.label('rabbit'), 'Andrea');
+    assert.strictEqual(Player.set('  <img src=x onerror=1> Léo-Paul 42  '), 'img srcx onerr');
+    assert.strictEqual(Player.set("Zoé d'Arc"), "Zoé d'Arc");
+    assert.ok(Player.asked());
+    assert.strictEqual(Player.text('Merci, {nom}. Tu sais, {nom} ?'), "Merci, Zoé d'Arc. Tu sais, Zoé d'Arc ?");
+    assert.strictEqual(Player.label('fox'), "Zoé d'Arc");
+    storage.set(storage.KEYS.USER_PREFS, { playerName: '<script>x</script>', nameAsked: true });
+    assert.strictEqual(Player.name(), 'scriptxscript', 'un prénom importé est nettoyé à la lecture');
+    Player.set('');
+    assert.ok(Player.asked() && Player.name() === '' && Player.text('{nom}') === 'renard');
+    // l'histoire s'adresse au joueur par {nom}, jamais par « renard » en apostrophe
+    const all = JSON.stringify(CHAPTERS);
+    assert.ok(all.includes('{nom}') && !/, renard[.,]/.test(all));
+    assert.ok(all.includes('Andrea') && !/lapine de|la lapine/i.test(all.replace(/"id":"lapine"/g, '')));
+});

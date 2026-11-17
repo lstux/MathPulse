@@ -2,8 +2,6 @@
 // MissionUI.create(run, ui) rend l'étape courante ; ui = { rerender, done, quit, later, setKeyHandler }
 
 const MissionUI = {
-    NAMES: { fox: 'Le renard', rabbit: 'La lapine' },
-
     create(run, ui) {
         if (run.isComplete()) return this.endScreen(run, ui);
         const step = run.step;
@@ -34,7 +32,7 @@ const MissionUI = {
     says(who, text, mood = 'content') {
         return `<div class="scene-line scene-line-${who} mission-says">
             <img class="face" src="assets/story/expr/${who}-${mood}.svg" alt="" width="56" height="56">
-            <p class="speech"><span class="sr-only">${this.NAMES[who]} : </span>${Scenes.fr(text)}</p>
+            <p class="speech"><span class="sr-only">${Player.label(who)} : </span>${Scenes.fr(text)}</p>
         </div>`;
     },
 
