@@ -1042,15 +1042,18 @@ test('diagnostic : chaque erreur typique est reconnue (additions et soustraction
     assert.strictEqual(id('−', 52, 7, 35), 'off-by-ten');
     assert.strictEqual(id('−', 54, 8, 56), 'sub-forgot-borrow');
     assert.strictEqual(id('−', 52, 7, 45), null);
-    assert.strictEqual(id('×', 4, 5, 9), null, 'pas encore de catalogue pour × : retour générique');
 });
 
 test('diagnostic : aucune piste ni image ne donne la réponse (tous les calculs à dizaine franchie, toutes les erreurs du catalogue)', () => {
-    const shows = (fb, total) => new RegExp(`(^|\\D)${total}(\\D|$)`).test(fb.text) || (fb.visual && fb.visual.args[0].includes(total));
-    for (const op of ['+', '−']) for (let a = 11; a <= 99; a++) for (let b = 2; b <= 9; b++) {
-        const total = op === '+' ? a + b : a - b;
+    const shows = (fb, total) => new RegExp(`(^|\\D)${total}(\\D|$)`).test(`${fb.text} ${fb.tip || ''}`) || (fb.visual && fb.visual.fn === 'jumps' && fb.visual.args[0].includes(total));
+    const cases = [];
+    for (let a = 11; a <= 99; a++) for (let b = 2; b <= 9; b++) cases.push(['+', a, b], ['−', a, b]);
+    for (let a = 1; a <= 10; a++) for (let b = 2; b <= 10; b++) cases.push(['×', a, b], ['÷', a * b, b]);
+    for (const a of [7, 12, 37, 50]) cases.push(['×', a, 100], ['÷', a * 100, 100], ['×', a, 2], ['÷', a * 2, 2]);
+    for (const [op, a, b] of cases) {
+        const total = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
         if (total < 1 || total === a || total === b) continue;   // résultat égal à un nombre de l'énoncé : le citer ne révèle rien
-        for (let r = 0; r <= 999; r++) {
+        for (const r of [...Array(1000).keys(), a * b, total * 10, total * 100]) {
             if (r === total || !Diagnosis.find(op, a, b, r)) continue;
             for (const n of [1, 2]) assert.ok(!shows(Diagnosis.feedback(op, a, b, r, n), total), `${a} ${op} ${b} : réponse ${r}, essai ${n}`);
         }
@@ -1066,7 +1069,8 @@ test('diagnostic : retour gradué (question, puis image du chemin sans résultat
     assert.strictEqual(JSON.stringify(fb.visual.args), JSON.stringify([[47, 50, '?'], ['+3', '+5']]));
     fb = Diagnosis.feedback('+', 47, 8, 12, 1);
     assert.ok(fb.error === null && fb.text === 'Presque ! Essaie encore.');
-    assert.ok(Diagnosis.feedback('+', 47, 8, 12, 2).visual, 'erreur inconnue au 2e essai : on montre quand même le chemin');
+    fb = Diagnosis.feedback('+', 47, 8, 12, 2);
+    assert.ok(fb.visual && fb.text === 'Regarde l\'image, et essaie encore.', 'erreur inconnue au 2e essai : on montre quand même le chemin');
     assert.strictEqual(Diagnosis.feedback('+', 42, 5, 37, 2).visual, null, 'pas de frise quand on ne franchit pas la dizaine');
     // dans une mission : la piste suit la réponse, les types d'erreurs sont comptés
     const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
@@ -1290,4 +1294,39 @@ test('carnet : vide au départ ; notions, astuces, idées de science et missions
 test('chapitres : chacun a son idée de science, courte ; chaque stratégie de mission a un nom', () => {
     for (const c of CHAPTERS) assert.ok(c.idea && c.idea.split(/\s+/).length <= 18, `idée de science du chapitre ${c.number}`);
     for (const m of Object.values(MISSIONS)) assert.ok(STRATEGIES[m.strategy] && STRATEGIES[m.strategy].name, `nom de la stratégie de ${m.id}`);
+});
+
+test('diagnostic × et ÷ : erreurs typiques reconnues, image ou conseil de méthode au 2e essai', () => {
+    const id = (op, a, b, r) => { const e = Diagnosis.find(op, a, b, r); return e ? e.id : null; };
+    assert.strictEqual(id('×', 6, 7, 13), 'op-added');
+    assert.strictEqual(id('×', 6, 7, 24), 'mul-reversed');
+    assert.strictEqual(id('×', 6, 7, 35), 'mul-one-group-off');
+    assert.strictEqual(id('×', 6, 7, 49), 'mul-one-group-off');
+    assert.strictEqual(id('×', 6, 7, 36), 'mul-wrong-table');
+    assert.strictEqual(id('×', 6, 7, 48), 'mul-wrong-table');
+    assert.strictEqual(id('×', 6, 7, 56), 'mul-same-table');
+    assert.strictEqual(id('×', 6, 7, 41), 'off-by-one');
+    assert.strictEqual(id('×', 6, 7, 42), null);
+    assert.strictEqual(id('×', 6, 7, 40), null);
+    assert.strictEqual(id('×', 37, 100, 370), 'mul-zeros');
+    assert.strictEqual(id('×', 37, 100, 37), 'mul-zeros');
+    assert.strictEqual(id('×', 4, 10, 4), 'mul-zeros');
+    assert.strictEqual(id('×', 3, 3, 9), null, 'un palindrome ou un carré juste n\'est pas une erreur');
+    assert.strictEqual(id('÷', 42, 7, 294), 'op-multiplied');
+    assert.strictEqual(id('÷', 42, 7, 35), 'op-subtracted');
+    assert.strictEqual(id('÷', 42, 7, 7), 'div-gave-divisor');
+    assert.strictEqual(id('÷', 42, 7, 5), 'div-one-group-off');
+    assert.strictEqual(id('÷', 300, 10, 300), 'div-zeros');
+    assert.strictEqual(id('÷', 300, 10, 3), 'div-zeros');
+    assert.strictEqual(id('÷', 42, 7, 6), null);
+    assert.strictEqual(id('÷', 42, 7, 9), null);
+    // 2e essai : des paquets à compter pour les petites tables, sinon un conseil de méthode
+    let fb = Diagnosis.feedback('×', 6, 4, 10, 2);
+    assert.ok(fb.error === 'op-added' && fb.visual.fn === 'groups' && fb.visual.args[0] === 6 && fb.visual.args[1] === 4 && fb.tip === null);
+    fb = Diagnosis.feedback('×', 6, 7, 13, 2);
+    assert.ok(fb.visual === null && fb.tip === 'Compte de 7 en 7, 6 fois.');
+    assert.strictEqual(Diagnosis.feedback('×', 6, 7, 13, 1).tip, null, 'pas de conseil au 1er essai');
+    assert.strictEqual(Diagnosis.feedback('÷', 42, 7, 35, 2).tip, "Compte de 7 en 7 jusqu'à 42 : combien de pas ?");
+    assert.strictEqual(Diagnosis.feedback('×', 37, 100, 370, 2).tip, null);
+    assert.ok(Diagnosis.feedback('÷', 42, 7, 9, 1).text === 'Presque ! Essaie encore.');
 });

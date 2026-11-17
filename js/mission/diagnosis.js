@@ -9,21 +9,24 @@
 const Diagnosis = {
     // Type d'erreur reconnu (entrée du catalogue) ou null
     find(op, a, b, answer) {
-        const total = op === '+' ? a + b : op === '−' ? a - b : null;
+        const total = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : op === '÷' ? a / b : null;
         if (total === null || !Number.isFinite(answer) || answer === total) return null;
         return (ERROR_CATALOG[op] || []).find(e => e.match(a, b, answer, total)) || null;
     },
 
-    // Retour pour une réponse fausse : { error, level, text, visual }
+    // Retour pour une réponse fausse : { error, level, text, visual, tip }
+    //   tip : au 2e essai, un conseil de méthode quand aucune image ne convient (ERROR_TIPS)
     feedback(op, a, b, answer, attempts) {
         const entry = this.find(op, a, b, answer);
         const level = attempts >= 2 ? 'visual' : 'question';
-        const fallback = op === '+' ? ErrorHelpers.addPath(a, b) : op === '−' ? ErrorHelpers.subPath(a, b) : null;
+        const fallback = op === '+' ? ErrorHelpers.addPath(a, b) : op === '−' ? ErrorHelpers.subPath(a, b) : op === '×' ? ErrorHelpers.mulGroups(a, b) : null;
+        const visual = level === 'visual' ? ((entry && entry.visual && entry.visual(a, b)) || fallback) : null;
+        const tip = level === 'visual' && !visual && ERROR_TIPS[op] ? ERROR_TIPS[op](a, b) : null;
         return {
             error: entry ? entry.id : null,
             level,
-            text: entry ? entry.say(a, b) : (level === 'visual' ? `Regarde le chemin, et essaie encore.` : `Presque ! Essaie encore.`),
-            visual: level === 'visual' ? ((entry && entry.visual && entry.visual(a, b)) || fallback) : null
+            text: entry ? entry.say(a, b) : (level === 'visual' && visual ? `Regarde l'image, et essaie encore.` : `Presque ! Essaie encore.`),
+            visual, tip
         };
     }
 };

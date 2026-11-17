@@ -128,7 +128,7 @@ const MissionUI = {
             } else {
                 // Piste d'Andrea adaptée au type d'erreur ; au 2e essai, une image du chemin (sans le résultat) s'y ajoute
                 const h = res.help, v = h.visual;
-                fb.innerHTML = `${this.says('rabbit', h.text, 'think')}${v && typeof Animations[v.fn] === 'function' ? Animations[v.fn](...v.args) : ''}`;
+                fb.innerHTML = `${this.says('rabbit', h.tip ? `${h.text} ${h.tip}` : h.text, 'think')}${v && typeof Animations[v.fn] === 'function' ? Animations[v.fn](...v.args) : ''}`;
                 screen.classList.add('has-help');
                 typed = '';
                 ui.later(show, 900);
