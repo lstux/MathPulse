@@ -42,8 +42,17 @@ class MissionRun {
         return { correct, attempts: r.attempts, done: r.done, feedback, help };
     }
 
+    // Manipulation terminée (but atteint). info : { moves, hinted }
+    explored(info = {}) {
+        const step = this.step;
+        if (step.type !== 'explore') throw new Error(`L'étape « ${step.type} » n'est pas une manipulation`);
+        this.results[step.id] = { attempts: 0, correct: true, firstTry: !info.hinted, answers: [], errors: [], done: true, moves: info.moves || 0, hinted: !!info.hinted };
+        return this.results[step.id];
+    }
+
     canAdvance() {
-        return !this.expectsAnswer() || !!(this.results[this.step.id] && this.results[this.step.id].done);
+        const needsDone = this.expectsAnswer() || this.step.type === 'explore';   // une manipulation se termine quand son but est atteint
+        return !needsDone || !!(this.results[this.step.id] && this.results[this.step.id].done);
     }
 
     next() {

@@ -9,6 +9,7 @@ const MissionUI = {
         if (step.type === 'scene') {
             return Scenes.create({ label: `Mission · ${run.mission.title}`, scene: step.vignettes }, { onDone: advance });
         }
+        if (step.type === 'explore') return this.exploreScreen(run, step, advance, ui);
         if (step.type === 'explain') return this.explainScreen(run, step, advance, ui);
         return this.answerScreen(run, step, advance, ui);
     },
@@ -51,6 +52,38 @@ const MissionUI = {
             <button class="btn-primary btn-large" id="btn-mission-next">J'ai compris</button>`);
         screen.querySelector('#btn-mission-next').addEventListener('click', advance);
         Sound.play('scene-next');
+        return screen;
+    },
+
+    // Manipulation libre : but simple, piste d'Andrea après un moment sans geste, « Continuer » quand le but est atteint
+    exploreScreen(run, step, advance, ui) {
+        const screen = this.shell(run, ui, `
+            <div id="explore-says">${this.says(step.who || 'rabbit', step.prompt)}</div>
+            <div id="explore-tool"></div>
+            <button class="btn-primary btn-large" id="btn-mission-next" hidden>Continuer</button>`);
+        const says = screen.querySelector('#explore-says'), next = screen.querySelector('#btn-mission-next');
+        const model = new TenFrameModel(step.operands[0], step.operands[1]);
+        let hinted = false, idle = null;
+        const armHint = () => {
+            clearTimeout(idle);
+            idle = setTimeout(() => { if (!model.full && screen.isConnected) { hinted = true; says.innerHTML = this.says('rabbit', step.hint, 'think'); } }, MISSION_RULES.exploreHintMs);
+        };
+        screen.querySelector('#explore-tool').appendChild(TenFrame.create(model, { item: step.item, onChange: (ev) => {
+            if (ev === 'complete') {
+                clearTimeout(idle);
+                run.explored({ moves: model.moves, hinted });
+                says.innerHTML = this.says('rabbit', step.done, 'bravo');
+                next.hidden = false;
+                Sound.play('good');
+            } else if (ev === 'back') {
+                // l'enfant défait : le but n'est plus atteint, on revient à la consigne
+                next.hidden = true; says.innerHTML = this.says(step.who || 'rabbit', step.prompt); armHint();
+            } else if (ev === 'nothing' && !model.full) {
+                says.innerHTML = this.says('rabbit', step.hint, 'think'); armHint();
+            } else if (!model.full) armHint();
+        } }));
+        next.addEventListener('click', () => { clearTimeout(idle); advance(); });
+        armHint();
         return screen;
     },
 

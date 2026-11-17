@@ -30,6 +30,7 @@ const PRECACHE = [
     './js/ui/scene.js',
     './js/ui/universe.js',
     './js/ui/sound.js',
+    './js/manipulatives/ten-frame.js',
     './js/ui/mission.js',
     './js/ui/screen.js',
     './js/app.js',

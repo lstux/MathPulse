@@ -153,8 +153,15 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 | 2a ✅ | `mission/runner` + étapes `scene/problem/challenge/explain` + format de mission + migration de données v2 | Une mission « factice » tourne de bout en bout, tests unitaires |
 | 2b ✅ | `diagnosis` + `feedback` gradué + catalogue d'erreurs (additions) | Chaque erreur type testée produit le bon retour |
 | 2c ✅ | `mastery` + `scheduler` | Simulations de séquences de réponses → états et rappels attendus (tests) |
-| 3 | Composant tactile (frise / boîte de 10) + mission pilote 47 + 8 complète | Test avec ton fils sur téléphone ; ajustements |
+| 3 ✅ (code) | Composant tactile (frise / boîte de 10) + mission pilote 47 + 8 complète | Test avec ton fils sur téléphone ; ajustements |
 | 4+ | Généralisation (§15 de la synthèse) | — |
+
+### Phase 3 — réalisé le 17 novembre (reste : le test réel)
+
+- `js/manipulatives/ten-frame.js` : boîte de 10. `TenFrameModel` (logique testée) et `TenFrame.create` (rendu tactile : toucher un objet, puis toucher la boîte ; toucher un objet ajouté le fait ressortir ; cibles de 48 à 56 px, tout tient sur un écran de 375 × 667).
+- Étape `explore` dans la mission 47 + 8, entre le problème et l'explication : but « remplir la boîte », piste d'Andrea après 12 s sans geste ou sur un geste à vide, « Continuer » seulement quand le but est atteint.
+- **Parcours de l'enfant** : quand la compétence du jour a une mission pas encore jouée, la mission est proposée à la place de l'écran de découverte (`missionForSkill`), puis retour à l'univers. Elle compte comme une activité terminée (+3 pour l'histoire).
+- À faire avec un vrai enfant : observer la manipulation (comprend-il « toucher puis toucher » sans lire ?), le temps passé, les pistes déclenchées ; ajuster textes et délais.
 
 ## 6. Décisions (16 novembre 2026)
 

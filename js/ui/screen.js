@@ -418,6 +418,14 @@ class ScreenManager {
             this.show('scene', { chapter: pending, doneLabel: 'À toi de jouer !', next: () => this.startSession() });
             return;
         }
+        // v2 : si la compétence du jour a une mission pas encore jouée, la mission la fait découvrir (elle remplace l'écran de découverte)
+        const mission = forcedSkill ? null : missionForSkill(this.engine.selectSkillForSession());
+        if (mission && !this.progression.getMission(mission.id)) {
+            this.progression.markDiscovery(mission.skill);
+            Sound.play('start');
+            this.show('mission', { missionId: mission.id, from: 'universe' });
+            return;
+        }
         this.session = new Session(this.engine, this.progression);
         this.session.start(forcedSkill ? { skill: forcedSkill } : {});
         Sound.play('start');

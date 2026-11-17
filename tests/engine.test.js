@@ -905,7 +905,7 @@ test('export / import : aller-retour, fichier invalide ou trop récent sans effe
 
 // ---------- v2 : missions ----------
 test('missions : données valides (étapes typées, ids uniques, preuves et compétence connues, visuels existants côté Animations)', () => {
-    const types = ['scene', 'problem', 'explain', 'challenge', 'transfer'];
+    const types = ['scene', 'problem', 'explore', 'explain', 'challenge', 'transfer'];
     for (const m of Object.values(MISSIONS)) {
         assert.ok(SKILLS[m.skill], `${m.id} : compétence inconnue`);
         const ids = m.steps.map(s => s.id);
@@ -915,6 +915,7 @@ test('missions : données valides (étapes typées, ids uniques, preuves et comp
             if (MISSION_ANSWER_STEPS.includes(s.type)) assert.ok(Array.isArray(s.operands) && s.operands.length === 2 && s.prompt);
             if (s.type === 'scene') assert.ok(s.vignettes.length && s.vignettes.every(v => v.art && v.lines.length));
             if (s.type === 'explain') assert.ok(s.title && s.text && s.formula);
+            if (s.type === 'explore') { assert.ok(s.tool === 'ten-frame' && s.prompt && s.hint && s.done); new TenFrameModel(...s.operands); }
         });
         [...m.evidence.understood, ...m.evidence.reused].forEach(id => assert.ok(ids.includes(id), `${m.id} : preuve « ${id} » sans étape`));
         assert.ok(m.steps.findIndex(s => s.type === 'problem') < m.steps.findIndex(s => s.type === 'explain'), 'on découvre avant d\'expliquer');
@@ -928,7 +929,7 @@ test('mission : parcours réussi du premier coup → comprise, sans aide, réemp
     assert.ok(run.next());
     assert.ok(!run.canAdvance() && !run.next(), 'problème : il faut proposer une réponse');
     assert.deepStrictEqual({ ...run.answer('55') }, { correct: true, attempts: 1, done: true, feedback: 'ok', help: null });
-    run.next(); run.next();                                       // explication
+    run.next(); run.explored(); run.next(); run.next();   // manipulation, explication
     assert.strictEqual(run.step.type, 'challenge');
     assert.ok(run.answer(43).correct); run.next();
     assert.ok(run.answer(64).correct); run.next();
@@ -949,7 +950,7 @@ test('mission : erreurs → jamais de blocage ; problème raté mène à l\'expl
     let r = run.answer(54);
     assert.ok(!r.correct && r.done && r.feedback === 'explain', 'problème raté : on passe à l\'explication');
     assert.strictEqual(run.answer(55).correct, false, 'étape close : une nouvelle réponse ne change rien');
-    run.next(); run.next();
+    run.next(); run.explored(); run.next(); run.next();
     assert.strictEqual(run.answer(42).feedback, 'retry');
     assert.ok(!run.canAdvance());
     assert.strictEqual(run.answer(44).feedback, 'hint');
@@ -964,7 +965,7 @@ test('mission : erreurs → jamais de blocage ; problème raté mène à l\'expl
     assert.strictEqual(progression.getMastery('add-units').strategies['pass-through-ten'], 'compris');
     // une mission rejouée moins bien ne fait rien régresser
     const again = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
-    again.next(); again.answer(0); again.next(); again.next();
+    again.next(); again.answer(0); again.next(); again.explored(); again.next(); again.next();
     [1, 2, 3].forEach(v => again.answer(v)); again.next(); [1, 2, 3].forEach(v => again.answer(v)); again.next();
     assert.ok(!again.complete().understood);
     assert.strictEqual(progression.getMission('pass-ten-47-8').runs, 2);
@@ -1063,7 +1064,7 @@ test('diagnostic : retour gradué (question, puis image du chemin sans résultat
     const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
     run.next();
     assert.strictEqual(run.answer(45).help.error, 'add-forgot-carry');        // problème : 47 + 8
-    run.next(); run.next();
+    run.next(); run.explored(); run.next(); run.next();
     let r = run.answer(33);                                                    // défi : 36 + 7
     assert.ok(r.feedback === 'retry' && r.help.error === 'add-forgot-carry' && r.help.level === 'question');
     r = run.answer(42);
@@ -1192,7 +1193,7 @@ test('histoire découplée : tout faux, l\'histoire avance quand même ; les ét
     // une mission terminée fait avancer l'histoire
     const before = progression.getStoryPoints();
     const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
-    run.next(); run.answer(0); run.next(); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next();
+    run.next(); run.answer(0); run.next(); run.explored(); run.next(); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next();
     run.complete();
     assert.strictEqual(progression.getStoryPoints(), before + STORY.mission);
     // migration : l'avancée reprend le total d'étoiles (v1, ou v2 d'avant le découplage)
@@ -1202,4 +1203,44 @@ test('histoire découplée : tout faux, l\'histoire avance quand même ; les ét
     assert.strictEqual(currentChapter(p.getStoryPoints()).id, currentChapter(40).id);
     p.addStars(9); p.save(); const q = new Progression(); q.load();
     assert.ok(q.getStoryPoints() === 40 && q.getTotalStars() === 49, 'une fois migrée, l\'avancée ne suit plus les étoiles');
+});
+
+// ---------- v2 : manipulation (boîte de 10) ----------
+test('boîte de 10 : toucher un objet puis la boîte ; pleine à 10 ; on peut défaire ; jamais plus de 10', () => {
+    const m = new TenFrameModel(47, 8);
+    assert.ok(m.tens === 4 && m.inFrame === 7 && m.loose === 8 && !m.full);
+    assert.strictEqual(m.place(), 'nothing', 'toucher la boîte sans objet en main ne fait rien');
+    assert.strictEqual(m.pick(), 'picked');
+    assert.strictEqual(m.pick(), 'dropped', 'retoucher l\'objet le repose');
+    m.pick(); assert.strictEqual(m.place(), 'placed');
+    m.pick(); assert.strictEqual(m.place(), 'placed');
+    assert.strictEqual(m.takeBack(), 'back');
+    assert.ok(m.inFrame === 8 && m.loose === 7);
+    m.pick(); m.place(); m.pick();
+    assert.strictEqual(m.place(), 'complete');
+    assert.ok(m.full && m.inFrame === 10 && m.loose === 5 && m.tens * 10 + m.inFrame + m.loose === 55, 'rien ne se perd : 40 + 10 + 5');
+    assert.strictEqual(m.pick(), 'full', 'boîte pleine : on ne prend plus d\'objet');
+    assert.ok(!m.selected && m.place() === 'nothing' && m.inFrame === 10);
+    assert.strictEqual(m.moves, 5);
+    const exact = new TenFrameModel(36, 4); for (let i = 0; i < 4; i++) { exact.pick(); exact.place(); }
+    assert.ok(exact.full && exact.loose === 0 && exact.pick() === 'empty');
+    assert.throws(() => new TenFrameModel(42, 5), /ne franchit pas/);
+    assert.throws(() => new TenFrameModel(40, 8), /ne franchit pas/);
+});
+
+test('mission : la manipulation bloque tant que le but n\'est pas atteint ; elle vient après le problème et avant l\'explication', () => {
+    const { progression } = setup();
+    const m = MISSIONS['pass-ten-47-8'], order = m.steps.map(s => s.type);
+    assert.ok(order.indexOf('problem') < order.indexOf('explore') && order.indexOf('explore') < order.indexOf('explain'));
+    const run = new MissionRun(m, progression);
+    run.next(); run.answer(1); run.next();
+    assert.strictEqual(run.step.type, 'explore');
+    assert.ok(!run.canAdvance() && !run.next());
+    assert.throws(() => run.answer(55), /n'attend pas/);
+    const r = run.explored({ moves: 3, hinted: true });
+    assert.ok(r.done && r.moves === 3 && r.hinted && run.canAdvance() && run.next());
+    assert.strictEqual(run.step.type, 'explain');
+    assert.throws(() => run.explored(), /pas une manipulation/);
+    assert.strictEqual(missionForSkill('add-units').id, 'pass-ten-47-8');
+    assert.strictEqual(missionForSkill('multiply-2'), null);
 });
