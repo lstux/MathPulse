@@ -93,9 +93,10 @@ const MissionUI = {
                 const ex = run.lastExplain();
                 close(`<div class="feedback-error"><p class="text-lg font-bold">On revoit l'idée, et on continue.</p></div>${ex ? this.explainHtml(ex) : ''}`, 'Continuer');
             } else {
-                // retry : simple encouragement ; hint : rappel de la stratégie (le diagnostic par type d'erreur arrive en phase 2b)
-                const ex = run.lastExplain();
-                fb.innerHTML = `<div class="feedback-error"><p class="text-lg font-bold">${res.feedback === 'hint' && ex ? Scenes.fr(`Un indice : ${ex.title.toLowerCase()}`) : 'Presque ! Essaie encore.'}</p></div>`;
+                // Piste d'Andrea adaptée au type d'erreur ; au 2e essai, une image du chemin (sans le résultat) s'y ajoute
+                const h = res.help, v = h.visual;
+                fb.innerHTML = `${this.says('rabbit', h.text, 'think')}${v && typeof Animations[v.fn] === 'function' ? Animations[v.fn](...v.args) : ''}`;
+                screen.classList.add('has-help');
                 typed = '';
                 ui.later(show, 900);
             }

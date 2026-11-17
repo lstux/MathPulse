@@ -107,6 +107,8 @@ Catalogue par compétence : chaque entrée associe un **motif d'erreur** à un *
   { "id": "operation-swap",   "match": "answer == |a - b|",           "feedback": ["question:which-operation"] }
 ]}
 ```
+_Réalisé (phase 2b, 17 nov.) : `js/content/errors.js` (les motifs sont des fonctions JS `match(a, b, réponse, total)`, pas des chaînes) et `js/mission/diagnosis.js`. Additions : chiffres collés (47 + 8 = 415), dizaine oubliée (45), unités seules (5), soustraction à la place (39), écart de 1, écart de 10. Soustractions : chiffres inversés (52 − 7 = 55), dizaine oubliée, addition à la place, écart de 1, écart de 10. Un test parcourt tous les calculs et vérifie qu'aucune piste ne contient le résultat. Les types d'erreurs rencontrés sont comptés par compétence (`errorTypes`)._
+
 Le retour est **gradué** (indice → question → visuel → nouvelle expérience → explication explicite) : on monte d'un cran à chaque nouvelle erreur sur la même question. Aucune erreur n'affiche directement la bonne réponse. Une erreur non reconnue retombe sur un retour générique.
 
 ### 3.4 Maîtrise et révision (E4, E5)
@@ -145,8 +147,8 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 | Phase | Livrable | Critère de fin |
 |---|---|---|
 | 1 (ici) | Ce document validé ; décisions §6 prises | Décisions consignées |
-| 2a | `mission/runner` + étapes `scene/problem/challenge/explain` + format de mission + migration de données v2 | Une mission « factice » tourne de bout en bout, tests unitaires |
-| 2b | `diagnosis` + `feedback` gradué + catalogue d'erreurs (additions) | Chaque erreur type testée produit le bon retour |
+| 2a ✅ | `mission/runner` + étapes `scene/problem/challenge/explain` + format de mission + migration de données v2 | Une mission « factice » tourne de bout en bout, tests unitaires |
+| 2b ✅ | `diagnosis` + `feedback` gradué + catalogue d'erreurs (additions) | Chaque erreur type testée produit le bon retour |
 | 2c | `mastery` + `scheduler` | Simulations de séquences de réponses → états et rappels attendus (tests) |
 | 3 | Composant tactile (frise / boîte de 10) + mission pilote 47 + 8 complète | Test avec ton fils sur téléphone ; ajustements |
 | 4+ | Généralisation (§15 de la synthèse) | — |

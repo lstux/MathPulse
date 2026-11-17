@@ -377,3 +377,10 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .name-face .face { width: 96px; height: 96px; }
 .name-input { width: 100%; max-width: 320px; min-height: 56px; padding: 0 var(--spacing-md); font: inherit; font-size: var(--font-size-2xl); font-weight: 700; text-align: center;
     color: var(--color-text); background: var(--color-surface, #fff); border: 3px solid var(--color-primary); border-radius: 16px; }
+/* Une piste d'Andrea est affichée : on resserre l'écran pour que le pavé reste visible sans défiler sur un petit téléphone */
+.mission-screen.has-help { gap: var(--spacing-sm); justify-content: flex-start; }
+.mission-screen.has-help > .mission-says { display: none; }
+.mission-screen.has-help .answer-display { min-height: 52px; }
+.mission-screen.has-help .key { min-height: 46px; }
+.mission-screen.has-help .visual-jumps svg { max-width: 16rem; }
+.mission-screen.has-help .feedback-container .mission-says { margin-top: 0; }

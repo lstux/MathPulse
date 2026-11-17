@@ -8,7 +8,7 @@ const MASTERY_STATES = ['vu', 'compris', 'durable'];
 
 class Progression {
     constructor() {
-        this.data = { version: DATA_VERSION, skills: {}, totalStars: 0, discovered: {}, errors: {}, chaptersSeen: {}, missions: {}, mastery: {}, reviews: [] };
+        this.data = { version: DATA_VERSION, skills: {}, totalStars: 0, discovered: {}, errors: {}, chaptersSeen: {}, missions: {}, mastery: {}, errorTypes: {}, reviews: [] };
     }
 
     load() {
@@ -22,6 +22,7 @@ class Progression {
             chaptersSeen: saved.chaptersSeen || {},   // scènes d'histoire déjà lues { idDuChapitre: true }
             missions: saved.missions || {},   // v2 : { idMission: { runs, lastAt, understood, unaided, reused } }
             mastery: saved.mastery || {},     // v2 : { idCompétence: { state: 'vu' | 'compris' | 'durable', strategies: { id: état } } }
+            errorTypes: saved.errorTypes || {},   // v2 : { idCompétence: { idErreur: nombre } }
             reviews: Array.isArray(saved.reviews) ? saved.reviews : []   // v2 : rappels espacés (phase 2c)
         };
         if ((saved.version || 1) < 2) this.seedMastery();
@@ -43,6 +44,10 @@ class Progression {
         return this.data.mastery[skillId] || null;
     }
 
+    getErrorTypes(skillId) {
+        return this.data.errorTypes[skillId] || {};
+    }
+
     getMission(missionId) {
         return this.data.missions[missionId] || null;
     }
@@ -57,6 +62,11 @@ class Progression {
             unaided: !!(m.unaided || summary.unaided),
             reused: !!(m.reused || summary.reused)
         };
+        // Types d'erreurs rencontrés, par compétence (pour cibler les révisions et informer le parent)
+        if (summary.skill && summary.errors && summary.errors.length) {
+            const seen = this.data.errorTypes[summary.skill] || (this.data.errorTypes[summary.skill] = {});
+            summary.errors.forEach(id => { seen[id] = (seen[id] || 0) + 1; });
+        }
         if (summary.skill) {
             const ma = this.data.mastery[summary.skill] || (this.data.mastery[summary.skill] = { state: 'vu', strategies: {} });
             ma.state = this.raiseState(ma.state, 'vu');

@@ -1,5 +1,5 @@
 // MathPulse v2 - Déroulement d'une mission (logique pure, sans DOM : testée dans tests/engine.test.js)
-// Dépend de : missions.js (MISSION_RULES), progression.js (recordMission)
+// Dépend de : missions.js (MISSION_RULES), diagnosis.js (Diagnosis), progression.js (recordMission)
 
 const MISSION_ANSWER_STEPS = ['problem', 'challenge', 'transfer'];
 
@@ -22,21 +22,24 @@ class MissionRun {
         return op === '+' ? a + b : op === '−' ? a - b : op === '÷' ? a / b : a * b;
     }
 
-    // Retour : { correct, attempts, done, feedback }
+    // Retour : { correct, attempts, done, feedback, help }
+    //   help (réponse fausse) : { error, level, text, visual } = diagnostic et piste adaptée (voir diagnosis.js)
     //   feedback : 'ok' | 'retry' (réessaie) | 'hint' (indice) | 'explain' (on revoit l'explication, l'étape est close)
     //   problem  : toute réponse clôt l'étape (on découvre avant d'expliquer : l'erreur mène à l'explication, pas à une sanction)
     answer(value) {
         const step = this.step;
         if (!this.expectsAnswer(step)) throw new Error(`L'étape « ${step.type} » n'attend pas de réponse`);
-        const r = this.results[step.id] || (this.results[step.id] = { attempts: 0, correct: false, firstTry: false, answers: [] });
+        const r = this.results[step.id] || (this.results[step.id] = { attempts: 0, correct: false, firstTry: false, answers: [], errors: [] });
         if (r.done) return { correct: r.correct, attempts: r.attempts, done: true, feedback: r.correct ? 'ok' : 'explain' };
         const n = Number(value), correct = n === this.expected(step);
         r.attempts++; r.answers.push(n);
         if (correct) { r.correct = true; r.firstTry = r.attempts === 1; }
+        const help = correct ? null : Diagnosis.feedback(step.op || '+', step.operands[0], step.operands[1], n, r.attempts);
+        if (help && help.error) r.errors.push(help.error);
         const exhausted = r.attempts >= MISSION_RULES.maxAttempts;
         r.done = correct || step.type === 'problem' || exhausted;
         const feedback = correct ? 'ok' : (step.type === 'problem' || exhausted) ? 'explain' : r.attempts === 1 ? 'retry' : 'hint';
-        return { correct, attempts: r.attempts, done: r.done, feedback };
+        return { correct, attempts: r.attempts, done: r.done, feedback, help };
     }
 
     canAdvance() {
@@ -71,6 +74,7 @@ class MissionRun {
             understood: all(ev.understood, 'correct'),
             unaided: all(ev.understood, 'firstTry'),
             reused: all(ev.reused, 'correct'),
+            errors: Object.values(this.results).flatMap(r => r.errors),   // types d'erreurs reconnus pendant la mission
             steps: Object.fromEntries(Object.entries(this.results).map(([id, r]) => [id, { attempts: r.attempts, correct: r.correct }]))
         };
         if (this.progression) this.progression.recordMission(this.summary);

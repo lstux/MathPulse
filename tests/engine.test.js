@@ -925,7 +925,7 @@ test('mission : parcours réussi du premier coup → comprise, sans aide, réemp
     assert.throws(() => run.answer(1), /n'attend pas/);          // scène : pas de réponse
     assert.ok(run.next());
     assert.ok(!run.canAdvance() && !run.next(), 'problème : il faut proposer une réponse');
-    assert.deepStrictEqual({ ...run.answer('55') }, { correct: true, attempts: 1, done: true, feedback: 'ok' });
+    assert.deepStrictEqual({ ...run.answer('55') }, { correct: true, attempts: 1, done: true, feedback: 'ok', help: null });
     run.next(); run.next();                                       // explication
     assert.strictEqual(run.step.type, 'challenge');
     assert.ok(run.answer(43).correct); run.next();
@@ -1009,4 +1009,66 @@ test('joueur : prénom nettoyé, demandé une fois, {nom} remplacé dans les tex
     const all = JSON.stringify(CHAPTERS);
     assert.ok(all.includes('{nom}') && !/, renard[.,]/.test(all));
     assert.ok(all.includes('Andrea') && !/lapine de|la lapine/i.test(all.replace(/"id":"lapine"/g, '')));
+});
+
+// ---------- v2 : diagnostic des erreurs ----------
+test('diagnostic : chaque erreur typique est reconnue (additions et soustractions), une bonne réponse ou une erreur inconnue ne l\'est pas', () => {
+    const id = (op, a, b, r) => { const e = Diagnosis.find(op, a, b, r); return e ? e.id : null; };
+    assert.strictEqual(id('+', 47, 8, 415), 'add-concat');
+    assert.strictEqual(id('+', 47, 8, 45), 'add-forgot-carry');
+    assert.strictEqual(id('+', 47, 8, 5), 'add-units-only');
+    assert.strictEqual(id('+', 47, 8, 39), 'op-subtracted');
+    assert.strictEqual(id('+', 47, 8, 54), 'off-by-one');
+    assert.strictEqual(id('+', 47, 8, 56), 'off-by-one');
+    assert.strictEqual(id('+', 47, 8, 65), 'off-by-ten');
+    assert.strictEqual(id('+', 42, 5, 37), 'op-subtracted', 'sans passage de dizaine, 37 n\'est pas une retenue oubliée');
+    assert.strictEqual(id('+', 47, 8, 55), null);
+    assert.strictEqual(id('+', 47, 8, 12), null);
+    assert.strictEqual(id('+', 47, 8, NaN), null);
+    assert.strictEqual(id('−', 52, 7, 55), 'sub-swapped');
+    assert.strictEqual(id('−', 52, 7, 59), 'op-added');
+    assert.strictEqual(id('−', 52, 7, 44), 'off-by-one');
+    assert.strictEqual(id('−', 52, 7, 35), 'off-by-ten');
+    assert.strictEqual(id('−', 54, 8, 56), 'sub-forgot-borrow');
+    assert.strictEqual(id('−', 52, 7, 45), null);
+    assert.strictEqual(id('×', 4, 5, 9), null, 'pas encore de catalogue pour × : retour générique');
+});
+
+test('diagnostic : aucune piste ni image ne donne la réponse (tous les calculs à dizaine franchie, toutes les erreurs du catalogue)', () => {
+    const shows = (fb, total) => new RegExp(`(^|\\D)${total}(\\D|$)`).test(fb.text) || (fb.visual && fb.visual.args[0].includes(total));
+    for (const op of ['+', '−']) for (let a = 11; a <= 99; a++) for (let b = 2; b <= 9; b++) {
+        const total = op === '+' ? a + b : a - b;
+        if (total < 1 || total === a || total === b) continue;   // résultat égal à un nombre de l'énoncé : le citer ne révèle rien
+        for (let r = 0; r <= 999; r++) {
+            if (r === total || !Diagnosis.find(op, a, b, r)) continue;
+            for (const n of [1, 2]) assert.ok(!shows(Diagnosis.feedback(op, a, b, r, n), total), `${a} ${op} ${b} : réponse ${r}, essai ${n}`);
+        }
+    }
+});
+
+test('diagnostic : retour gradué (question, puis image du chemin sans résultat), erreurs enregistrées par compétence', () => {
+    const { progression } = setup();
+    let fb = Diagnosis.feedback('+', 47, 8, 45, 1);
+    assert.ok(fb.error === 'add-forgot-carry' && fb.level === 'question' && fb.visual === null && fb.text.includes('50'));
+    fb = Diagnosis.feedback('+', 47, 8, 45, 2);
+    assert.ok(fb.level === 'visual' && fb.visual.fn === 'jumps');
+    assert.strictEqual(JSON.stringify(fb.visual.args), JSON.stringify([[47, 50, '?'], ['+3', '+5']]));
+    fb = Diagnosis.feedback('+', 47, 8, 12, 1);
+    assert.ok(fb.error === null && fb.text === 'Presque ! Essaie encore.');
+    assert.ok(Diagnosis.feedback('+', 47, 8, 12, 2).visual, 'erreur inconnue au 2e essai : on montre quand même le chemin');
+    assert.strictEqual(Diagnosis.feedback('+', 42, 5, 37, 2).visual, null, 'pas de frise quand on ne franchit pas la dizaine');
+    // dans une mission : la piste suit la réponse, les types d'erreurs sont comptés
+    const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
+    run.next();
+    assert.strictEqual(run.answer(45).help.error, 'add-forgot-carry');        // problème : 47 + 8
+    run.next(); run.next();
+    let r = run.answer(33);                                                    // défi : 36 + 7
+    assert.ok(r.feedback === 'retry' && r.help.error === 'add-forgot-carry' && r.help.level === 'question');
+    r = run.answer(42);
+    assert.ok(r.feedback === 'hint' && r.help.error === 'off-by-one' && r.help.level === 'visual' && r.help.visual);
+    run.answer(43); run.next(); run.answer(64); run.next();
+    assert.deepStrictEqual([...run.complete().errors], ['add-forgot-carry', 'add-forgot-carry', 'off-by-one']);
+    assert.strictEqual(progression.getErrorTypes('add-units')['add-forgot-carry'], 2);
+    assert.strictEqual(progression.getErrorTypes('add-units')['off-by-one'], 1);
+    assert.deepStrictEqual(Object.keys(progression.getErrorTypes('multiply-2')), []);
 });
