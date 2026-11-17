@@ -163,6 +163,10 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 - **Parcours de l'enfant** : quand la compétence du jour a une mission pas encore jouée, la mission est proposée à la place de l'écran de découverte (`missionForSkill`), puis retour à l'univers. Elle compte comme une activité terminée (+3 pour l'histoire).
 - À faire avec un vrai enfant : observer la manipulation (comprend-il « toucher puis toucher » sans lire ?), le temps passé, les pistes déclenchées ; ajuster textes et délais.
 
+### Carnet de découvertes — réalisé le 17 novembre
+
+`js/ui/notebook.js`, bouton « 📒 Mon carnet » sur l'accueil. Quatre pages, sans score ni pourcentage : **mes astuces** (stratégies vues en mission, avec leur formule ; toucher = revoir l'explication), **ce que je sais faire** (notions découvertes par parcours, avec l'état 👀 découvert / 💡 compris / 🌳 bien ancré ; toucher = revoir la découverte), **ce que la hase m'a appris** (l'idée de science de chaque chapitre lu, champ `idea` de `chapters.js`), **mes missions** (à rejouer ; rejouer ne fait pas avancer l'histoire une seconde fois).
+
 ## 6. Décisions (16 novembre 2026)
 
 1. **Public cible : 8 ans (CE2) reste le cœur.** 8 + 7 n'était qu'un exemple ; la mission pilote devient **47 + 8** (même stratégie de passage par la dizaine, au niveau CE2, compétence existante `add-units`).

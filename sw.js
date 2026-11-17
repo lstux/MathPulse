@@ -32,6 +32,7 @@ const PRECACHE = [
     './js/ui/sound.js',
     './js/manipulatives/ten-frame.js',
     './js/ui/mission.js',
+    './js/ui/notebook.js',
     './js/ui/screen.js',
     './js/app.js',
     './assets/story/intro.svg',

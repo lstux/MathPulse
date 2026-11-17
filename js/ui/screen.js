@@ -39,11 +39,19 @@ class ScreenManager {
             rapidIntro: () => this.createRapidIntroScreen(),
             rapidCountdown: () => this.createRapidCountdownScreen(),
             discovery: () => data.replay
-                ? Discovery.create(data.skillId, () => this.show('parent'), 'Retour')
+                ? Discovery.create(data.skillId, () => this.show(data.back || 'parent'), 'Retour')
                 : Discovery.create(data.skillId, data.then || (() => this.show('game'))),
             game: () => this.createGameScreen(),
             result: () => this.createResultScreen(data.summary),
             name: () => this.createNameScreen(data),
+            notebook: () => Notebook.create({
+                progression: this.progression,
+                back: () => this.show('home'),
+                replaySkill: id => this.show('discovery', { skillId: id, replay: true, back: 'notebook' }),
+                replayStrategy: id => this.show('strategy', { missionId: id }),
+                replayMission: id => this.show('mission', { missionId: id, from: 'notebook' })
+            }),
+            strategy: () => Notebook.strategyScreen(data.missionId, () => this.show('notebook')),
             mission: () => this.createMissionScreen(data),
             parent: () => this.createParentScreen()
         };
@@ -188,12 +196,14 @@ class ScreenManager {
             </div>
             <div class="flex flex-col gap-md btn-column">
                 <button class="btn-primary btn-large" id="btn-play">Jouer</button>
+                <button class="btn-secondary" id="btn-notebook">📒 Mon carnet</button>
                 <button class="btn-secondary" id="btn-parent">Espace parent</button>
                 <button class="btn-secondary" id="btn-intro">🎬 Revoir l'intro</button>
             </div>
             <p class="text-sm muted">⭐ ${this.progression.getTotalStars()}${Cheat.isOn() ? ' · 🧪 mode test' : ''}</p>
         `;
         screen.querySelector('#btn-play').addEventListener('click', () => this.show('universe'));
+        screen.querySelector('#btn-notebook').addEventListener('click', () => this.show('notebook'));
         screen.querySelector('#btn-parent').addEventListener('click', () => this.show('parent'));
         screen.querySelector('#btn-intro').addEventListener('click', () => this.show('intro', { replay: true }));
         return screen;

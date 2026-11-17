@@ -11,6 +11,7 @@
 //   lines: lignes d'Andrea, une au hasard sur l'écran de l'univers avant « C'est parti »
 //   ambience : ambiance sonore du chapitre (nature | ship | space), jouée pendant la scène et sur l'écran Univers
 //   sfx  : son joué à la fin de la scène du chapitre (ici les applaudissements)
+//   idea : l'idée de science du chapitre, en une phrase (elle s'écrit dans le carnet de découvertes quand la scène a été lue)
 //   end  : message de fin de session { full (3 ⭐), some (1 à 2 ⭐), none (0 ⭐) } ; absent = pas de message
 // Règles d'écriture : textes courts (une quarantaine de mots par vignette au plus), lisibles seul en CE2.
 // Le renard est le joueur : dans les scènes il pose des questions, il ne donne pas la réponse aux calculs (c'est la session qui y répond).
@@ -26,6 +27,7 @@ const STORY = { session: 3, mission: 3, rapid: 1, free: 1 };
 
 const CHAPTERS = [
     { id: 'lapine',      number: 1,  unlockAt: 0, ambience: 'nature', banner: 'forest',   emoji: '🌲', title: 'Une drôle de hase',          mission: 'Le test de la hase',
+        idea: "Les étoiles sont des soleils très lointains.",
         scene: [
             { art: 'forest', cast: [{ who: 'fox', at: 'left', small: true }], lines: [
                 { who: 'narrator', text: "Une lueur entre les arbres… Tu t'approches, le cœur un peu rapide." }] },
@@ -50,6 +52,7 @@ const CHAPTERS = [
         end: { full: "Parfait ! {hase} est impressionnée.", some: "Bien joué ! {hase} te fait confiance.", none: "Pas grave, {hase} te laisse retenter." }
     },
     { id: 'vaisseau',    number: 2,  unlockAt: 6, ambience: 'nature', banner: 'clearing',   emoji: '🛸', title: 'Le vaisseau en piteux état', mission: 'Dégager les débris',
+        idea: "Une étoile filante est un caillou qui chauffe en frottant l'air.",
         scene: [
             { art: 'clearing', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Voilà mon vaisseau." }] },
@@ -77,6 +80,7 @@ const CHAPTERS = [
         end: { full: "Le panneau est presque propre !", some: "Tu as aidé {hase} à dégager le vaisseau." }
     },
     { id: 'circuits',    number: 3,  unlockAt: 15, ambience: 'ship', banner: 'ship-lit',  emoji: '🔌', title: 'Les circuits',               mission: 'Doubler et grouper',
+        idea: "L'électricité ne passe que si le circuit forme une boucle fermée.",
         scene: [
             { sfx: 'power-on', art: 'ship', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'think', text: "C'est… plus grand que je pensais." }] },
@@ -100,6 +104,7 @@ const CHAPTERS = [
         end: { some: "Un voyant de plus brille grâce à toi !" }
     },
     { id: 'machines',    number: 4,  unlockAt: 28, ambience: 'ship', banner: 'engine-on',  emoji: '⚙️', title: 'La salle des machines',      mission: 'Compter par groupes',
+        idea: "Une fusée avance en poussant du gaz vers l'arrière.",
         scene: [
             { sfx: 'engine-start', art: 'engine', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Voici le cœur du vaisseau : les moteurs." }] },
@@ -124,6 +129,7 @@ const CHAPTERS = [
         end: { some: "Un moteur de plus tourne grâce à toi !" }
     },
     { id: 'nuit', number: 5, unlockAt: 38, ambience: 'ship', banner: 'cockpit-night', emoji: '🌙', title: 'La nuit à bord', mission: 'Un jeu pour patienter',
+        idea: "La Terre tourne sur elle-même : c'est ce qui fait le jour et la nuit.",
         scene: [
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'narrator', text: "Le moteur a trop chauffé. Il s'est arrêté tout seul, dans un grand soupir." }] },
@@ -151,6 +157,7 @@ const CHAPTERS = [
         end: { some: "La nuit passe plus vite avec toi !" }
     },
     { id: 'energie',     number: 6,  unlockAt: 50, ambience: 'ship', banner: 'tanks-full',  emoji: '🔋', title: 'Partager l\'énergie',        mission: 'Répartir les cellules',
+        idea: "L'énergie ne se fabrique pas : on la capte, on la stocke, on la transforme.",
         scene: [
             { sfx: 'tank-fill', art: 'tanks', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Le moteur est froid. Cette fois, on fait les choses dans l'ordre : d'abord l'énergie." }] },
@@ -175,6 +182,7 @@ const CHAPTERS = [
         end: { some: "Tu as aidé {hase} à répartir l'énergie." }
     },
     { id: 'carnet',      number: 7,  unlockAt: 68, ambience: 'ship', banner: 'cockpit',  emoji: '📒', title: 'Le carnet de mesures',       mission: 'Compléter les relevés',
+        idea: "La Terre a de l'eau liquide parce qu'elle est à la bonne distance du Soleil.",
         scene: [
             { art: 'cockpit', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Je ne t'ai pas dit pourquoi je suis venue. Voilà mon carnet de mesures." }] },
@@ -199,6 +207,7 @@ const CHAPTERS = [
         end: { some: "Tu as aidé {hase} à compléter son carnet." }
     },
     { id: 'carte', number: 8, unlockAt: 88, ambience: 'ship', banner: 'cockpit-chart', emoji: '🗺️', title: 'La carte du ciel', mission: 'Lire la carte',
+        idea: "Les constellations et l'étoile Polaire servent à se repérer.",
         scene: [
             { art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "Pour rentrer, il me faut une carte. Et la carte, elle est là-haut." }] },
@@ -223,6 +232,7 @@ const CHAPTERS = [
         end: { some: "La carte du ciel est tracée grâce à toi !" }
     },
     { id: 'fenetre', number: 9, unlockAt: 108, ambience: 'ship', banner: 'cockpit-lit', emoji: '⏰', title: 'La fenêtre de départ', mission: 'Trouver le bon moment',
+        idea: "La Terre tourne autour du Soleil en un an : il faut partir au bon moment.",
         scene: [
             { art: 'cockpit-chart', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "On ne part pas quand on veut. La Terre file autour du Soleil : un tour complet, c'est une année." }] },
@@ -250,6 +260,7 @@ const CHAPTERS = [
         end: { some: "La fenêtre de départ est calculée grâce à toi !" }
     },
     { id: 'message', number: 10, unlockAt: 130, ambience: 'ship', banner: 'cockpit-radio', emoji: '📡', title: 'Un message de chez elle', mission: 'Décoder le signal',
+        idea: "Un message met du temps à voyager, même à la vitesse de la lumière.",
         scene: [
             { sfx: 'radio-signal', art: 'cockpit-night', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'think', text: "Attends. Le récepteur capte quelque chose… Un signal. De chez moi !" },
@@ -275,6 +286,7 @@ const CHAPTERS = [
         end: { some: "Tu as aidé {hase} à décoder le message de chez elle." }
     },
     { id: 'embarquement', number: 11, unlockAt: 155, ambience: 'space', banner: 'porthole-earth', emoji: '🚪', title: 'Embarquement surprise',      mission: 'Vérifier le carburant',
+        idea: "En orbite on flotte ; la Terre est ronde, entourée d'une fine couche d'air.",
         scene: [
             { art: 'airlock', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "C'est l'heure. Merci pour tout, {nom}. Sans toi, je serais encore dans la clairière." }] },
@@ -299,6 +311,7 @@ const CHAPTERS = [
         end: { some: "Tu as aidé {hase} à vérifier le carburant." }
     },
     { id: 'voyage',      number: 12,  unlockAt: 185, ambience: 'space', banner: 'space-beacon-on', emoji: '☄️', title: 'Le voyage',                  mission: 'Naviguer entre les astéroïdes',
+        idea: "Dans le vide, rien ne freine et aucun son ne voyage.",
         scene: [
             { art: 'space-beacon', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', text: "La balise relais est là-bas. J'ai coupé les moteurs : ici, rien ne nous freine, on continue tout droit." }] },
@@ -325,6 +338,7 @@ const CHAPTERS = [
         end: { some: "Tu as aidé {hase} à guider le vaisseau jusqu'à la balise." }
     },
     { id: 'retour',      number: 13, unlockAt: 225, ambience: 'nature', sfx: 'applause', banner: 'hill', emoji: '🔦', title: 'Le retour',                  mission: 'Atterrir en douceur',
+        idea: "À la rentrée, l'air freine le vaisseau et le fait chauffer, comme une étoile filante.",
         scene: [
             { art: 'earth-top', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'think', text: "On arrive trop vite pour se poser. Il faut ralentir : la moitié, puis encore la moitié." }] },

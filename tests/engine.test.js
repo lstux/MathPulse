@@ -1204,6 +1204,9 @@ test('histoire découplée : tout faux, l\'histoire avance quand même ; les ét
     run.next(); run.answer(0); run.next(); run.explored(); run.next(); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next(); [1, 2, 3].forEach(v => run.answer(v)); run.next();
     run.complete();
     assert.strictEqual(progression.getStoryPoints(), before + STORY.mission);
+    const replay = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
+    replay.next(); replay.answer(55); replay.next(); replay.explored(); replay.next(); replay.next(); replay.answer(43); replay.next(); replay.answer(64); replay.next(); replay.complete();
+    assert.strictEqual(progression.getStoryPoints(), before + STORY.mission, 'rejouer une mission ne fait pas avancer l\'histoire une 2e fois');
     // migration : l'avancée reprend le total d'étoiles (v1, ou v2 d'avant le découplage)
     storage.set(storage.KEYS.PROGRESSION, { version: 1, totalStars: 40, skills: {} });
     const p = new Progression(); p.load();
@@ -1251,4 +1254,40 @@ test('mission : la manipulation bloque tant que le but n\'est pas atteint ; elle
     assert.throws(() => run.explored(), /pas une manipulation/);
     assert.strictEqual(missionForSkill('add-units').id, 'pass-ten-47-8');
     assert.strictEqual(missionForSkill('multiply-2'), null);
+});
+
+// ---------- v2 : carnet de découvertes ----------
+test('carnet : vide au départ ; notions, astuces, idées de science et missions s\'y écrivent au fil du jeu, sans score', () => {
+    const { progression } = setup();
+    let n = Notebook.data(progression);
+    assert.ok(n.empty && !n.strategies.length && !n.paths.length && !n.science.length && !n.missions.length);
+    // une notion présentée, une autre pratiquée
+    progression.markDiscovery('multiply-2');
+    progression.recordAnswer('addition-simple', true, 1000);
+    n = Notebook.data(progression);
+    assert.ok(!n.empty);
+    assert.deepStrictEqual(n.paths.map(p => p.id), ['calc', 'tables']);
+    assert.deepStrictEqual(n.paths[0].skills.map(k => [k.id, k.state]), [['addition-simple', 'vu']]);
+    assert.strictEqual(n.paths[1].total, 10);
+    // un chapitre lu apporte son idée de science
+    progression.markChapterSeen('lapine'); progression.markChapterSeen('vaisseau');
+    n = Notebook.data(progression);
+    assert.deepStrictEqual(n.science.map(c => c.number), [1, 2]);
+    assert.ok(n.science[1].idea.includes('étoile filante'));
+    // une mission jouée apporte une astuce (avec sa formule) et se retrouve dans « mes missions »
+    const run = new MissionRun(MISSIONS['pass-ten-47-8'], progression);
+    run.next(); run.answer(55); run.next(); run.explored(); run.next(); run.next(); run.answer(43); run.next(); run.answer(64); run.next(); run.complete();
+    n = Notebook.data(progression);
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(n.strategies)), [{ id: 'pass-through-ten', name: 'Passer par la dizaine', mission: 'pass-ten-47-8', state: 'compris', formula: '47 + 3 + 5 = 55' }]);
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(n.missions)), [{ id: 'pass-ten-47-8', title: 'Le plein du réservoir', runs: 1 }]);
+    assert.ok(n.paths[0].skills.some(k => k.id === 'add-units'), 'la notion vue en mission est dans le carnet');
+    // l'état suit la maîtrise durable
+    for (let i = 0; i < 2; i++) ['numeric', 'missing'].forEach(type => progression.recordEvidence({ skill: 'addition-simple', type }, true, { context: 'session' }));
+    assert.strictEqual(Notebook.data(progression).paths[0].skills.find(k => k.id === 'addition-simple').state, 'compris');
+    assert.ok(!/\d+ ?%|⭐/.test(JSON.stringify(Notebook.data(progression))), 'ni pourcentage ni étoiles dans le carnet');
+});
+
+test('chapitres : chacun a son idée de science, courte ; chaque stratégie de mission a un nom', () => {
+    for (const c of CHAPTERS) assert.ok(c.idea && c.idea.split(/\s+/).length <= 18, `idée de science du chapitre ${c.number}`);
+    for (const m of Object.values(MISSIONS)) assert.ok(STRATEGIES[m.strategy] && STRATEGIES[m.strategy].name, `nom de la stratégie de ${m.id}`);
 });

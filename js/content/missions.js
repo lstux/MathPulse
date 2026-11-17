@@ -10,6 +10,11 @@
 // evidence : ids des étapes qui prouvent la compréhension (understood) et le réemploi (reused).
 // Règle d'écriture : textes très courts, lisibles seul en CE2 ; le sens passe d'abord par l'image.
 
+// Stratégies (les « astuces » du carnet de découvertes)
+const STRATEGIES = {
+    'pass-through-ten': { name: 'Passer par la dizaine' }
+};
+
 const MISSIONS = {
     'pass-ten-47-8': {
         id: 'pass-ten-47-8',

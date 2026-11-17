@@ -86,7 +86,8 @@ class Progression {
             summary.errors.forEach(id => { seen[id] = (seen[id] || 0) + 1; });
         }
         Mastery.recordMission(this.data, summary, now);
-        this.data.story += STORY.mission;   // une mission terminée fait avancer l'histoire, réussie ou non
+        // une mission terminée fait avancer l'histoire, réussie ou non ; la rejouer (depuis le carnet) ne la fait pas avancer de nouveau
+        if (this.data.missions[summary.mission].runs === 1) this.data.story += STORY.mission;
         this.save();
     }
 
