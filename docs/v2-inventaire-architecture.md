@@ -12,7 +12,7 @@ _16 novembre 2026. Base : tag `v1.0.0` et synthèse « Vision et orientations de
 | E4 | Valider par le réemploi (§4.4, 4.5) | La maîtrise a **3 états** (vu / compris / durable), alimentés par des preuves de formes et de contextes différents, et des rappels espacés |
 | E5 | Progression narrative ≠ progression pédagogique (§5.2) | L'histoire avance **indépendamment** de la maîtrise ; le moteur ramène les notions fragiles |
 | E6 | Sauvegarde locale, export versionné (§12) | Format de données **v2** + migration depuis v1 |
-| E7 | Smartphone d'abord, tactile (§2) | Manipulations **« toucher pour déplacer »**, grandes cibles, pas de glisser-déposer obligatoire |
+| E7 | Smartphone d'abord, tactile (§2) | Manipulations **au toucher** (l'objet va seul à sa place quand il n'y en a qu'une), glisser-déposer possible, grandes cibles |
 
 ## 2. Inventaire de l'existant (v1.0.0, ~3 600 lignes, aucune dépendance)
 
@@ -158,10 +158,10 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 
 ### Phase 3 — réalisé le 17 novembre (reste : le test réel)
 
-- `js/manipulatives/ten-frame.js` : boîte de 10. `TenFrameModel` (logique testée) et `TenFrame.create` (rendu tactile : toucher un objet, puis toucher la boîte ; toucher un objet ajouté le fait ressortir ; cibles de 48 à 56 px, tout tient sur un écran de 375 × 667).
+- `js/manipulatives/ten-frame.js` : boîte de 10. `TenFrameModel` (logique testée) et `TenFrame.create` (rendu tactile : toucher un objet le fait filer dans la prochaine case vide ; on peut aussi le glisser jusqu'à la boîte, lâché ailleurs il revient ; boîte pleine : les objets restants ne bougent plus et la boîte tremble ; toucher un objet ajouté le fait ressortir ; cibles de 48 à 56 px, tout tient sur un écran de 375 × 667).
 - Étape `explore` dans la mission 47 + 8, entre le problème et l'explication : but « remplir la boîte », piste d'Andrea après 12 s sans geste ou sur un geste à vide, « Continuer » seulement quand le but est atteint.
 - **Parcours de l'enfant** : quand la compétence du jour a une mission pas encore jouée, la mission est proposée à la place de l'écran de découverte (`missionForSkill`), puis retour à l'univers. Elle compte comme une activité terminée (+3 pour l'histoire).
-- À faire avec un vrai enfant : observer la manipulation (comprend-il « toucher puis toucher » sans lire ?), le temps passé, les pistes déclenchées ; ajuster textes et délais.
+- À faire avec un vrai enfant : observer la manipulation (comprend-il qu'il suffit de toucher les gouttes ?), le temps passé, les pistes déclenchées ; ajuster textes et délais.
 
 ### Carnet de découvertes — réalisé le 17 novembre
 
@@ -171,7 +171,7 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 
 1. **Public cible : 8 ans (CE2) reste le cœur.** 8 + 7 n'était qu'un exemple ; la mission pilote devient **47 + 8** (même stratégie de passage par la dizaine, au niveau CE2, compétence existante `add-units`).
 2. **Lecture : textes très courts, animations porteuses du sens.** Pas de voix dans le périmètre initial.
-3. **Manipulation : « toucher l'objet, puis toucher la destination »** par défaut ; pas de glisser-déposer obligatoire.
+3. **Manipulation : toucher pour placer, glisser possible.** Révisé le 17 novembre après essai : « toucher l'objet, puis toucher la destination » n'était pas intuitif. Quand il n'y a qu'une destination (boîte de 10), toucher l'objet suffit ; le glisser-déposer marche aussi. Une manipulation à plusieurs destinations pourra demander de glisser.
 4. **Étoiles : conservées comme récompense de satisfaction**, sans rôle de verrou une fois l'histoire découplée (compatibilité des données v1, repère familier pour l'enfant).
 5. **Seuils de maîtrise : valeurs du §3.4 comme point de départ** (≥ 2 formes, ≥ 2 contextes, rappels à 3 j et 14 j), regroupés dans une constante réglable et ajustés après les premiers tests réels.
 6. **Branche `v2` longue** ; `main` reste en 1.x (correctifs uniquement).

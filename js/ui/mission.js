@@ -78,8 +78,8 @@ const MissionUI = {
             } else if (ev === 'back') {
                 // l'enfant défait : le but n'est plus atteint, on revient à la consigne
                 next.hidden = true; says.innerHTML = this.says(step.who || 'rabbit', step.prompt); armHint();
-            } else if (ev === 'nothing' && !model.full) {
-                says.innerHTML = this.says('rabbit', step.hint, 'think'); armHint();
+            } else if (ev === 'full') {
+                says.innerHTML = this.says('rabbit', step.done, 'bravo');
             } else if (!model.full) armHint();
         } }));
         next.addEventListener('click', () => { clearTimeout(idle); advance(); });

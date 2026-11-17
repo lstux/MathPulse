@@ -31,7 +31,7 @@ const MISSIONS = {
             { id: 'problem', type: 'problem', who: 'fox', prompt: "47 litres, et encore 8. Combien en tout ?", operands: [47, 8] },
             { id: 'explore', type: 'explore', tool: 'ten-frame', who: 'rabbit', item: '💧', operands: [47, 8],
               prompt: "Remplis la boîte de 10 avec mes 8 litres.",
-              hint: "Touche une goutte, puis touche la boîte.",
+              hint: "Touche une goutte : elle file dans la boîte.",
               done: "La boîte est pleine ! Regarde ce qui reste." },
             { id: 'explain', type: 'explain', who: 'rabbit', title: 'On passe par la dizaine !',
               visual: { fn: 'jumps', args: [[47, 50, 55], ['+3', '+5']] },

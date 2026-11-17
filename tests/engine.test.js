@@ -1221,24 +1221,22 @@ test('histoire découplée : tout faux, l\'histoire avance quand même ; les ét
 });
 
 // ---------- v2 : manipulation (boîte de 10) ----------
-test('boîte de 10 : toucher un objet puis la boîte ; pleine à 10 ; on peut défaire ; jamais plus de 10', () => {
+test('boîte de 10 : toucher un objet le met dans la boîte ; pleine à 10 ; on peut défaire ; jamais plus de 10', () => {
     const m = new TenFrameModel(47, 8);
     assert.ok(m.tens === 4 && m.inFrame === 7 && m.loose === 8 && !m.full);
-    assert.strictEqual(m.place(), 'nothing', 'toucher la boîte sans objet en main ne fait rien');
-    assert.strictEqual(m.pick(), 'picked');
-    assert.strictEqual(m.pick(), 'dropped', 'retoucher l\'objet le repose');
-    m.pick(); assert.strictEqual(m.place(), 'placed');
-    m.pick(); assert.strictEqual(m.place(), 'placed');
+    assert.strictEqual(m.takeBack(), 'nothing', 'rien à reprendre au départ (les 7 de départ restent)');
+    assert.strictEqual(m.add(), 'placed');
+    assert.strictEqual(m.add(), 'placed');
     assert.strictEqual(m.takeBack(), 'back');
     assert.ok(m.inFrame === 8 && m.loose === 7);
-    m.pick(); m.place(); m.pick();
-    assert.strictEqual(m.place(), 'complete');
+    m.add();
+    assert.strictEqual(m.add(), 'complete');
     assert.ok(m.full && m.inFrame === 10 && m.loose === 5 && m.tens * 10 + m.inFrame + m.loose === 55, 'rien ne se perd : 40 + 10 + 5');
-    assert.strictEqual(m.pick(), 'full', 'boîte pleine : on ne prend plus d\'objet');
-    assert.ok(!m.selected && m.place() === 'nothing' && m.inFrame === 10);
+    assert.strictEqual(m.add(), 'full', 'boîte pleine : les objets restants ne bougent plus');
+    assert.ok(m.inFrame === 10 && m.loose === 5);
     assert.strictEqual(m.moves, 5);
-    const exact = new TenFrameModel(36, 4); for (let i = 0; i < 4; i++) { exact.pick(); exact.place(); }
-    assert.ok(exact.full && exact.loose === 0 && exact.pick() === 'empty');
+    const exact = new TenFrameModel(36, 4); for (let i = 0; i < 4; i++) exact.add();
+    assert.ok(exact.full && exact.loose === 0 && exact.add() === 'empty');
     assert.throws(() => new TenFrameModel(42, 5), /ne franchit pas/);
     assert.throws(() => new TenFrameModel(40, 8), /ne franchit pas/);
 });

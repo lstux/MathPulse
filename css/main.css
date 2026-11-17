@@ -400,7 +400,14 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .tf-status { font-weight: 800; font-size: var(--font-size-lg); }
 .tf-loose { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 56px; }
 .tf-item { width: 56px; min-height: 56px; padding: 0; font-size: 1.7rem; border-radius: 50%; background: var(--color-surface); border: 2px solid var(--color-border); box-shadow: var(--shadow-md); }
-.tf-item.selected { border: 3px solid var(--color-primary); transform: scale(1.12); }
+.tf-item { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.tf-item.lifted { opacity: .25; }
+.tf-item.locked { opacity: .6; cursor: default; }
+.tf-cell.arriving { color: transparent; }
+.tf-ghost { position: fixed; z-index: 50; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; border-radius: 50%; background: var(--color-surface); border: 3px solid var(--color-primary); box-shadow: var(--shadow-md); pointer-events: none; }
+.tf-ghost.dragging { transform-origin: center; }
+.tf-frame.shake { animation: tf-shake .35s; }
+@keyframes tf-shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 
 /* ---------- Carnet de découvertes ---------- */
 .notebook-screen { align-items: stretch; max-width: 520px; margin: 0 auto; width: 100%; }
