@@ -62,25 +62,30 @@ const MissionUI = {
             <div id="explore-tool"></div>
             <button class="btn-primary btn-large" id="btn-mission-next" hidden>Continuer</button>`);
         const says = screen.querySelector('#explore-says'), next = screen.querySelector('#btn-mission-next');
-        const model = new TenFrameModel(step.operands[0], step.operands[1]);
+        const tool = MANIPULATIVES[step.tool];
+        const model = tool.model(step);
         let hinted = false, idle = null;
+        const say = (text, mood) => { says.innerHTML = this.says('rabbit', text, mood); };
         const armHint = () => {
             clearTimeout(idle);
-            idle = setTimeout(() => { if (!model.full && screen.isConnected) { hinted = true; says.innerHTML = this.says('rabbit', step.hint, 'think'); } }, MISSION_RULES.exploreHintMs);
+            idle = setTimeout(() => { if (!model.done && screen.isConnected) { hinted = true; say(step.hint, 'think'); } }, MISSION_RULES.exploreHintMs);
         };
-        screen.querySelector('#explore-tool').appendChild(TenFrame.create(model, { item: step.item, onChange: (ev) => {
+        screen.querySelector('#explore-tool').appendChild(tool.view.create(model, { item: step.item, container: step.container, onChange: (ev) => {
             if (ev === 'complete') {
                 clearTimeout(idle);
                 run.explored({ moves: model.moves, hinted });
-                says.innerHTML = this.says('rabbit', step.done, 'bravo');
+                say(step.done, 'bravo');
                 next.hidden = false;
                 Sound.play('good');
             } else if (ev === 'back') {
                 // l'enfant défait : le but n'est plus atteint, on revient à la consigne
                 next.hidden = true; says.innerHTML = this.says(step.who || 'rabbit', step.prompt); armHint();
-            } else if (ev === 'full') {
-                says.innerHTML = this.says('rabbit', step.done, 'bravo');
-            } else if (!model.full) armHint();
+            } else if (step.say && step.say[ev]) {
+                // réplique propre à l'outil (« pas encore », « ce n'est pas juste »…)
+                say(step.say[ev], 'think'); if (!model.done) armHint();
+            } else if (ev === 'full' || ev === 'done') {
+                say(step.done, 'bravo');
+            } else if (!model.done) armHint();
         } }));
         next.addEventListener('click', () => { clearTimeout(idle); advance(); });
         armHint();

@@ -154,7 +154,8 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 | 2b ✅ | `diagnosis` + `feedback` gradué + catalogue d'erreurs (additions) | Chaque erreur type testée produit le bon retour |
 | 2c ✅ | `mastery` + `scheduler` | Simulations de séquences de réponses → états et rappels attendus (tests) |
 | 3 ✅ (code) | Composant tactile (frise / boîte de 10) + mission pilote 47 + 8 complète | Test avec ton fils sur téléphone ; ajustements |
-| 4+ | Généralisation (§15 de la synthèse) | — |
+| 4 ✅ (code, 1re vague) | Trois missions de plus (52 − 7, 6 × 4, 15 ÷ 5) et leurs manipulations | Tests ; essai réel |
+| 5+ | Généralisation (§15 de la synthèse) | — |
 
 ### Phase 3 — réalisé le 17 novembre (reste : le test réel)
 
@@ -162,6 +163,21 @@ Un échec ne fait jamais « perdre » un état d'un coup : il programme un rappe
 - Étape `explore` dans la mission 47 + 8, entre le problème et l'explication : but « remplir la boîte », piste d'Andrea après 12 s sans geste ou sur un geste à vide, « Continuer » seulement quand le but est atteint.
 - **Parcours de l'enfant** : quand la compétence du jour a une mission pas encore jouée, la mission est proposée à la place de l'écran de découverte (`missionForSkill`), puis retour à l'univers. Elle compte comme une activité terminée (+3 pour l'histoire).
 - À faire avec un vrai enfant : observer la manipulation (comprend-il qu'il suffit de toucher les gouttes ?), le temps passé, les pistes déclenchées ; ajuster textes et délais.
+
+### Phase 4, première vague — réalisée le 17 novembre (reste : l'essai réel)
+
+Une mission par grande opération, chacune avec sa manipulation et son astuce (carnet). Même déroulé que la mission pilote : scène, problème, manipulation, explication, défi, réemploi.
+
+| Mission | Compétence | Manipulation | Astuce | Défi / réemploi |
+|---|---|---|---|---|
+| `back-ten-52-7` Les débris | `sub-units` | **casser une dizaine** (`break-ten.js`) : enlever d'abord les objets seuls (on tombe sur 50), puis ouvrir un paquet de 10 ; ouvrir trop tôt est refusé | Redescendre à la dizaine : 52 − 2 − 5 | 43 − 6 ; 61 − 4 (minutes avant le décollage) |
+| `double-double-6x4` Les boulons des moteurs | `multiply-4` | **paquets égaux** (`groups.js`) : toucher un moteur pose ses 4 boulons ; le compte avance de 4 en 4 | Fois 4 : le double du double (6 × 2 = 12, 12 × 2 = 24) | 7 × 4 ; 8 × 4 (pieds de tables) |
+| `share-15-5` Les cellules d'énergie | `divide-5` | **partager** (`share.js`) : toucher une cellule l'envoie dans le réservoir qui en a le moins ; glisser = choisir le réservoir ; un partage injuste est signalé, on reprend une cellule en la touchant | Partager avec la table : 5 × 3 = 15, donc 15 ÷ 5 = 3 | 20 ÷ 5 ; 35 ÷ 5 (équipes) |
+
+- Socle commun `js/manipulatives/common.js` (vol d'un objet, secousse, toucher et glisser au pointeur) et registre `registry.js` (outil d'une étape `explore` → modèle + rendu). L'écran `explore` est générique ; répliques propres à un outil dans `say` (par événement).
+- Un clic qui suit un toucher ne déclenche un bouton que s'il a commencé sur lui (sinon, après un toucher qui réorganise l'écran, il tombait sur un autre objet).
+- Les scènes se passent dans le vaisseau sans dépendre d'un chapitre : une mission se lance la première fois que sa compétence tombe en séance, à n'importe quel moment de l'histoire.
+- Tests : chaque modèle (règles, rien ne se perd), chaque mission jouée de bout en bout, formules cohérentes avec le problème, une seule mission par compétence.
 
 ### Carnet de découvertes — réalisé le 17 novembre
 

@@ -6,7 +6,7 @@ const vm = require('vm');
 const assert = require('assert');
 
 const root = path.join(__dirname, '..');
-const sources = ['js/content/skills.js', 'js/content/chapters.js', 'js/content/missions.js', 'js/content/errors.js', 'js/core/storage.js', 'js/core/cheat.js', 'js/core/player.js', 'js/learning/mastery.js', 'js/core/progression.js', 'js/core/engine.js', 'js/core/session.js', 'js/mission/diagnosis.js', 'js/mission/runner.js', 'js/manipulatives/ten-frame.js', 'js/ui/universe.js', 'js/ui/notebook.js'];
+const sources = ['js/content/skills.js', 'js/content/chapters.js', 'js/content/missions.js', 'js/content/errors.js', 'js/core/storage.js', 'js/core/cheat.js', 'js/core/player.js', 'js/learning/mastery.js', 'js/core/progression.js', 'js/core/engine.js', 'js/core/session.js', 'js/mission/diagnosis.js', 'js/mission/runner.js', 'js/manipulatives/common.js', 'js/manipulatives/ten-frame.js', 'js/manipulatives/break-ten.js', 'js/manipulatives/groups.js', 'js/manipulatives/share.js', 'js/manipulatives/registry.js', 'js/ui/animations.js', 'js/ui/universe.js', 'js/ui/notebook.js'];
 
 function makeContext() {
     const store = new Map();

@@ -915,11 +915,89 @@ test('missions : données valides (étapes typées, ids uniques, preuves et comp
             if (MISSION_ANSWER_STEPS.includes(s.type)) assert.ok(Array.isArray(s.operands) && s.operands.length === 2 && s.prompt);
             if (s.type === 'scene') assert.ok(s.vignettes.length && s.vignettes.every(v => v.art && v.lines.length));
             if (s.type === 'explain') assert.ok(s.title && s.text && s.formula);
-            if (s.type === 'explore') { assert.ok(s.tool === 'ten-frame' && s.prompt && s.hint && s.done); new TenFrameModel(...s.operands); }
+            if (s.type === 'explore') {
+                assert.ok(MANIPULATIVES[s.tool] && s.prompt && s.hint && s.done, `${m.id}/${s.id} : outil ou textes manquants`);
+                const model = MANIPULATIVES[s.tool].model(s);
+                assert.ok(!model.done && model.moves === 0, `${m.id} : la manipulation démarre non résolue`);
+            }
+            if (s.type === 'explain' && s.visual) assert.strictEqual(typeof Animations[s.visual.fn], 'function', `${m.id} : visuel ${s.visual.fn} inconnu`);
         });
         [...m.evidence.understood, ...m.evidence.reused].forEach(id => assert.ok(ids.includes(id), `${m.id} : preuve « ${id} » sans étape`));
         assert.ok(m.steps.findIndex(s => s.type === 'problem') < m.steps.findIndex(s => s.type === 'explain'), 'on découvre avant d\'expliquer');
+        assert.ok(STRATEGIES[m.strategy], `${m.id} : stratégie inconnue`);
+        // les nombres de l'explication collent au problème : la formule finit par le bon résultat
+        const pb = m.steps.find(s => s.type === 'problem'), ex = m.steps.find(s => s.type === 'explain');
+        const [a, b] = pb.operands, op = pb.op || '+', res = op === '+' ? a + b : op === '−' ? a - b : op === '÷' ? a / b : a * b;
+        assert.ok(ex.formula.includes(`= ${res}`), `${m.id} : formule « ${ex.formula} »`);
     }
+    assert.ok(new Set(Object.values(MISSIONS).map(m => m.skill)).size === Object.keys(MISSIONS).length, 'une seule mission par compétence');
+});
+
+test('missions : chaque mission se termine du premier coup → comprise, réemployée, astuce notée', () => {
+    for (const m of Object.values(MISSIONS)) {
+        const { progression } = setup();
+        const run = new MissionRun(m, progression);
+        while (!run.isComplete()) {
+            const s = run.step;
+            if (run.expectsAnswer()) assert.ok(run.answer(run.expected()).correct, `${m.id}/${s.id}`);
+            if (s.type === 'explore') run.explored({ moves: 3 });
+            assert.ok(run.next(), `${m.id}/${s.id} : on doit pouvoir avancer`);
+        }
+        const r = run.complete();
+        assert.ok(r.discovered && r.understood && r.unaided && r.reused, m.id);
+        assert.strictEqual(progression.getMastery(m.skill).strategies[m.strategy], 'compris', m.id);
+        assert.ok(Number.isInteger(run.expected(m.steps.find(x => x.type === 'transfer'))), `${m.id} : réponse entière`);
+    }
+});
+
+test('casser une dizaine : on enlève les seuls d\'abord, puis on ouvre un paquet ; on passe par la dizaine', () => {
+    const m = new BreakTenModel(52, 7);
+    assert.ok(m.tens === 5 && m.loose === 2 && m.left === 52 && !m.done);
+    assert.strictEqual(m.open(), 'not-yet', 'pas d\'ouverture tant qu\'il reste des objets seuls');
+    assert.strictEqual(m.take(), 'taken');
+    assert.strictEqual(m.take(), 'ten');
+    assert.strictEqual(m.left, 50, 'on tombe pile sur la dizaine');
+    assert.strictEqual(m.take(), 'need-open');
+    assert.strictEqual(m.open(), 'opened');
+    assert.ok(m.tens === 4 && m.loose === 10 && m.left === 50);
+    for (let i = 0; i < 4; i++) assert.strictEqual(m.take(), 'taken');
+    assert.strictEqual(m.take(), 'complete');
+    assert.ok(m.done && m.left === 45 && m.removed === 7 && m.left + m.removed === 52, 'rien ne se perd');
+    assert.ok(m.take() === 'done' && m.open() === 'done' && m.left === 45);
+    assert.strictEqual(m.moves, 8);
+    assert.throws(() => new BreakTenModel(57, 4), /ne passe pas/);
+    assert.throws(() => new BreakTenModel(50, 12), /ne passe pas/);
+});
+
+test('paquets égaux : un toucher pose un paquet entier ; on compte par bonds ; pas de double paquet', () => {
+    const m = new GroupsModel(6, 4);
+    assert.ok(m.total === 0 && !m.done);
+    assert.strictEqual(m.fill(2), 'filled');
+    assert.strictEqual(m.fill(2), 'already');
+    assert.strictEqual(m.fill(9), 'nothing');
+    [0, 1, 3, 4].forEach(i => assert.strictEqual(m.fill(i), 'filled'));
+    assert.deepStrictEqual([...m.steps], [4, 8, 12, 16, 20]);
+    assert.strictEqual(m.fill(5), 'complete');
+    assert.ok(m.done && m.total === 24 && m.moves === 6);
+    assert.throws(() => new GroupsModel(1, 4), /hors limites/);
+});
+
+test('partage : chacun son tour par défaut ; un partage injuste est signalé ; on peut reprendre', () => {
+    const m = new ShareModel(15, 5);
+    for (let i = 0; i < 14; i++) assert.strictEqual(m.deal(), 'dealt');
+    assert.deepStrictEqual([...m.bins], [3, 3, 3, 3, 2], 'toucher sert le contenant qui en a le moins');
+    assert.strictEqual(m.deal(), 'complete');
+    assert.ok(m.done && m.pile === 0 && m.deal() === 'empty');
+    assert.strictEqual(m.takeBack(0), 'back');
+    assert.ok(!m.done && m.pile === 1);
+    assert.strictEqual(m.deal(2), 'unfair', 'glissé dans un contenant déjà servi : pas juste');
+    assert.ok(!m.done && m.pile === 0);
+    assert.strictEqual(m.takeBack(2), 'back');
+    assert.strictEqual(m.deal(0), 'complete');
+    assert.strictEqual(m.takeBack(4), 'back'); assert.strictEqual(m.takeBack(4), 'back');
+    assert.strictEqual(m.takeBack(1), 'back');
+    assert.ok(m.takeBack(9) === 'nothing' && m.bins.reduce((x, y) => x + y) + m.pile === 15, 'rien ne se perd');
+    assert.throws(() => new ShareModel(16, 5), /impossible/);
 });
 
 test('mission : parcours réussi du premier coup → comprise, sans aide, réemployée ; progression enregistrée', () => {
