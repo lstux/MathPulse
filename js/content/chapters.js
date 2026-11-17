@@ -317,7 +317,7 @@ const CHAPTERS = [
                 { who: 'rabbit', text: "La balise relais est là-bas. J'ai coupé les moteurs : ici, rien ne nous freine, on continue tout droit." }] },
             { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'think', text: "Mais il y a ces rochers. Le chemin sûr fait des détours : il faut additionner chaque tronçon." }] },
-            { sfx: 'asteroid-pass', art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
+            { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'narrator', text: "Un énorme rocher frôle le hublot. Tu serres les pattes." }] },
             { art: 'space-asteroids', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'fox', mood: 'think', text: "Dehors, il n'a fait aucun bruit !" },
@@ -354,7 +354,7 @@ const CHAPTERS = [
             { sfx: 'flashlight-click', art: 'hill', cast: [{ who: 'fox', at: 'left' }, { who: 'rabbit', at: 'right' }], lines: [
                 { who: 'rabbit', mood: 'content', text: "Garde ma lampe. Un éclair pour dire bonne nuit, deux pour dire je pense à toi." }] },
             { art: 'hill-reply', cast: [{ who: 'fox', at: 'center' }], lines: [
-                { who: 'fox', mood: 'moved', text: "Deux éclairs… Et là-haut, une petite lueur me répond." },
+                { who: 'fox', mood: 'moved', text: "Deux éclairs… Là-haut, une petite lumière clignote deux fois. C'est son vaisseau !" },
                 { who: 'narrator', text: "Dans le carnet de la hase : « Prochaine mission : à suivre. »" }] }
         ],
         lines: [

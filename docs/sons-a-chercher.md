@@ -69,7 +69,7 @@ Une boucle de **20 à 40 secondes** convient. Si le son n'est pas parfaitement b
 | `engine-start` | Ch. 4, les moteurs démarrent et se mettent à ronronner | `engine start` · `motor hum` · `machine start up` | 2 à 3 s | Ronronnement, pas de moteur de voiture qui rugit. |
 | `tank-fill` | Ch. 6, les réservoirs se remplissent d'énergie | `water filling` · `liquid fill` · `energy charge` · `charging up` | 2 à 3 s | Au choix : liquide qui coule ou énergie qui monte. |
 | `radio-signal` | Ch. 10, le signal radio de la planète de la 🐰 | `radio static` · `radio signal` · `morse beeps` · `transmission` | 2 à 4 s | Grésillements légers puis quelques bips. |
-| `asteroid-pass` | Ch. 12, un astéroïde frôle le hublot | `fast whoosh` · `pass by whoosh` · `air swoosh` | 0,5 à 1 s | Rapide mais pas violent. |
+| `asteroid-pass` | Ch. 12, un astéroïde frôle le hublot | `fast whoosh` · `pass by whoosh` · `air swoosh` | 0,5 à 1 s | Rapide mais pas violent. **Retiré le 17/11** : il n'y a pas de son dans l'espace (la hase le dit dans la même scène). Fichier gardé, plus utilisé. |
 | `beacon-ping` | Ch. 12, la balise s'allume et envoie le rapport | `sonar ping` · `satellite beep` · `signal sent` | 1 à 2 s | Un « ping » clair qui s'éloigne. |
 | `flashlight-click` | Ch. 13, le renard allume la lampe de poche (deux éclairs) | `flashlight click` · `button click` · `switch click` | < 0,3 s | Joué deux fois de suite. |
 
